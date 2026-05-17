@@ -3973,17 +3973,33 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
             '<span class="dot-sch__text ' + textClass + '">' + (it.text || '') + '</span>' +
           '</div>';
       };
+      var expandedItems = Array.isArray(sv.expandedItems) ? sv.expandedItems : [
+        { text: 'Design standup', time: '10:00', tone: 'muted' },
+        { text: 'Coffee w/ Sarah', time: '14:00', tone: 'muted' },
+        { text: 'Run 5km', time: '18:30', tone: 'accent' },
+        { text: 'Dinner reservation', time: '20:00', tone: 'strong' }
+      ];
+      var expandedHtml = window.renderAtomicForRole({
+        role: 'dot-schedule-4x2',
+        variant: {
+          date: sv.expandedDate || 'May 15',
+          items: expandedItems
+        }
+      }, rect);
       return '' +
         '<div class="dot-card dot-sch dot-sch22" data-state="' + (sv.state || 'idle') + '">' +
-          '<div class="dot-sch__unit">' +
-            '<div class="dot-sch__date">' + date + '</div>' +
-            '<div class="dot-sch__list">' +
-              row(items[0]) +
-              row(items[1]) +
-              row(items[2]) +
-              row(items[3]) +
+          '<div class="dot-sch22__compact">' +
+            '<div class="dot-sch__unit">' +
+              '<div class="dot-sch__date">' + date + '</div>' +
+              '<div class="dot-sch__list">' +
+                row(items[0]) +
+                row(items[1]) +
+                row(items[2]) +
+                row(items[3]) +
+              '</div>' +
             '</div>' +
           '</div>' +
+          '<div class="dot-sch22__expanded" aria-hidden="true">' + expandedHtml + '</div>' +
         '</div>';
     }
 

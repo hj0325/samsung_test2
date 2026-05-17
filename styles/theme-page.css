@@ -700,7 +700,7 @@
   }
   @keyframes dotMusicPreviewReveal {
     0%, 28% { clip-path: inset(0 172px 0 0 round 32px); }
-    42%, 92% { clip-path: inset(0 0 0 0 round 32px); }
+    42%, 94% { clip-path: inset(0 0 0 0 round 32px); }
     100% { clip-path: inset(0 172px 0 0 round 32px); }
   }
   @keyframes dotMusicPreviewCompact {
@@ -708,9 +708,13 @@
       opacity: 1;
       transform: translateX(0) scale(1);
     }
-    42%, 100% {
+    42%, 93% {
       opacity: 0;
       transform: translateX(-8px) scale(0.98);
+    }
+    96%, 100% {
+      opacity: 1;
+      transform: translateX(0) scale(1);
     }
   }
   @keyframes dotMusicPreviewActions {
@@ -732,11 +736,11 @@
       opacity: 0;
       transform: translateX(8px) scale(0.985);
     }
-    82%, 94% {
+    82%, 90% {
       opacity: 1;
       transform: translateX(0) scale(1);
     }
-    100% {
+    94%, 100% {
       opacity: 0;
       transform: translateX(4px) scale(0.985);
     }
@@ -1339,6 +1343,61 @@
     height: 168px;
     position: relative;
   }
+  .dot-sch22__compact,
+  .dot-sch22__expanded {
+    position: absolute;
+    inset: 0;
+  }
+  .dot-sch22__compact {
+    opacity: 1;
+  }
+  .dot-sch22__expanded {
+    width: 340px;
+    height: 168px;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .detail-stage .dot-sch22 {
+    width: 340px;
+    clip-path: inset(0 172px 0 0 round 32px);
+    animation: dotScheduleReveal 3.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    will-change: clip-path;
+  }
+  .detail-stage .dot-sch22__compact {
+    animation: dotScheduleCompactOut 3.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  .detail-stage .dot-sch22__expanded {
+    opacity: 1;
+  }
+  .detail-stage .dot-sch22__compact .dot-sch__row {
+    animation: dotScheduleRowOut 360ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    will-change: opacity, transform;
+  }
+  .detail-stage .dot-sch22__compact .dot-sch__row:nth-child(1) { animation-delay: 1.48s; }
+  .detail-stage .dot-sch22__compact .dot-sch__row:nth-child(2) { animation-delay: 1.54s; }
+  .detail-stage .dot-sch22__compact .dot-sch__row:nth-child(3) { animation-delay: 1.60s; }
+  .detail-stage .dot-sch22__compact .dot-sch__row:nth-child(4) { animation-delay: 1.66s; }
+  .detail-stage .dot-sch22__expanded .dot-sch__date,
+  .detail-stage .dot-sch22__expanded .dot-sch__row {
+    opacity: 0;
+    transform: translateX(18px);
+    will-change: opacity, transform;
+  }
+  .detail-stage .dot-sch22__expanded .dot-sch__date {
+    animation: dotScheduleRowIn 420ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation-delay: 1.88s;
+  }
+  .detail-stage .dot-sch22__expanded .dot-sch__row {
+    animation: dotScheduleRowIn 420ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  .detail-stage .dot-sch22__expanded .dot-sch__row:nth-child(1) { animation-delay: 2.00s; }
+  .detail-stage .dot-sch22__expanded .dot-sch__row:nth-child(2) { animation-delay: 2.12s; }
+  .detail-stage .dot-sch22__expanded .dot-sch__row:nth-child(3) { animation-delay: 2.24s; }
+  .detail-stage .dot-sch22__expanded .dot-sch__row:nth-child(4) { animation-delay: 2.36s; }
+  .detail-stage .dot-sch22__compact .dot-sch__date {
+    animation: dotScheduleDateOut 300ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation-delay: 1.72s;
+  }
   .dot-sch42 {
     width: 340px;
     height: 168px;
@@ -1425,6 +1484,50 @@
   }
   .dot-sch__time.is-time { color: rgba(255, 255, 255, 0.8); }
   .dot-sch__time.is-strong { color: #FFFFFF; }
+  @keyframes dotScheduleReveal {
+    0%, 52% { clip-path: inset(0 172px 0 0 round 32px); }
+    100% { clip-path: inset(0 0 0 0 round 32px); }
+  }
+  @keyframes dotScheduleCompactOut {
+    0%, 60% {
+      opacity: 1;
+      transform: translateX(0) scale(1);
+    }
+    100% {
+      opacity: 0;
+      transform: translateX(-8px) scale(0.98);
+    }
+  }
+  @keyframes dotScheduleDateOut {
+    0% {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    100% {
+      opacity: 0;
+      transform: translateX(-8px);
+    }
+  }
+  @keyframes dotScheduleRowOut {
+    0% {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    100% {
+      opacity: 0;
+      transform: translateX(-14px);
+    }
+  }
+  @keyframes dotScheduleRowIn {
+    0% {
+      opacity: 0;
+      transform: translateX(18px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
 
   /* Productivity · Total steps 2×1 (168×82) */
   .dot-steps21 {
