@@ -4195,9 +4195,10 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
       var w2 = (comp && comp.variant) || {};
       var loc = w2.location || 'Sydney';
       var wt = w2.weather || 'Sunny';
+      var darkClass = w2.theme === 'dark' ? ' dot-w21--dark' : '';
       // Reuse dot-sun but sized/positioned per spec and dark color.
       return '' +
-        '<div class="dot-card dot-w21" data-state="' + (w2.state || 'idle') + '">' +
+        '<div class="dot-card dot-w21' + darkClass + '" data-state="' + (w2.state || 'idle') + '">' +
           '<svg class="dot-w21__sun" width="41.7" height="41.7" viewBox="0 0 46.37 46.37" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
             // outer ring
             '<circle cx="23.185" cy="2.32" r="2.17" fill="#191919"/>' +

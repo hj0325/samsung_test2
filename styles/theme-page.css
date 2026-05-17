@@ -1902,6 +1902,12 @@
     border-radius: 93px;
     overflow: hidden;
   }
+  .dot-w21--dark {
+    background: #000000;
+  }
+  .dot-w21--dark .dot-w21__sun circle {
+    fill: #FFFFFF;
+  }
   .dot-w21__sun {
     position: absolute;
     width: 41.7px;
@@ -1931,6 +1937,9 @@
     text-align: right;
     color: #191919;
     white-space: nowrap;
+  }
+  .dot-w21--dark .dot-w21__loc {
+    color: #FFFFFF;
   }
   .dot-w21__weather {
     width: 47px;

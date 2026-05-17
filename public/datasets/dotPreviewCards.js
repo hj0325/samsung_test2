@@ -227,6 +227,12 @@
       editSections: ['Page', 'Card globals'],
       role: 'dot-weather-2x1-v1-1',
       variant: { location: 'Seoul', weather: 'Sunny' }
+    },
+    {
+      name: 'Weather 2×1 V1_1 Copy (dot)',
+      editSections: ['Page', 'Card globals'],
+      role: 'dot-weather-2x1-v1-1',
+      variant: { location: 'Seoul', weather: 'Sunny', theme: 'dark' }
     }
   ];
 })();
