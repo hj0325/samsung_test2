@@ -3631,16 +3631,27 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
       var camv = (comp && comp.variant) || {};
       var img = camv.img || '';
       var imgHtml = img ? '<img class="dot-cam__img" src="' + img + '" alt="" />' : '';
+      var camId = 'dotcam_' + Math.random().toString(36).slice(2, 9);
       return '' +
-        '<div class="dot-card dot-cam" data-state="' + (camv.state || 'idle') + '">' +
-          imgHtml +
-          '<div class="dot-cam__fade" aria-hidden="true"></div>' +
-          '<div class="dot-cam__shutter" aria-hidden="true"></div>' +
-          '<div class="dot-cam__expand" aria-hidden="true">' +
-            '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">' +
-              '<path d="M15 3h6v6h-2V6.41l-4.29 4.3-1.42-1.42L17.59 5H15V3Z" fill="#FFFFFF"/>' +
-              '<path d="M9 21H3v-6h2v3.59l4.29-4.3 1.42 1.42L6.41 19H9v2Z" fill="#FFFFFF"/>' +
+        '<div class="dot-card dot-cam dot-cam--morph" data-state="' + (camv.state || 'idle') + '">' +
+          '<input class="dot-cam__toggle" type="checkbox" id="' + camId + '" aria-label="Open camera card" />' +
+          '<label class="dot-cam__trigger" for="' + camId + '" aria-hidden="true">' +
+            '<svg width="82" height="82" viewBox="0 0 82 82" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+              '<rect width="82" height="82" rx="41" fill="#FF7F24"/>' +
+              '<path d="M31.6667 53C30.9333 53 30.3056 52.7389 29.7833 52.2167C29.2611 51.6944 29 51.0667 29 50.3333V45H31.6667V50.3333H37V53H31.6667ZM45 53V50.3333H50.3333V45H53V50.3333C53 51.0667 52.7389 51.6944 52.2167 52.2167C51.6944 52.7389 51.0667 53 50.3333 53H45ZM29 37V31.6667C29 30.9333 29.2611 30.3056 29.7833 29.7833C30.3056 29.2611 30.9333 29 31.6667 29H37V31.6667H31.6667V37H29ZM50.3333 37V31.6667H45V29H50.3333C51.0667 29 51.6944 29.2611 52.2167 29.7833C52.7389 30.3056 53 30.9333 53 31.6667V37H50.3333Z" fill="#1A1D1C"/>' +
+              '<path fill-rule="evenodd" clip-rule="evenodd" d="M41 43.6665C42.4728 43.6665 43.6667 42.4726 43.6667 40.9998C43.6667 39.5271 42.4728 38.3332 41 38.3332C39.5273 38.3332 38.3334 39.5271 38.3334 40.9998C38.3334 42.4726 39.5273 43.6665 41 43.6665ZM41 46.3332C43.9455 46.3332 46.3334 43.9454 46.3334 40.9998C46.3334 38.0543 43.9455 35.6665 41 35.6665C38.0545 35.6665 35.6667 38.0543 35.6667 40.9998C35.6667 43.9454 38.0545 46.3332 41 46.3332Z" fill="#1A1D1C"/>' +
             '</svg>' +
+          '</label>' +
+          '<div class="dot-cam__body">' +
+            imgHtml +
+            '<div class="dot-cam__fade" aria-hidden="true"></div>' +
+            '<div class="dot-cam__shutter" aria-hidden="true"></div>' +
+            '<div class="dot-cam__expand" aria-hidden="true">' +
+              '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+                '<path d="M15 3h6v6h-2V6.41l-4.29 4.3-1.42-1.42L17.59 5H15V3Z" fill="#FFFFFF"/>' +
+                '<path d="M9 21H3v-6h2v3.59l4.29-4.3 1.42 1.42L6.41 19H9v2Z" fill="#FFFFFF"/>' +
+              '</svg>' +
+            '</div>' +
           '</div>' +
         '</div>';
     }
