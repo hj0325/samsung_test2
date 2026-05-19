@@ -1226,7 +1226,7 @@ function renderPreviewGrid() {
         const offsetX = (previewRect.w - contentW) / 2 - minX;
         const offsetY = (previewRect.h - contentH) / 2 - minY;
 
-        html = '<div class="composite-set-container" style="position:relative; width:' + previewRect.w + 'px; height:' + previewRect.h + 'px;">';
+        html = '<div class="composite-set-container theme-preview-container" style="position:relative; width:' + previewRect.w + 'px; height:' + previewRect.h + 'px;">';
         if (children.length === 0) {
           html += '<div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,0.15); font-size:14px; font-weight:600; text-transform:uppercase; letter-spacing:1px;">Empty Set</div>';
         }
@@ -2622,14 +2622,20 @@ document.getElementById('preview-bg-swatches')?.addEventListener('click', functi
       const offsetX = (rect.w - contentW) / 2 - minX;
       const offsetY = (rect.h - contentH) / 2 - minY;
 
-      html = '<div class="composite-set-container" style="position:relative; width:' + rect.w + 'px; height:' + rect.h + 'px; background:transparent; border:none; box-shadow:none;">';
+      html = '<div class="composite-set-container theme-preview-container" style="position:relative; width:' + rect.w + 'px; height:' + rect.h + 'px; border:none; box-shadow:none; border-radius: 48px;">';
       children.forEach(child => {
         if (typeof window.renderAtomicForRole === 'function') {
           const childHtml = window.renderAtomicForRole({ role: child.role, variant: child.variant || {} }, { w: child.w, h: child.h });
           const left = child.x + offsetX;
           const top = child.y + offsetY;
           const isMusic = child.role === 'dot-music-1x1';
-          html += '<div class="composite-child' + (isMusic ? ' is-orange' : '') + '" data-comp-role="' + child.role + '" style="position:absolute; left:' + left + 'px; top:' + top + 'px; width:' + child.w + 'px; height:' + child.h + 'px;">' + childHtml + '</div>';
+          
+          // Theme view only: Calculate overlaps and adjust sizes slightly if necessary
+          // Note: In original design, Productivity Set does not have overlap issues,
+          // so we don't apply scale by default unless it's a known tight layout
+          const sizeStyle = ''; 
+          
+          html += '<div class="composite-child' + (isMusic ? ' is-orange' : '') + '" data-comp-role="' + child.role + '" style="position:absolute; left:' + left + 'px; top:' + top + 'px; width:' + child.w + 'px; height:' + child.h + 'px; ' + sizeStyle + '">' + childHtml + '</div>';
         }
       });
       html += '</div>';

@@ -88,7 +88,7 @@ export default function ThemePage() {
       <Script src="/datasets/normalPreviewCards.js" strategy="beforeInteractive" />
       <Script src="/datasets/dotPreviewCards.js?v=runpanel-frames-4" strategy="beforeInteractive" />
       <Script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" strategy="beforeInteractive" />
-      <Script src="/theme-logic.js?v=2" strategy="lazyOnload" />
+      <Script src="/theme-logic.js?v=3" strategy="lazyOnload" />
     </>
   );
 }

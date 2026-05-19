@@ -168,6 +168,7 @@ window.composeSurfacePlan = function composeSurfacePlan(surfaceType, layout) {
         surfaceType,
         components: [
           { id: 'status-bar',    role: 'status-bar',    zone: 'topSystem' },
+          { id: 'lockIndicator', role: 'lockIndicator', zone: 'topSystem' },
           { id: 'weatherDate',   role: 'weatherDate',   zone: 'viewing', variant: { date: 'Sat, May 3', temp: '24', condition: 'moon' } },
           // Match the intended lockscreen scale (image2)
           { id: 'clock',         role: 'clock',         zone: 'viewing', variant: { fontSize: 90, lineHeight: 66, gap: 10 } },
@@ -324,12 +325,23 @@ window.composeSurfacePlan = function composeSurfacePlan(surfaceType, layout) {
     }
 
     case T.TAB_ROOT:
+      if (window.__p1_custom_widgets && window.__p1_custom_widgets.length > 0) {
+        return {
+          surfaceType,
+          components: [
+            { id: 'status-bar', role: 'status-bar', zone: 'topSystem' },
+            { id: 'home-persona1-widgets', role: 'home-persona1-widgets', zone: 'viewing' },
+            { id: 'app-dock',   role: 'app-dock',   zone: 'bottomNav',
+              content: { apps: ['Camera','Gallery','Maps','YT Music'] } },
+            { id: 'gesture-bar', role: 'gestureBar', zone: 'bottomAction' }
+          ]
+        };
+      }
       return {
         surfaceType,
         components: [
           { id: 'status-bar', role: 'status-bar', zone: 'topSystem' },
           // Persona 1 Home (Figma 75:13339) — place atomics by fixed rects
-          // to match the reference screen exactly (388×880).
           { id: 'p1-goal', role: 'dot-goal', zone: 'viewing',
             variant: { title: "Today's Goal", time: '01:42:43', timeSuffix: 'Within', distance: '15km' },
             _rect: { x: 24, y: 42, w: 340, h: 168 } },
@@ -414,15 +426,23 @@ window.composeSurfacePlan = function composeSurfacePlan(surfaceType, layout) {
           { id: 'p3-subtitle', role: 'cooking-subtitle', zone: 'viewing',
             variant: { text: '회복을 돕는 연어스테이크를 준비해볼까요?' },
             _rect: { x: 24, y: 142, w: 340, h: 32 } },
+          { id: 'p3-yes-no', role: 'cooking-yes-no-btn', zone: 'interaction',
+            _rect: { x: 24, y: 190, w: 340, h: 56 } },
           { id: 'p3-recipe', role: 'cooking-recipe', zone: 'viewing',
             variant: { rightMeta: '85% 데이터 일치' },
-            _rect: { x: 22, y: 184, w: 341, h: 125 } },
+            _rect: { x: 24, y: 184, w: 340, h: 125 } },
           { id: 'p3-ingredients', role: 'cooking-ingredients', zone: 'viewing',
             variant: { rightMeta: '스마트싱즈 연동 중' },
-            _rect: { x: 22, y: 317, w: 341, h: 390 } },
+            _rect: { x: 24, y: 317, w: 340, h: 390 } },
           { id: 'p3-send', role: 'cooking-send-btn', zone: 'viewing',
             variant: { text: '인덕션 연동 및 조리 시작' },
-            _rect: { x: 24, y: 782, w: 339, h: 56 } },
+            _rect: { x: 24, y: 782, w: 340, h: 56 } },
+          { id: 'p3-agent', role: 'cooking-agent-card', zone: 'interaction',
+            variant: { title: '에이전트 추천', text: '와인 페어링 추천: 쇼비뇽 블랑이 잘 어울려요', icon: '🍷' },
+            _rect: { x: 24, y: 880, w: 340, h: 100 } }, // Positioned below screen
+          { id: 'p3-agent-2', role: 'cooking-agent-card-2', zone: 'interaction',
+            variant: {},
+            _rect: { x: 24, y: 880, w: 340, h: 100 } }, // Positioned below screen
           { id: 'gesture-bar', role: 'gestureBar', zone: 'bottomAction' }
         ]
       };
@@ -937,7 +957,7 @@ window.resolveComponentRect = function resolveComponentRect(comp, layout, plan) 
     case 'weather-date':
       return {
         x: z.viewing.x,
-        y: 119 + (window.currentSurfaceType === 'lockscreen-persona2' ? 28 : 0), // Figma top: 119.67
+        y: 84 + (window.currentSurfaceType === 'lockscreen-persona2' ? 28 : 0), // Figma top: 119.67 -> Adjusted higher
         w: z.viewing.w,
         h: 28
       };
@@ -947,7 +967,7 @@ window.resolveComponentRect = function resolveComponentRect(comp, layout, plan) 
     case 'lock-time':
       return {
         x: z.viewing.x,
-        y: 154 + (window.currentSurfaceType === 'lockscreen-persona2' ? 28 : 0), // Below weatherDate
+        y: 112 + (window.currentSurfaceType === 'lockscreen-persona2' ? 28 : 0), // Below weatherDate -> Adjusted higher
         w: z.viewing.w,
         h: 176
       };
@@ -971,9 +991,9 @@ window.resolveComponentRect = function resolveComponentRect(comp, layout, plan) 
     case 'persona2-widgets':
       return {
         x: 0,
-        y: 338 + 28,
+        y: 310 + 28, // Adjusted higher
         w: vw,
-        h: 300
+        h: 450
       };
 
     case 'lock-dot-widgets':
@@ -1437,9 +1457,10 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
   switch (comp.role) {
     // (p3-ai-orb / p3-ai-result removed — star interaction belongs to persona2)
     case 'cooking-bg': {
-      // Persona3 background should follow the unified wallpaper set on the
-      // phone frame (.canvas-inner). Keep this layer transparent.
-      return '<div style="width:100%;height:100%;background:transparent;"></div>';
+      var bgImg = '/assets/dot-gallery/image-114131.png';
+      return '<div class="p3-bg-container" style="width:100%;height:100%;position:absolute;inset:0;overflow:hidden;">' +
+        '<div class="p3-bg-overlay" style="position:absolute;inset:-50px;background:url(' + bgImg + ') center/cover; filter:blur(40px) brightness(0.65); opacity:0;"></div>' +
+      '</div>';
     }
 
     case 'cooking-greeting': {
@@ -1460,13 +1481,20 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
       '</div>';
     }
 
+    case 'cooking-yes-no-btn': {
+      return '<div style="width:100%;height:100%;display:flex;gap:12px;">' +
+        '<button class="p3-yes-no-action" data-action="no" style="flex:1;height:56px;border-radius:28px;background:rgba(255,255,255,0.4);color:#1A1D1C;font-family:var(--font);font-weight:600;font-size:16px;border:none;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:opacity 0.2s;">아니요</button>' +
+        '<button class="p3-yes-no-action" data-action="yes" style="flex:1;height:56px;border-radius:28px;background:#B7E46A;color:#1A1D1C;font-family:var(--font);font-weight:600;font-size:16px;border:none;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:opacity 0.2s;">네, 준비해볼게요</button>' +
+      '</div>';
+    }
+
     case 'cooking-recipe': {
       var rv = (comp && comp.variant) || {};
       var right = rv.rightMeta || '85% 데이터 일치';
       var chip = function (label, value) {
-        return '<div style="width:96px;height:54px;background:rgba(255,255,255,0.10);border:1px solid rgba(255,255,255,0.10);border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--p3-green,#B7E46A);">' +
-          '<div style="font-family:var(--font);font-weight:500;font-size:14px;line-height:1.3;color:rgba(231,255,200,0.92);">' + label + '</div>' +
-          '<div style="font-family:var(--font-dot);font-weight:400;font-size:22px;line-height:1.1;color:var(--p3-green,#B7E46A);letter-spacing:0.06em;">' + value + '</div>' +
+        return '<div style="width:100px;height:54px;background:rgba(255,255,255,0.10);border:1px solid rgba(255,255,255,0.10);border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--p3-green,#B7E46A);">' +
+          '<div style="font-family:var(--font);font-weight:500;font-size:13px;line-height:1.3;color:rgba(231,255,200,0.92);">' + label + '</div>' +
+          '<div style="font-family:var(--font-dot);font-weight:400;font-size:19px;line-height:1.1;color:var(--p3-green,#B7E46A);letter-spacing:0.02em;white-space:nowrap;">' + value + '</div>' +
         '</div>';
       };
       var alertIcon =
@@ -1483,7 +1511,7 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
           '</div>' +
           '<div style="font-family:var(--font);font-weight:500;font-size:15px;line-height:1.3;opacity:0.5;color:#1a1d1c;">' + right + '</div>' +
         '</div>' +
-        '<div style="width:339px;height:72px;background:var(--p3-black,rgba(16,16,18,0.92));border-radius:30px;display:flex;align-items:center;justify-content:center;gap:10px;">' +
+        '<div style="width:340px;height:72px;background:var(--p3-black,rgba(16,16,18,0.92));border-radius:30px;display:flex;align-items:center;justify-content:center;gap:10px;">' +
           chip('칼로리', '420kcal') +
           chip('조리 시간', '15min') +
           chip('난이도', 'M') +
@@ -1500,25 +1528,24 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
             '<span style="width:4px;height:4px;border-radius:99px;background:#1a1d1c;opacity:0.8;"></span>'.repeat(5) +
           '</div>' +
         '</div>';
-      function row(bg, title, sub, amount, checked) {
-        var leftCircleBg = checked ? 'rgba(255,255,255,0.92)' : 'rgba(255,255,255,0.55)';
-        var checkColor = checked ? 'var(--p3-ink,#1A1D1C)' : 'rgba(16,16,18,0.35)';
-        return '<button type="button" class="p3-ing-row" data-title="' + (title || '') + '" aria-label="' + (title || 'ingredient') + '" style="width:341px;height:61px;background:' + bg + ';border-radius:93px;display:flex;align-items:center;justify-content:space-between;padding:0 18px 0 15px;box-sizing:border-box;border:1px solid rgba(16,16,18,0.06);cursor:pointer;-webkit-tap-highlight-color:transparent;">' +
+      function row(title, sub, amount, shouldBeChecked) {
+        var extraClass = shouldBeChecked ? ' will-be-checked' : '';
+        return '<button type="button" class="p3-ing-row' + extraClass + '" data-title="' + (title || '') + '" aria-label="' + (title || 'ingredient') + '" style="width:341px;height:61px;border-radius:93px;display:flex;align-items:center;justify-content:space-between;padding:0 18px 0 15px;box-sizing:border-box;border:1px solid rgba(16,16,18,0.06);cursor:pointer;-webkit-tap-highlight-color:transparent;">' +
           '<div style="display:flex;align-items:center;gap:17px;min-width:0;">' +
-            '<div style="width:35px;height:35px;border-radius:18px;background:' + leftCircleBg + ';display:flex;align-items:center;justify-content:center;flex-shrink:0;">' +
-              '<div style="width:18px;height:18px;border-radius:99px;border:2px solid ' + checkColor + ';display:flex;align-items:center;justify-content:center;opacity:' + (checked ? '1' : '0.55') + ';">' +
-                (checked ? '<div style="width:8px;height:8px;border-radius:99px;background:' + checkColor + ';"></div>' : '') +
+            '<div class="p3-left-circle" style="width:35px;height:35px;border-radius:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">' +
+              '<div class="p3-check-ring" style="width:18px;height:18px;border-radius:99px;border:2px solid;display:flex;align-items:center;justify-content:center;">' +
+                '<div class="p3-check-dot" style="width:8px;height:8px;border-radius:99px;"></div>' +
               '</div>' +
             '</div>' +
             '<div style="display:flex;flex-direction:column;gap:3px;min-width:0;">' +
               '<div style="font-family:var(--font);font-weight:700;font-size:15px;line-height:1.3;color:var(--p3-ink,#1A1D1C);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + title + '</div>' +
-              (sub ? '<div style="font-family:var(--font);font-weight:600;font-size:12px;line-height:1.3;color:rgba(26,29,28,0.62);opacity:' + (checked ? '1' : '0.55') + ';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + sub + '</div>' : '') +
+              (sub ? '<div class="p3-subtext" style="font-family:var(--font);font-weight:600;font-size:12px;line-height:1.3;color:rgba(26,29,28,0.62);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + sub + '</div>' : '') +
             '</div>' +
           '</div>' +
           '<div style="font-family:var(--font-dot);font-weight:400;font-size:22px;line-height:1.1;color:var(--p3-ink,#1A1D1C);letter-spacing:0.06em;">' + amount + '</div>' +
         '</button>';
       }
-      return '<div style="width:100%;height:100%;display:flex;flex-direction:column;gap:8px;">' +
+      return '<div id="p3-ingredients-wrapper" style="width:100%;height:100%;display:none;flex-direction:column;gap:8px;">' +
         '<div style="display:flex;align-items:center;justify-content:space-between;width:341px;">' +
           '<div style="display:flex;align-items:center;gap:4px;color:#1a1d1c;">' +
             alertIcon +
@@ -1527,10 +1554,10 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
           '<div style="font-family:var(--font);font-weight:500;font-size:15px;line-height:1.3;opacity:0.5;color:#1a1d1c;">' + right + '</div>' +
         '</div>' +
         '<div style="display:flex;flex-direction:column;gap:7px;">' +
-          row('rgba(183,228,106,0.72)','생연어 필렛','냉장고 2칸 확인됨','200g',true) +
-          row('rgba(183,228,106,0.72)','아스파라거스','신선실 확인됨','4',true) +
-          row('rgba(255,255,255,0.68)','올리브 오일','펜트리 보관 추천','2',false) +
-          row('rgba(255,255,255,0.68)','소금 및 후추','', '2',false) +
+          row('생연어 필렛','냉장고 2칸 확인됨','200g',true) +
+          row('아스파라거스','신선실 확인됨','4',true) +
+          row('올리브 오일','펜트리 보관 추천','2',false) +
+          row('소금 및 후추','', '2',false) +
         '</div>' +
       '</div>';
     }
@@ -1544,6 +1571,36 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
           '<span></span><span></span><span></span><span></span><span></span><span></span>' +
         '</div>' +
       '</button>';
+    }
+
+    case 'cooking-agent-card': {
+      var cav = (comp && comp.variant) || {};
+      var title = cav.title || '에이전트 추천';
+      var text = cav.text || '와인 페어링 추천: 쇼비뇽 블랑이 잘 어울려요';
+      var icon = cav.icon || '🍷';
+      return '<div class="p3-agent-card" style="width:340px; height:auto; background:rgba(255,255,255,0.85); border-radius:40px; padding:22px 26px; box-sizing:border-box; display:flex; flex-direction:column; gap:12px; box-shadow: 0 15px 40px rgba(0,0,0,0.08); border: 1px solid rgba(255,255,255,0.6); backdrop-filter:blur(15px);">' +
+        '<div style="display:flex; align-items:center; gap:14px;">' +
+          '<div style="width:44px; height:44px; background:rgba(185,166,255,0.2); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:24px;">' + icon + '</div>' +
+          '<div style="font-family:var(--font); font-weight:800; font-size:14px; color:var(--p2-lavender, #8E74FF); text-transform:uppercase; letter-spacing:1px;">' + title + '</div>' +
+        '</div>' +
+        '<div style="font-family:var(--font); font-weight:700; font-size:18px; color:#1a1d1c; line-height:1.4;">' + text + '</div>' +
+      '</div>';
+    }
+    case 'cooking-agent-card-2': {
+      var cav = (comp && comp.variant) || {};
+      var title = cav.title || '부족한 재료 구매';
+      var text = cav.text || '올리브 오일, 소금 및 후추를 장바구니에 담을까요?';
+      var icon = cav.icon || '🛒';
+      return '<div class="p3-agent-card" style="width:340px; height:auto; background:rgba(255,255,255,0.85); border-radius:40px; padding:22px 26px; box-sizing:border-box; display:flex; flex-direction:column; gap:12px; box-shadow: 0 15px 40px rgba(0,0,0,0.08); border: 1px solid rgba(255,255,255,0.6); backdrop-filter:blur(15px);">' +
+        '<div style="display:flex; align-items:center; gap:14px;">' +
+          '<div style="width:44px; height:44px; background:rgba(185,166,255,0.2); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:24px;">' + icon + '</div>' +
+          '<div style="font-family:var(--font); font-weight:800; font-size:14px; color:var(--p2-lavender, #8E74FF); text-transform:uppercase; letter-spacing:1px;">' + title + '</div>' +
+        '</div>' +
+        '<div style="font-family:var(--font); font-weight:700; font-size:18px; color:#1a1d1c; line-height:1.4;">' + text + '</div>' +
+        '<div style="display:flex; gap:8px; margin-top:8px;">' +
+          '<button type="button" class="p3-agent-action-btn p3-agent-action-btn-yes" style="flex:1; height:48px; background:var(--p3-ink,#1A1D1C); color:#fff; border-radius:24px; border:none; font-family:var(--font); font-weight:600; font-size:15px; cursor:pointer;">네, 담아주세요</button>' +
+        '</div>' +
+      '</div>';
     }
     case 'status-bar':
       var sbv = (comp && comp.variant) || {};
@@ -3554,6 +3611,25 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
         '</div>';
     }
 
+    case 'composite-set': {
+      var cv = (comp && comp.variant) || {};
+      var children = cv.children || [];
+      var targetRect = rect || { w: 340, h: 340 };
+      
+      var html = '<div class="composite-set-container" style="position:relative; width:340px; height:'+targetRect.h+'px; overflow:visible; background:transparent !important; border:none !important;">';
+      children.forEach(function(child) {
+        var childHtml = window.renderAtomicForRole({ role: child.role, variant: child.variant || {} }, { w: child.w, h: child.h });
+        var left = child.x || 0;
+        var top = child.y || 0;
+        var isMusic = child.role === 'dot-music-1x1';
+        // For wide child components, ensure they take full width instead of hardcoded width
+        var widthStyle = (child.w === 340) ? 'width:100%;' : 'width:' + (child.w || 0) + 'px;';
+        html += '<div class="composite-child' + (isMusic ? ' is-orange' : '') + '" style="position:absolute; left:' + left + 'px; top:' + top + 'px; ' + widthStyle + ' height:' + (child.h || 0) + 'px; overflow:visible;">' + childHtml + '</div>';
+      });
+      html += '</div>';
+      return html;
+    }
+
     case 'dot-call': {
       var cv = (comp && comp.variant) || {};
       var cName = cv.name || 'Michael Jones';
@@ -3644,7 +3720,7 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
     case 'dot-gallery-img': {
       var gv = (comp && comp.variant) || {};
       var active = gv.activeIndex != null ? gv.activeIndex : 0;
-      var img = gv.img || '';
+      var img = gv.img || '/assets/dot-gallery/image-114131.png';
       var imgHtml = img ? '<img class="dot-gimg__img" src="' + img + '" alt="" />' : '';
       return '' +
         '<div class="dot-card dot-gimg" data-state="' + (gv.state || 'idle') + '">' +
@@ -3690,7 +3766,7 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
         window.__dotGalleryFrame1Focus = function (cell) {
           var frame = cell && cell.parentNode;
           if (!frame || !frame.closest) return;
-          if (!frame.closest('.detail-stage') && !frame.classList.contains('dot-gframe3')) return;
+          if (!frame.closest('.detail-stage') && !frame.closest('#canvas') && !frame.closest('#theme-container') && !frame.classList.contains('dot-gframe3')) return;
           var cells = Array.prototype.slice.call(frame.children).filter(function (item) {
             return item.classList && item.classList.contains('dot-gcell');
           });
@@ -3848,7 +3924,7 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
       var camId = 'dotcam_' + Math.random().toString(36).slice(2, 9);
       return '' +
         '<div class="dot-card dot-cam dot-cam--morph" data-state="' + (camv.state || 'idle') + '">' +
-          '<input class="dot-cam__toggle" type="checkbox" id="' + camId + '" aria-label="Open camera card" />' +
+          '<input class="dot-cam__toggle" type="checkbox" id="' + camId + '" aria-label="Open camera card" style="display:none;" />' +
           '<label class="dot-cam__trigger" for="' + camId + '" aria-hidden="true">' +
             '<svg width="82" height="82" viewBox="0 0 82 82" fill="none" xmlns="http://www.w3.org/2000/svg">' +
               '<rect width="82" height="82" rx="41" fill="#FF7F24"/>' +
@@ -3894,8 +3970,9 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
       }, rect);
       var isTabRoot = window.currentSurfaceType === window.SURFACE_TYPES.TAB_ROOT;
       var orangeClass = isTabRoot ? ' is-orange' : '';
+      var widthStyle = (rect && rect.w === 340) ? 'width:340px;' : 'width:168px;';
       return '' +
-        '<div class="dot-card dot-music dot-music1' + orangeClass + '" data-state="' + (mv.state || 'idle') + '">' +
+        '<div class="dot-card dot-music dot-music1' + orangeClass + '" data-state="' + (mv.state || 'idle') + '" style="' + widthStyle + '">' +
           '<div class="dot-music1__compact">' +
             '<div class="dot-music1__top">' +
               '<div class="dot-music1__artist">' + artist + '</div>' +
@@ -4134,7 +4211,7 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
       // Show day-of-month as a separate 2-digit block to avoid right clipping.
       var dayDigits = (mv.dayDigits || day);
 
-      var DOT_COLOR = mv.dotColor || '#FF7F24';
+      var DOT_COLOR = mv.dotColor || 'var(--p2-lavender, #FF7F24)';
       // No solid background panel — only gray background dots.
       var BG_DOT = mv.bgDotColor || 'rgba(255,255,255,0.16)';
 
@@ -4213,6 +4290,8 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
       _putText(active, lineMeta, 0, 11);
       _putText(active, String(dayDigits).padStart(2, '0'), cols - 11, 11);
 
+      var isMusic = lineTime.indexOf('MUSIC') !== -1 || lineMeta.indexOf('MUSIC') !== -1;
+
       var bgDots = '';
       for (var yy = 0; yy < rows; yy++) {
         for (var xx = 0; xx < cols; xx++) {
@@ -4246,10 +4325,14 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
 
         var cx2 = margin + gx * step;
         var cy2 = margin + gy * step;
-        onDots += '<circle class="dot-timemat__dot" cx="' + cx2 + '" cy="' + cy2 + '" r="' + r + '" fill="' + DOT_COLOR + '" style=\"--i:' + dotIndex + ';\" />';
+        onDots += '<circle class="dot-timemat__dot" cx="' + cx2 + '" cy="' + cy2 + '" r="' + r + '" fill="' + DOT_COLOR + '" style="--i:' + dotIndex + ';" />';
         dotIndex++;
       }
       var totalDots = dotIndex;
+
+      var onDotsHtml = isMusic 
+        ? '<g class="dot-timemat__onGroup--scroll">' + onDots + '</g>' 
+        : onDots;
 
       return '' +
         '<div class="dot-card dot-timemat" ' +
@@ -4259,7 +4342,7 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
           'title="dot-count: ' + totalDots + '">' +
           '<svg class="dot-timemat__svg" width="340" height="180" viewBox="0 0 340 180" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
             bgDots +
-            onDots +
+            onDotsHtml +
           '</svg>' +
         '</div>';
     }
@@ -4267,15 +4350,15 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
     case 'dot-schedule-2x2': {
       var sv = (comp && comp.variant) || {};
       var date = sv.date || '13 May';
-      var items = Array.isArray(sv.items) ? sv.items : [
+      var items = Array.isArray(sv.items) ? sv.items.slice(0, 3) : [
         { text: 'Wild Life', tone: 'muted' },
         { text: 'Blue Mountains', tone: 'muted' },
-        { text: 'Darling Harbour', tone: 'accent' },
-        { text: 'Opera House', tone: 'muted' }
+        { text: 'Darling Harbour', tone: 'accent' }
       ];
-      while (items.length < 4) items.push({ text: 'Schedule item', tone: 'muted' });
+      // Removed padding
       var row = function (it) {
-        var tone = (it && it.tone) || 'muted';
+        if (!it) return '';
+        var tone = it.tone || 'muted';
         var bulletClass = tone === 'accent' ? 'is-accent' : 'is-dark';
         var textClass = tone === 'accent' ? 'is-accent' : (tone === 'strong' ? 'is-strong' : 'is-muted');
         return '' +
@@ -4287,8 +4370,7 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
       var expandedItems = Array.isArray(sv.expandedItems) ? sv.expandedItems : [
         { text: 'Design standup', time: '10:00', tone: 'muted' },
         { text: 'Coffee w/ Sarah', time: '14:00', tone: 'muted' },
-        { text: 'Run 5km', time: '18:30', tone: 'accent' },
-        { text: 'Dinner reservation', time: '20:00', tone: 'strong' }
+        { text: 'Run 5km', time: '18:30', tone: 'accent' }
       ];
       var expandedHtml = window.renderAtomicForRole({
         role: 'dot-schedule-4x2',
@@ -4303,10 +4385,7 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
             '<div class="dot-sch__unit">' +
               '<div class="dot-sch__date">' + date + '</div>' +
               '<div class="dot-sch__list">' +
-                row(items[0]) +
-                row(items[1]) +
-                row(items[2]) +
-                row(items[3]) +
+                items.map(function(item) { return row(item); }).join('') +
               '</div>' +
             '</div>' +
           '</div>' +
@@ -4318,28 +4397,35 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
       var sv2 = (comp && comp.variant) || {};
       var date2 = sv2.date || 'May 15';
       var items2 = Array.isArray(sv2.items) ? sv2.items : [];
-      while (items2.length < 4) items2.push({ text: 'Schedule item', time: '00:00', tone: 'muted' });
-      var row2 = function (it) {
+      // Strictly limit to 3 items as requested for Scenario 2
+      var displayItems = items2.slice(0, 3);
+      // Removed the while loop that padded with dummy items
+      // while (displayItems.length < 3) displayItems.push({ text: 'Schedule item', time: '00:00', tone: 'muted' });
+      
+      var row2 = function (it, idx) {
+        if (!it) return ''; // Safegaurd
         var tone = (it && it.tone) || 'muted';
         var bulletClass = tone === 'accent' ? 'is-accent' : 'is-dark';
         var textClass = tone === 'accent' ? 'is-accent' : (tone === 'strong' ? 'is-strong' : 'is-muted');
-        var timeClass = tone === 'strong' ? 'is-strong' : 'is-time';
+        // In dark mode, muted text should be white with opacity
+        var textStyle = 'font-family:\'Pretendard\', sans-serif; font-size:14px; flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;';
+        if (tone === 'accent') textStyle += ' color:var(--p2-lavender, #B9A6FF);';
+        else if (tone === 'strong') textStyle += ' color:#FFFFFF; font-weight:700;';
+        else textStyle += ' color:rgba(255,255,255,0.7);';
+
         return '' +
-          '<div class="dot-sch__row dot-sch__row--wide">' +
-            '<span class="dot-sch__bullet ' + bulletClass + '" aria-hidden="true"></span>' +
-            '<span class="dot-sch__text ' + textClass + '">' + (it.text || '') + '</span>' +
-            '<span class="dot-sch__time ' + timeClass + '">' + (it.time || '') + '</span>' +
+          '<div class="dot-sch__row dot-sch__row--wide" style="display:flex; align-items:center; gap:12px; opacity:0; animation: p2ScheduleRowIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; animation-delay: ' + (0.2 + idx * 0.1) + 's;">' +
+            '<span class="dot-sch__bullet ' + bulletClass + '" aria-hidden="true" style="width:6px; height:6px; border-radius:50%; background:' + (tone === 'accent' ? 'var(--p2-lavender, #B9A6FF)' : 'rgba(255,255,255,0.3)') + '; flex-shrink:0;"></span>' +
+            '<span class="dot-sch__text ' + textClass + '" style="' + textStyle + '">' + (it.text || '') + '</span>' +
+            '<span class="dot-sch__time" style="font-family:var(--font-dot); font-size:14px; color:rgba(255,255,255,0.5); flex-shrink:0; letter-spacing:0.05em;">' + (it.time || '') + '</span>' +
           '</div>';
       };
       return '' +
-        '<div class="dot-card dot-sch dot-sch42" data-state="' + (sv2.state || 'idle') + '">' +
-          '<div class="dot-sch__unit dot-sch__unit--wide">' +
-            '<div class="dot-sch__date dot-sch__date--wide">' + date2 + '</div>' +
-            '<div class="dot-sch__list dot-sch__list--wide">' +
-              row2(items2[0]) +
-              row2(items2[1]) +
-              row2(items2[2]) +
-              row2(items2[3]) +
+        '<div class="dot-card dot-sch dot-sch42" data-state="' + (sv2.state || 'idle') + '" style="background:var(--p2-black, rgba(16,16,18,0.92)); border-radius:36px; display:flex; flex-direction:column; padding:26px; box-sizing:border-box; transition:background 0.5s ease; width:100%; height:100%; overflow:hidden; border: 1px solid rgba(255,255,255,0.08);">' +
+          '<div class="dot-sch__unit dot-sch__unit--wide" style="flex:1; display:flex; flex-direction:column; gap:16px;">' +
+            '<div class="dot-sch__date dot-sch__date--wide" style="font-family:var(--font-dot), sans-serif; font-size:24px; color:var(--p2-lavender, #B9A6FF); margin-bottom:4px; font-weight:bold; transition:color 0.5s ease; text-transform:uppercase; opacity:0; animation: p2ScheduleRowIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;">' + date2 + '</div>' +
+            '<div class="dot-sch__list dot-sch__list--wide" style="display:flex; flex-direction:column; gap:10px;">' +
+              displayItems.map(function(item, idx) { return row2(item, idx); }).join('') +
             '</div>' +
           '</div>' +
         '</div>';
@@ -4353,6 +4439,88 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
         '<div class="dot-card dot-steps21" data-state="' + (st.state || 'idle') + '">' +
           '<div class="dot-steps21__title">' + stTitle + '</div>' +
           '<div class="dot-steps21__count">' + stCount + '</div>' +
+        '</div>';
+    }
+
+    case 'dot-emoji-1x1': {
+      var ev = (comp && comp.variant) || {};
+      var emoji = ev.emoji || '🍳';
+      
+      var dotSize = 2.5;
+      var gap = 10;
+      var dotsHtml = '';
+      
+      // Define icon patterns as relative grid offsets from center (84, 84)
+      var patterns = {
+        'music': [
+          [-2,-3],[-1,-3],[0,-3],[1,-3],[2,-3],
+          [-2,-2],[2,-2],
+          [-2,-1],[2,-1],
+          [-2,0],[2,0],
+          [-4,1],[-3,1],[-2,1],[0,1],[1,1],[2,1],
+          [-4,2],[-3,2],[-2,2],[0,2],[1,2],[2,2]
+        ],
+        'cooking': [
+          [0,-3],[-1,-2],[1,-2],[-2,-1],[2,-1],[-2,0],[2,0],
+          [-1,1],[0,1],[1,1],[-1,2],[0,2],[1,2]
+        ],
+        'coffee': [
+          [-1,-1],[0,-1],[1,-1],
+          [-2,0],[-1,0],[0,0],[1,0],[2,0],
+          [-2,1],[-1,1],[0,1],[1,1],[2,1],
+          [-1,2],[0,2],[1,2]
+        ],
+        'shopping': [
+          [-2,-2],[-1,-2],[0,-2],[1,-2],
+          [-1,-1],[1,-1],
+          [-1,0],[0,0],[1,0],
+          [-1,1],[1,1]
+        ],
+        'airplane': [
+          [0,-3],[0,-2],[0,-1],[0,0],[0,1],[0,2],
+          [-2,-1],[-1,-1],[1,-1],[2,-1],
+          [-1,1],[1,1]
+        ]
+      };
+
+      var activePattern = [];
+      if (emoji === '🎵' || emoji === '🎶' || emoji === 'music') activePattern = patterns.music;
+      else if (emoji === '🍳' || emoji === 'cooking' || emoji === 'chef') activePattern = patterns.cooking;
+      else if (emoji === '☕' || emoji === 'coffee' || emoji === 'cafe') activePattern = patterns.coffee;
+      else if (emoji === '🛒' || emoji === 'shopping' || emoji === 'mart') activePattern = patterns.shopping;
+      else if (emoji === '✈️' || emoji === 'airplane' || emoji === 'travel' || emoji === 'plane') activePattern = patterns.airplane;
+
+      function isIconDot(gx, gy) {
+        for (var i = 0; i < activePattern.length; i++) {
+          if (activePattern[i][0] === gx && activePattern[i][1] === gy) return true;
+        }
+        return false;
+      }
+
+      for (var y = 14; y < 168; y += gap) {
+        for (var x = 14; x < 168; x += gap) {
+          var dx = x - 84;
+          var dy = y - 84;
+          if (dx*dx + dy*dy <= 72*72) {
+            var gx = Math.round(dx / gap);
+            var gy = Math.round(dy / gap);
+            var isIcon = isIconDot(gx, gy);
+            
+            var fill = isIcon ? 'var(--p2-lavender, #FFFFFF)' : 'rgba(255,255,255,0.7)';
+            // Use same dot size for both, but add opacity flow animation to active dots
+            var r = dotSize;
+            var cls = isIcon ? 'dot-emoji11__icon-dot' : '';
+            
+            dotsHtml += '<circle class="' + cls + '" cx="' + x + '" cy="' + y + '" r="' + r + '" fill="' + fill + '" />';
+          }
+        }
+      }
+
+      return '' +
+        '<div class="dot-card dot-emoji11" data-state="' + (ev.state || 'idle') + '" style="background:transparent; border:none; box-shadow:none; position:relative; width:100%; height:100%; display:flex; align-items:center; justify-content:center;">' +
+          '<svg width="168" height="168" viewBox="0 0 168 168" fill="none" xmlns="http://www.w3.org/2000/svg" style="position:absolute; inset:0;">' +
+            dotsHtml +
+          '</svg>' +
         '</div>';
     }
 
@@ -4441,41 +4609,34 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
       var loc = w2.location || 'Sydney';
       var wt = w2.weather || 'Sunny';
       var darkClass = w2.theme === 'dark' ? ' dot-w21--dark' : '';
-      // Reuse dot-sun but sized/positioned per spec and dark color.
+      
+      // Helper for dot icons
+      var _renderDots = function(type) {
+        var dots = '';
+        var t = String(type).toLowerCase();
+        if (t.indexOf('cloud') >= 0 || t.indexOf('흐림') >= 0) {
+          // Cloud
+          [[23,15],[29,15],[17,18],[23,18],[29,18],[35,18],[11,23],[17,23],[23,23],[29,23],[35,23],[41,23],[17,28],[23,28],[29,28],[35,28]].forEach(function(d){
+            dots += '<circle cx="'+d[0]+'" cy="'+d[1]+'" r="2.17" fill="currentColor"/>';
+          });
+        } else if (t.indexOf('rain') >= 0 || t.indexOf('비') >= 0) {
+          // Rain
+          [[23,12],[29,12],[17,15],[23,15],[29,15],[35,15],[11,20],[17,20],[23,20],[29,20],[35,20],[41,20],[17,30],[29,30],[41,30],[17,38],[29,38],[41,38]].forEach(function(d){
+            dots += '<circle cx="'+d[0]+'" cy="'+d[1]+'" r="2.17" fill="currentColor"/>';
+          });
+        } else {
+          // Sun
+          [[23.185,2.32],[38.13,8.07],[44.05,23.185],[38.13,38.3],[23.185,44.05],[8.1,38.3],[2.32,23.185],[7.55,8.07],[17.3,11.5],[23.185,11.5],[29.1,11.5],[11.5,17.3],[17.3,17.3],[23.185,17.3],[29.1,17.3],[34.9,17.3],[11.5,23.185],[17.3,23.185],[23.185,23.185],[29.1,23.185],[34.9,23.185],[11.5,29.1],[17.3,29.1],[23.185,29.1],[29.1,29.1],[34.9,29.1],[17.3,34.9],[23.185,34.9],[29.1,34.9]].forEach(function(d){
+            dots += '<circle cx="'+d[0]+'" cy="'+d[1]+'" r="2.17" fill="currentColor"/>';
+          });
+        }
+        return dots;
+      };
+
       return '' +
         '<div class="dot-card dot-w21' + darkClass + '" data-state="' + (w2.state || 'idle') + '">' +
           '<svg class="dot-w21__sun" width="41.7" height="41.7" viewBox="0 0 46.37 46.37" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
-            // outer ring
-            '<circle cx="23.185" cy="2.32" r="2.17" fill="#191919"/>' +
-            '<circle cx="38.13" cy="8.07" r="2.17" fill="#191919"/>' +
-            '<circle cx="44.05" cy="23.185" r="2.17" fill="#191919"/>' +
-            '<circle cx="38.13" cy="38.3" r="2.17" fill="#191919"/>' +
-            '<circle cx="23.185" cy="44.05" r="2.17" fill="#191919"/>' +
-            '<circle cx="8.1" cy="38.3" r="2.17" fill="#191919"/>' +
-            '<circle cx="2.32" cy="23.185" r="2.17" fill="#191919"/>' +
-            '<circle cx="7.55" cy="8.07" r="2.17" fill="#191919"/>' +
-            // inner grid (uniform 5x5 rounded)
-            '<circle cx="17.3" cy="11.5" r="2.17" fill="#191919"/>' +
-            '<circle cx="23.185" cy="11.5" r="2.17" fill="#191919"/>' +
-            '<circle cx="29.1" cy="11.5" r="2.17" fill="#191919"/>' +
-            '<circle cx="11.5" cy="17.3" r="2.17" fill="#191919"/>' +
-            '<circle cx="17.3" cy="17.3" r="2.17" fill="#191919"/>' +
-            '<circle cx="23.185" cy="17.3" r="2.17" fill="#191919"/>' +
-            '<circle cx="29.1" cy="17.3" r="2.17" fill="#191919"/>' +
-            '<circle cx="34.9" cy="17.3" r="2.17" fill="#191919"/>' +
-            '<circle cx="11.5" cy="23.185" r="2.17" fill="#191919"/>' +
-            '<circle cx="17.3" cy="23.185" r="2.17" fill="#191919"/>' +
-            '<circle cx="23.185" cy="23.185" r="2.17" fill="#191919"/>' +
-            '<circle cx="29.1" cy="23.185" r="2.17" fill="#191919"/>' +
-            '<circle cx="34.9" cy="23.185" r="2.17" fill="#191919"/>' +
-            '<circle cx="11.5" cy="29.1" r="2.17" fill="#191919"/>' +
-            '<circle cx="17.3" cy="29.1" r="2.17" fill="#191919"/>' +
-            '<circle cx="23.185" cy="29.1" r="2.17" fill="#191919"/>' +
-            '<circle cx="29.1" cy="29.1" r="2.17" fill="#191919"/>' +
-            '<circle cx="34.9" cy="29.1" r="2.17" fill="#191919"/>' +
-            '<circle cx="17.3" cy="34.9" r="2.17" fill="#191919"/>' +
-            '<circle cx="23.185" cy="34.9" r="2.17" fill="#191919"/>' +
-            '<circle cx="29.1" cy="34.9" r="2.17" fill="#191919"/>' +
+            _renderDots(wt) +
           '</svg>' +
           '<div class="dot-w21__text">' +
             '<div class="dot-w21__loc">' + loc + '</div>' +
@@ -4483,6 +4644,7 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
           '</div>' +
         '</div>';
     }
+
 
     case 'dot-running': {
       // DOT dataset — Running coach pill (297×75). Markup is class-based so
@@ -5046,7 +5208,7 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
       '</div>';
 
     case 'persona2-widgets':
-      return '<div class="p2-widgets" style="position:relative; width: 100%; height: 350px;">' +
+      return '<div class="p2-widgets" style="position:relative; width: 100%; height: 450px;">' +
         // Pill
         '<div class="p2-pill" style="position:absolute; top:0; left: 24px; right: 24px; height: 80px; background: var(--p2-white); border-radius: 40px; display:flex; align-items:center; padding: 0 24px 0 12px; gap: 16px;">' +
           '<div class="p2-pill__icon" style="width: 56px; height: 56px; background: var(--p2-lavender); border-radius: 28px; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden;">' +
@@ -5057,10 +5219,10 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
              '</div>' +
           '</div>' +
           '<div style="display:flex; flex-direction:column; flex:1; margin-left:2px;">' +
-            '<span class="p2-grad-text" style="font-family:\'Pretendard\',sans-serif; font-weight:700; font-size:18px; line-height:1.3;">휴가는 즐거우셨나요?</span>' +
-            '<span class="p2-grad-text p2-grad-text--subtle" style="font-family:\'Pretendard\',sans-serif; font-weight:600; font-size:13px;">밀린 일들은 제가 정리할게요..</span>' +
+            '<span id="p2-pill-title" class="p2-grad-text" style="font-family:\'Pretendard\',sans-serif; font-weight:700; font-size:18px; line-height:1.3;">휴가는 즐거우셨나요?</span>' +
+            '<span id="p2-pill-sub" class="p2-grad-text p2-grad-text--subtle" style="font-family:\'Pretendard\',sans-serif; font-weight:600; font-size:13px;">밀린 일들은 제가 정리할게요..</span>' +
           '</div>' +
-          '<button id="p2-arrow" type="button" aria-label="AI Action" style="display:flex;justify-content:center;align-items:center;width:30px;height:30px;flex-shrink:0;border:0;padding:0;background:transparent;cursor:pointer;-webkit-tap-highlight-color:transparent;color:var(--p2-lavender);">' +
+          '<button id="p2-arrow" type="button" aria-label="AI Action" style="display:flex;justify-content:center;align-items:center;width:30px;height:30px;flex-shrink:0;border:0;padding:0;background:transparent;cursor:pointer;-webkit-tap-highlight-color:transparent;color:var(--p2-lavender);z-index:5;">' +
             '<div class="dot-running__dots-arrow" style="position:relative;left:auto;top:auto;transform:none;">' +
               '<svg width="30" height="30" viewBox="0 0 30 30" fill="none">' +
                 '<circle class="dot-run-arrow-dot dot-run-arrow-dot--0" cx="6" cy="15" r="2.1" fill="currentColor" />' +
@@ -5078,46 +5240,89 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
           '</button>' +
         '</div>' +
 
-        // Message Circle
-        '<div style="position:absolute; top: 88px; left: 24px; width: 80px; height: 80px; background: var(--p2-white); border-radius: 40px; display:flex; flex-direction:column; align-items:center; justify-content:center; color:var(--p2-ink);">' +
-          '<span style="font-family:\'Pretendard\',sans-serif; font-weight:700; font-size:11px; margin-bottom:-4px; opacity:0.78;">메시지</span>' +
-          '<span class="dot-date11__text" style="font-family:var(--font-dot); font-size:38px; letter-spacing:1px; margin-top:2px; color:#000;">14</span>' +
-        '</div>' +
-
-        // Sparkle Circle (AI trigger)
-        '<button id="p2-star" type="button" aria-label="AI Voice" style="position:absolute; top: 176px; left: 24px; width: 80px; height: 80px; background: var(--p2-lavender); border:0; padding:0; border-radius: 40px; display:flex; align-items:center; justify-content:center; cursor:pointer; -webkit-tap-highlight-color:transparent;">' +
-          '<svg width="36" height="36" viewBox="0 0 24 24" fill="none"><path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4L12 2z" fill="#fff"/><path d="M19 4l1 3 3 1-3 1-1 3-1-3-3-1 3-1z" fill="#fff"/></svg>' +
-        '</button>' +
-
-        // Dark Box (AI result card)
-        '<div id="p2-result" class="p2-dark" style="position:absolute; top: 88px; left: 112px; right: 24px; height: 168px; background: var(--p2-black); border-radius: 36px; padding: 24px 26px; display:flex; flex-direction:column; justify-content:space-between; box-sizing:border-box; overflow:hidden;">' +
-          '<div class="p2-dark__stack" style="position:relative;flex:1;min-height:0;">' +
-            '<div class="p2-dark__text" style="display:flex; flex-direction:column; gap:4px;">' +
-              '<span class="p2-result-title p2-grad-text p2-grad-text--lav" style="font-family:\'Pretendard\',sans-serif; font-weight:800; font-size:16px; line-height:1.3;">정산 보고서를<br>수정했어요</span>' +
-              '<span class="p2-result-sub p2-grad-text p2-grad-text--lav p2-grad-text--subtle" style="font-family:\'Pretendard\',sans-serif; font-weight:700; font-size:13px; margin-top:2px;">수식 2곳 자동 교정</span>' +
+        // Main Widget Area (Container for placed components)
+        '<div id="p2-area" style="position:absolute; top: 88px; left: 24px; right: 24px; height: 168px; overflow:visible;">' +
+          // Default State (Message + Star + Result Box)
+          '<div id="p2-default-widgets" style="position:relative; width:100%; height:100%; transition: opacity 0.4s ease;">' +
+            // Message Circle
+            '<div style="position:absolute; top: 0; left: 0; width: 80px; height: 80px; background: var(--p2-white); border-radius: 40px; display:flex; flex-direction:column; align-items:center; justify-content:center; color:var(--p2-ink); gap: 2px;">' +
+              '<span style="font-family:\'Pretendard\',sans-serif; font-weight:700; font-size:11px; opacity:0.78; line-height:1;">메시지</span>' +
+              '<span class="dot-date11__text" style="font-family:var(--font-dot); font-size:36px; letter-spacing:1px; color:#000; line-height:1; margin-top: 2px;">14</span>' +
             '</div>' +
-            '<div id="p2-slot" class="p2-dark__slot" aria-hidden="true" style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none;"></div>' +
+            // Sparkle Circle (AI trigger)
+            '<button id="p2-star" type="button" aria-label="AI Voice" style="position:absolute; top: 88px; left: 0; width: 80px; height: 80px; background: var(--p2-lavender); border:0; padding:0; border-radius: 40px; display:flex; align-items:center; justify-content:center; cursor:pointer; -webkit-tap-highlight-color:transparent; z-index: 1001 !important;">' +
+              '<svg width="36" height="36" viewBox="0 0 24 24" fill="none"><path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4L12 2z" fill="#fff"/><path d="M19 4l1 3 3 1-3 1-1 3-1-3-3-1 3-1z" fill="#fff"/></svg>' +
+            '</button>' +
+            // Dark Box (Initial text state)
+            '<div id="p2-result" class="p2-dark" style="position:absolute; top: 0; left: 88px; right: 0; height: 168px; background: var(--p2-black); border-radius: 36px; padding: 24px 26px; display:flex; flex-direction:column; justify-content:space-between; box-sizing:border-box; overflow:visible;">' +
+              '<div class="p2-dark__stack" style="position:relative;flex:1;min-height:0;">' +
+                '<div class="p2-dark__text" style="display:flex; flex-direction:column; gap:4px;">' +
+                  '<span class="p2-result-title p2-grad-text p2-grad-text--lav" style="font-family:\'Pretendard\',sans-serif; font-weight:800; font-size:16px; line-height:1.3;">정산 보고서를<br>수정했어요</span>' +
+                  '<span class="p2-result-sub p2-grad-text p2-grad-text--lav p2-grad-text--subtle" style="font-family:\'Pretendard\',sans-serif; font-weight:700; font-size:13px; margin-top:2px;">수식 2곳 자동 교정</span>' +
+                '</div>' +
+              '</div>' +
+              '<div style="align-self:flex-end; display:flex; align-items:flex-end; height:45px;">' +
+                 '<div class="p2-dotbar" aria-hidden="true">' +
+                   '<span></span><span></span><span></span><span></span><span></span><span></span>' +
+                 '</div>' +
+              '</div>' +
+            '</div>' +
           '</div>' +
-          '<div style="align-self:flex-end; display:flex; align-items:flex-end; height:45px;">' +
-             '<div class="p2-dotbar" aria-hidden="true">' +
-               '<span></span><span></span><span></span><span></span><span></span><span></span>' +
-             '</div>' +
-          '</div>' +
+          // Full Slot (For AI-placed components)
+          '<div id="p2-slot" style="position:absolute; inset:0; opacity:0; pointer-events:none; overflow:visible;"></div>' +
         '</div>' +
       '</div>';
 
     case 'home-persona1-widgets':
-      // Align to persona2 padding style: fixed 24px side inset, left-aligned grid.
+      if (window.__p1_custom_widgets && window.__p1_custom_widgets.length > 0) {
+        var sizes = {
+          'dot-goal': {w: 340, h: 168},
+          'dot-music-1x1': {w: 164, h: 164},
+          'dot-total-steps-2x1': {w: 164, h: 80},
+          'dot-running-compact': {w: 164, h: 80},
+          'dot-time-matrix': {w: 340, h: 180},
+          'dot-weather-2x1-v1-1': {w: 164, h: 80},
+          'dot-weather-2x1-v1-2': {w: 164, h: 80},
+          'dot-temperature-1x1': {w: 80, h: 80},
+          'dot-date-1x1-v1-1': {w: 80, h: 80},
+          'dot-date-1x1-v1-2': {w: 80, h: 80},
+          'dot-schedule-4x2': {w: 340, h: 168},
+          'dot-schedule-2x2': {w: 164, h: 164},
+          'dot-emoji-1x1': {w: 164, h: 164},
+          'dot-gallery-frame1': {w: 164, h: 164},
+          'dot-gallery-img': {w: 164, h: 164},
+          'dot-camera': {w: 164, h: 246},
+          'composite-set': {w: 340, h: 340}
+        };
+        var customHtml = '<div class="home-persona1-widgets-container" style="width:100%;padding:0 24px;box-sizing:border-box;">' +
+          '<div style="display:flex; flex-wrap:wrap; gap:12px; align-content:flex-start; justify-content:center;">';
+        window.__p1_custom_widgets.forEach(function(c) {
+          var sz = sizes[c.role] || {w: 340, h: 168};
+          // Apply exact sizing constraints to prevent overlaps, handle composite sets specifically
+          if (c.role === 'composite-set') {
+              customHtml += '<div style="width:100%; position:relative;">' +
+                window.renderAtomicForRole({ role: c.role, variant: c.variant || {} }, sz) +
+              '</div>';
+          } else {
+              customHtml += '<div style="width:' + sz.w + 'px; height:' + sz.h + 'px; position:relative;">' +
+                window.renderAtomicForRole({ role: c.role, variant: c.variant || {} }, sz) +
+              '</div>';
+          }
+        });
+        customHtml += '</div></div>';
+        return customHtml;
+      }
+      // Align to persona2 padding style: fixed 24px side inset, centered grid.
       return '<div class="home-persona1-widgets-container" style="display:flex;flex-direction:column;align-items:stretch;gap:12px;width:100%;padding:0 24px;box-sizing:border-box;">' +
         // Row 1: Today's Goal
-        '<div style="display:flex;justify-content:flex-start;">' +
-          '<div style="transform:scale(1.185);transform-origin:top left;">' +
+        '<div style="display:flex;justify-content:center;">' +
+          '<div style="width:340px; height:168px; position:relative;">' +
             window.renderAtomicForRole({ role: 'dot-goal', variant: { title: "Today's Goal", time: '01:42:43', timeSuffix: 'Within', distance: '15km' } }, { w: 340, h: 168 }) +
           '</div>' +
         '</div>' +
         // Row 2: Music, Total Steps, Running compact
-        '<div style="display:flex;gap:8px;width:100%;justify-content:flex-start;">' +
-          '<div style="transform:scale(1.171);transform-origin:top left;display:flex;gap:8px;">' +
+        '<div style="display:flex;gap:8px;width:100%;justify-content:center;">' +
+          '<div style="width:340px; height:168px; position:relative;display:flex;gap:8px;">' +
             '<div style="width:168px;height:168px;">' +
               window.renderAtomicForRole({ role: 'dot-music-1x1' }, { w: 168, h: 168 }) +
             '</div>' +
@@ -5128,8 +5333,8 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
           '</div>' +
         '</div>' +
         // Row 3: Time matrix
-        '<div style="display:flex;justify-content:flex-start;margin-top:8px;">' +
-          '<div style="transform:scale(1.185);transform-origin:top left;">' +
+        '<div style="display:flex;justify-content:center;margin-top:8px;">' +
+          '<div style="width:340px; height:168px; position:relative;">' +
             window.renderAtomicForRole({ role: 'dot-time-matrix', variant: { bgColor: 'transparent', dotColor: '#FF7F24', time: '12:45', meta: 'MON', dayDigits: '  ' } }, { w: 340, h: 180 }) +
           '</div>' +
         '</div>' +

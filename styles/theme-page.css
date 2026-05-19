@@ -148,6 +148,7 @@
     transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), opacity 0.2s;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
+    box-sizing: border-box;
   }
   .dot-card:active {
     transform: scale(0.96);
@@ -185,14 +186,45 @@
 
   /* Persona3 interactions (tap feedback + toggles) */
   .p3-ing-row {
-    transition: transform 180ms cubic-bezier(0.2,0,0,1), filter 180ms ease, opacity 180ms ease;
+    transition: transform 180ms cubic-bezier(0.2,0,0,1), filter 180ms ease, opacity 180ms ease, background 300ms ease;
+    background: rgba(255,255,255,0.68) !important;
+  }
+  .p3-ing-row.is-done {
+    background: rgba(183,228,106,0.72) !important;
+  }
+  .p3-ing-row .p3-left-circle {
+    background: rgba(255,255,255,0.55);
+    transition: background 300ms ease;
+  }
+  .p3-ing-row.is-done .p3-left-circle {
+    background: rgba(255,255,255,0.92);
+  }
+  .p3-ing-row .p3-check-ring {
+    border-color: rgba(16,16,18,0.35);
+    opacity: 0.55;
+    transition: all 300ms ease;
+  }
+  .p3-ing-row.is-done .p3-check-ring {
+    border-color: var(--p3-ink,#1A1D1C);
+    opacity: 1;
+  }
+  .p3-ing-row .p3-check-dot {
+    opacity: 0;
+    transition: opacity 300ms ease;
+  }
+  .p3-ing-row.is-done .p3-check-dot {
+    opacity: 1;
+    background: var(--p3-ink,#1A1D1C);
+  }
+  .p3-ing-row .p3-subtext {
+    opacity: 0.55;
+  }
+  .p3-ing-row.is-done .p3-subtext {
+    opacity: 1;
   }
   .p3-ing-row:active {
     transform: scale(0.985);
     filter: brightness(0.98);
-  }
-  .p3-ing-row.is-done {
-    filter: saturate(1.05);
   }
   #p3-send {
     transition: transform 180ms cubic-bezier(0.2,0,0,1), filter 180ms ease;
@@ -330,22 +362,27 @@
   }
 
   /* Persona2 swap slot appearance */
-  #p2-slot .dot-card {
-    transform: scale(0.92);
-    transform-origin: center;
-    filter: drop-shadow(0 14px 28px rgba(0,0,0,0.18));
-  }
-  /* Slot is a full-cover absolute box; center + scale the inserted component */
   #p2-slot {
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
+    z-index: 10 !important;
+    pointer-events: none; /* Controlled via JS toggle */
   }
-  #p2-slot > * {
-    width: auto !important;
-    height: auto !important;
+  #p2-star:hover, #p2-arrow:hover {
+    transform: scale(1.05);
+    filter: brightness(1.1);
+    transition: all 0.2s ease;
+  }
+  #p2-star:active, #p2-arrow:active {
     transform: scale(0.95);
-    transform-origin: center;
+  }
+  #p2-star {
+    animation: p2StarPulse 2s infinite ease-in-out;
+  }
+  @keyframes p2StarPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(185, 166, 255, 0.4); }
+    50% { box-shadow: 0 0 0 10px rgba(185, 166, 255, 0); }
   }
   #p2-result .p2-dark__text {
     transition: opacity 240ms ease;
@@ -358,128 +395,227 @@
     opacity: 0 !important;
     pointer-events: none !important;
   }
-  /* When swapped, the black card itself transitions to the component's theme */
+  /* When swapped, the black card itself becomes a transparent container for the placed components */
   #p2-result.has-swap {
-    background: var(--p2-white) !important;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.12) !important;
+    background: transparent !important;
+    box-shadow: none !important;
     transition: background 0.5s ease, box-shadow 0.5s ease;
   }
   #p2-slot {
     transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    width: 100% !important;
+    height: 100% !important;
+    display: block !important;
+    overflow: visible !important;
   }
   #p2-slot .dot-card {
-    background: transparent !important;
-    box-shadow: none !important;
-    transform: scale(1) !important;
+    /* Allow components to keep their original colors if intended, 
+       but for P2 we often want to unify them. */
+    position: relative;
+    animation: p2ComponentGrow 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    transform-origin: top center;
+  }
+  
+  /* Theme-aware dot colors for P2 slot */
+  #p2-slot .dot-timemat__dot,
+  #p2-slot .dot-music3__noteSvg circle,
+  #p2-slot .dot-w11__sun circle,
+  #p2-slot .dot-w21__sun circle,
+  #p2-slot .dot-emoji11 svg circle[fill="#FFFFFF"],
+  #p2-slot .dot-emoji11 svg circle[fill="var(--p2-lavender, #FFFFFF)"] {
+    fill: var(--p2-lavender, #FF7F24) !important;
+    transition: fill 0.5s ease;
+  }
+  
+  #p2-slot .dot-emoji11__icon-dot {
+    fill: #FFFFFF !important;
+    transition: fill 0.5s ease;
+  }
+
+  .dot-emoji11__icon-dot {
+    animation: dotEmojiPulse 2.4s ease-in-out infinite alternate;
+    transform-origin: center;
+    transform-box: fill-box;
+  }
+  .dot-emoji11__icon-dot:nth-child(5n) { animation-delay: -0.4s; }
+  .dot-emoji11__icon-dot:nth-child(3n) { animation-delay: -0.9s; }
+  .dot-emoji11__icon-dot:nth-child(7n) { animation-delay: -1.6s; }
+
+  @keyframes dotEmojiPulse {
+    0% { opacity: 0.9; filter: brightness(1.5) drop-shadow(0 0 2px rgba(255,255,255,0.3)); transform: scale(0.95); }
+    50% { opacity: 1; filter: brightness(2.2) drop-shadow(0 0 4px rgba(255,255,255,0.5)); transform: scale(1.05); }
+    100% { opacity: 0.95; filter: brightness(1.8) drop-shadow(0 0 3px rgba(255,255,255,0.4)); transform: scale(1); }
+  }
+
+  #p2-slot .dot-temp11__value,
+  #p2-slot .dot-sch__date,
+  #p2-slot .dot-sch__text.is-accent,
+  #p2-slot .dot-sch__bullet.is-accent {
+    color: var(--p2-lavender, #FF7F24) !important;
+    background-color: transparent; /* for bullet, we use background below */
+    transition: color 0.5s ease;
+  }
+
+  #p2-slot .dot-sch__bullet.is-accent {
+    background: var(--p2-lavender, #FF7F24) !important;
+    transition: background 0.5s ease;
+  }
+  #p2-slot .dot-music1 {
+    width: 340px !important;
+    clip-path: inset(0 172px 0 0 round 32px);
+    animation: 
+      p2ComponentGrow 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards,
+      dotMusicRevealCard 2.9s cubic-bezier(0.16, 1, 0.3, 1) 0.6s forwards;
+    will-change: clip-path, transform, opacity;
+  }
+  #p2-slot .dot-music1__compact {
+    width: 120px;
+    animation: dotMusicCompactOut 2.9s cubic-bezier(0.16, 1, 0.3, 1) 0.6s forwards;
+  }
+  #p2-slot .dot-music1__expanded {
+    animation: dotMusicExpandedIn 5.8s cubic-bezier(0.16, 1, 0.3, 1) 0.6s forwards;
+  }
+  #p2-slot .dot-music1__icon {
+    animation: dotMusicIconIn 5.8s cubic-bezier(0.16, 1, 0.3, 1) 0.6s forwards;
+  }
+
+  /* Schedule expansion motion */
+  @keyframes p2ScheduleListGrow {
+    from { max-height: 0; opacity: 0; }
+    to { max-height: 200px; opacity: 1; }
+  }
+  #p2-slot .dot-sch42 .dot-sch__list--wide {
+    overflow: hidden;
+    animation: p2ScheduleListGrow 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.4s both;
   }
 
   /* -----------------------------------------------------------------------
      Persona2 slot theme skinning
-     Ensure swapped components match the white/black/lavender theme instead of
-     showing their original orange/teal accents.
-     Scope is STRICTLY the right black card slot only.
      ----------------------------------------------------------------------- */
   #p2-slot .dot-card {
-    background: var(--p2-white) !important;
-    color: var(--p2-ink) !important;
-    border-radius: 32px !important;
-    box-shadow: 0 12px 36px rgba(0,0,0,0.15) !important;
+    /* Allow components to keep their original colors if intended, 
+       but we can still provide subtle theme hints via CSS variables */
   }
-  #p2-slot .dot-gcell {
-    background: rgba(0, 0, 0, 0.05) !important;
+  
+  /* Removed P2 skinning overrides to preserve original component designs */
+  
+  /* Schedule (plan) */
+  #p2-slot .dot-sch {
+    background: var(--p2-lavender-soft, rgba(255,255,255,0.6)) !important;
+    position: relative !important;
+    overflow: hidden !important;
+    border-radius: 30px !important;
+    transition: background 0.5s ease !important;
   }
-  #p2-slot .dot-gcell__label {
-    color: var(--p2-ink) !important;
-    font-size: 9px !important;
-    line-height: 1 !important;
-    font-weight: 800 !important;
-    font-family: 'Pretendard', sans-serif !important;
-    text-shadow: 0 0 4px rgba(255,255,255,0.8), 0 0 8px rgba(255,255,255,0.4) !important;
-    transform: scale(0.9);
-    bottom: 6px !important;
-    top: auto !important;
+  #p2-slot .dot-sch.dot-sch22 {
+    width: 168px !important;
+    height: 168px !important;
+  }
+  #p2-slot .dot-sch.dot-sch42 {
+    width: 340px !important;
+    height: 168px !important;
+  }
+  #p2-slot > div {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    overflow: visible;
+  }
+  #p2-slot .dot-sch22, #p2-slot .dot-sch42 {
+    width: 100% !important;
+    height: 100% !important;
+    overflow: visible !important;
+  }
+  #p2-slot .dot-sch__unit, #p2-slot .dot-sch__unit--wide {
+    position: absolute !important;
+    left: 4px !important;
+    top: 10px !important; 
+    width: calc(100% - 8px) !important;
+    height: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+  #p2-slot .dot-sch.dot-sch42 .dot-sch__unit--wide {
     left: 0 !important;
-    right: 0 !important;
-    text-align: center !important;
+    top: 0 !important;
+    position: relative !important;
+    width: 100% !important;
   }
-  #p2-slot .dot-gcell__label.is-today {
-    font-size: 8px !important;
+  #p2-slot .dot-sch__date, #p2-slot .dot-sch__date--wide {
+    color: var(--p2-lavender, #A080FF) !important;
+    font-family: var(--font-dot) !important;
+    font-size: 21px !important; 
+    line-height: 1.2 !important;
+    height: auto !important;
+    margin: 0 !important;
+    display: block !important;
+    transition: color 0.5s ease !important;
+    opacity: 0;
+    animation: p2ScheduleRowIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation-delay: 0s;
   }
-  #p2-slot .dot-gcell__shade {
-    background: rgba(255, 255, 255, 0.1) !important;
+  #p2-slot .dot-sch__list, #p2-slot .dot-sch__list--wide {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 7px !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    justify-content: flex-start !important;
+    height: auto !important;
+    overflow: visible !important;
   }
-  #p2-slot .dot-steps21 {
-    background: var(--p2-lavender-soft) !important;
+  #p2-slot .dot-sch__row, #p2-slot .dot-sch__row--wide {
+    display: flex !important;
+    align-items: center !important;
+    height: auto !important;
+    min-height: 20px !important;
+    gap: 10px !important;
+    width: 100% !important;
+    overflow: visible !important;
+    opacity: 0;
+    animation: p2ScheduleRowIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
-  #p2-slot .dot-steps21__title,
-  #p2-slot .dot-steps21__count {
-    color: var(--p2-ink) !important;
-  }
-  #p2-slot .dot-temp11,
-  #p2-slot .dot-w11,
-  #p2-slot .dot-w21 {
-    background: var(--p2-white) !important;
-    color: var(--p2-ink) !important;
-  }
-  #p2-slot .dot-w11__sun circle,
-  #p2-slot .dot-w21__sun circle {
-    fill: var(--p2-lavender) !important;
-  }
-  #p2-slot .dot-sch__date {
-    color: var(--p2-lavender) !important;
-  }
-  #p2-slot .dot-sch__bullet {
-    background: var(--p2-lavender) !important;
-  }
-  #p2-slot .dot-sch__text.is-accent {
-    color: var(--p2-lavender) !important;
+  #p2-slot .dot-sch__row:nth-child(1) { animation-delay: 0.1s; }
+  #p2-slot .dot-sch__row:nth-child(2) { animation-delay: 0.2s; }
+  #p2-slot .dot-sch__row:nth-child(3) { animation-delay: 0.3s; }
+  #p2-slot .dot-sch__row:nth-child(4) { animation-delay: 0.4s; }
+  
+  @keyframes p2ScheduleRowIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 
-  /* Schedule (plan) */
-  #p2-slot .dot-sch__date,
-  #p2-slot .dot-sch__text,
-  #p2-slot .dot-sch__time {
-    color: var(--p2-ink) !important;
+  #p2-slot .dot-sch__bullet {
+    background: var(--p2-lavender, #A080FF) !important;
+    opacity: 1 !important;
+    width: 7.5px !important;
+    height: 7.5px !important;
+    flex-shrink: 0 !important;
+    margin: 0 !important;
+    transform: none !important;
+    box-shadow: none !important;
+    transition: background 0.5s ease !important;
   }
   #p2-slot .dot-sch__bullet.is-accent {
-    background: var(--p2-lavender) !important;
-    box-shadow: 0 0 0 3px rgba(185,166,255,0.18);
+    background: var(--p2-lavender, #A080FF) !important;
+    box-shadow: none !important;
   }
-  #p2-slot .dot-sch__text.is-accent,
-  #p2-slot .dot-sch__time.is-strong {
-    color: var(--p2-lavender) !important;
+  #p2-slot .dot-sch__text {
+    color: var(--p2-ink, #000) !important;
+    font-family: 'Pretendard', sans-serif !important;
+    font-weight: 600 !important;
+    font-size: 14px !important;
+    line-height: 1.3 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    transition: color 0.5s ease !important;
   }
-
-  /* Weather */
-  #p2-slot .dot-w21__loc,
-  #p2-slot .dot-w21__weather {
-    color: var(--p2-ink) !important;
-  }
-  #p2-slot .dot-w21__sun circle {
-    fill: var(--p2-ink) !important;
-  }
-  /* give a hint of lavender on a few dots */
-  #p2-slot .dot-w21__sun circle:nth-child(3),
-  #p2-slot .dot-w21__sun circle:nth-child(12),
-  #p2-slot .dot-w21__sun circle:nth-child(19),
-  #p2-slot .dot-w21__sun circle:nth-child(25) {
-    fill: var(--p2-lavender) !important;
-  }
-
-  /* Contact (call modal) */
-  #p2-slot .dot-call__name { color: var(--p2-ink) !important; }
-  #p2-slot .dot-call__phone { color: rgba(26,29,28,0.55) !important; }
-  #p2-slot .dot-call__arrow svg circle {
-    fill: var(--p2-lavender) !important;
-  }
-
-  /* Photo (camera) */
-  #p2-slot .dot-cam__trigger rect {
-    fill: var(--p2-lavender) !important;
-  }
-  #p2-slot .dot-cam__trigger path {
-    fill: var(--p2-ink) !important;
-  }
+  /* Removed additional P2 skinning overrides */
 
   /* Persona2: weather mood background overlays (applied on #canvas) */
   #canvas.p2-bg-clear::before,
@@ -891,6 +1027,7 @@
     padding: 16px 20px;
     gap: 8px;
     background: #1C1C1E;
+    box-sizing: border-box;
   }
   .dot-running2__human {
     width: 24px;
@@ -973,6 +1110,7 @@
     align-items: flex-start;
     padding: 20px 24px;
     gap: 34.74px;
+    box-sizing: border-box;
   }
   .dot-music1__compact,
   .dot-music1__expanded {
@@ -2104,6 +2242,7 @@
     width: 340px;
     height: 168px;
     position: relative;
+    box-sizing: border-box;
   }
   .dot-sch__unit--wide {
     width: 292px;
@@ -2385,14 +2524,15 @@
     width: 82px;
     height: 82px;
     position: relative;
-    background: #FF7F24;
-    --dot-mask-bg: #FF7F24;
+    background: var(--p2-lavender, #FF7F24);
+    --dot-mask-bg: var(--p2-lavender, #FF7F24);
     border-radius: 101.68px;
     overflow: hidden;
     color: #FFFFFF;
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: background 0.5s ease;
   }
   .dot-temp11__center {
     display: flex;
@@ -2458,13 +2598,15 @@
     justify-content: center;
   }
   .dot-date11--dark {
-    background: rgba(255, 255, 255, 0.2);
-    --dot-mask-bg: rgba(255, 255, 255, 0.2);
+    background: var(--p2-lavender-soft, rgba(255, 255, 255, 0.2));
+    --dot-mask-bg: var(--p2-lavender-soft, rgba(255, 255, 255, 0.2));
+    transition: background 0.5s ease;
   }
   .dot-date11--light {
-    background: #FFFFFF;
-    --dot-mask-bg: #FFFFFF;
+    background: var(--p2-lavender-soft, #FFFFFF);
+    --dot-mask-bg: var(--p2-lavender-soft, #FFFFFF);
     border-radius: 101.045px;
+    transition: background 0.5s ease;
   }
   .dot-date11__text {
     font-family: 'Ndot55', var(--font-dot), sans-serif;
@@ -2475,15 +2617,17 @@
     text-align: center;
     letter-spacing: 0.01em;
     font-feature-settings: 'pnum' on, 'lnum' on;
-    color: #FFFFFF;
+    color: var(--p2-ink, #FFFFFF);
     white-space: pre-line;
     margin-top: 4px; /* Visually center offset */
+    transition: color 0.5s ease;
   }
   .dot-date11__text--light {
     font-size: 17.7791px;
     line-height: 110%;
-    color: #000000;
+    color: var(--p2-ink, #000000);
     margin-top: 4px; /* Visually center offset */
+    transition: color 0.5s ease;
   }
 
   /* Weather 2×1 V1_1 (168×82) */
@@ -2491,9 +2635,10 @@
     width: 168px;
     height: 82px;
     position: relative;
-    background: #FFFFFF;
+    background: var(--p2-lavender-soft, rgba(255,255,255,0.2));
     border-radius: 93px;
     overflow: hidden;
+    transition: background 0.5s ease;
   }
   .dot-w21--dark {
     background: #000000;
@@ -2507,6 +2652,10 @@
     height: 41.7px;
     left: 24px;
     top: 21px;
+  }
+  .dot-w21__sun circle {
+    fill: var(--p2-ink, #191919);
+    transition: fill 0.5s ease;
   }
   .dot-w21__text {
     position: absolute;
@@ -2528,8 +2677,9 @@
     font-size: 14px;
     line-height: 130%;
     text-align: right;
-    color: #191919;
+    color: var(--p2-ink, #191919);
     white-space: nowrap;
+    transition: color 0.5s ease;
   }
   .dot-w21--dark .dot-w21__loc {
     color: #FFFFFF;
@@ -2543,8 +2693,9 @@
     font-size: 14px;
     line-height: 130%;
     text-align: right;
-    color: #FF7F24;
+    color: var(--p2-lavender, #FF7F24);
     white-space: nowrap;
+    transition: color 0.5s ease;
   }
   .dot-w21 .dot-w21__sun,
   .dot-w21 .dot-w21__text {
@@ -2780,6 +2931,7 @@
     gap: 16px;
     color: #FFFFFF;
     overflow: hidden;
+    box-sizing: border-box;
   }
   .dot-goal__title {
     width: 292px;
@@ -3072,6 +3224,7 @@
     top: calc(50% - 12px/2 + 0.17px);
   }
   .detail-stage .dot-gframe1.is-focus,
+  #canvas .dot-gframe1.is-focus,
   .dot-gframe3.is-focus {
     width: 162px;
     height: 218px;
@@ -3079,6 +3232,7 @@
     position: relative;
   }
   .detail-stage .dot-gframe1.is-focus .dot-gcell,
+  #canvas .dot-gframe1.is-focus .dot-gcell,
   .dot-gframe3.is-focus .dot-gcell {
     position: absolute;
     will-change: transform, opacity;
@@ -3092,6 +3246,7 @@
       transform 520ms cubic-bezier(0.16, 1, 0.3, 1);
   }
   .detail-stage .dot-gframe1.is-focus .dot-gcell.is-selected,
+  #canvas .dot-gframe1.is-focus .dot-gcell.is-selected,
   .dot-gframe3.is-focus .dot-gcell.is-selected {
     left: var(--dot-gallery-origin-left, 0);
     top: var(--dot-gallery-origin-top, 0);
@@ -3101,6 +3256,7 @@
     animation: dotGalleryBubble18 680ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
   .detail-stage .dot-gframe1.is-focus .dot-gcell.is-selected .dot-gcell__img,
+  #canvas .dot-gframe1.is-focus .dot-gcell.is-selected .dot-gcell__img,
   .dot-gframe3.is-focus .dot-gcell.is-selected .dot-gcell__img {
     left: 50% !important;
     right: auto !important;
@@ -3113,6 +3269,7 @@
     transition: object-position 680ms cubic-bezier(0.16, 1, 0.3, 1);
   }
   .detail-stage .dot-gframe1.is-focus .dot-gcell.is-selected .dot-gcell__shade,
+  #canvas .dot-gframe1.is-focus .dot-gcell.is-selected .dot-gcell__shade,
   .dot-gframe3.is-focus .dot-gcell.is-selected .dot-gcell__shade {
     inset: 0;
     width: auto;
@@ -3121,6 +3278,7 @@
     top: 0;
   }
   .detail-stage .dot-gframe1.is-focus .dot-gcell.is-selected .dot-gcell__label,
+  #canvas .dot-gframe1.is-focus .dot-gcell.is-selected .dot-gcell__label,
   .dot-gframe3.is-focus .dot-gcell.is-selected .dot-gcell__label {
     left: 24px;
     top: 18px;
@@ -3136,6 +3294,7 @@
       font-size 680ms cubic-bezier(0.16, 1, 0.3, 1);
   }
   .detail-stage .dot-gframe1.is-focus .dot-gcell:not(.is-selected),
+  #canvas .dot-gframe1.is-focus .dot-gcell:not(.is-selected),
   .dot-gframe3.is-focus .dot-gcell:not(.is-selected) {
     opacity: 1;
     transform: translateX(0) scale(1);
@@ -3378,10 +3537,21 @@
     pointer-events: auto;
   }
   .toolbar-back, button.secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 9px 18px;
+    border-radius: 10px;
     background: rgba(255, 255, 255, 0.08) !important;
     border: 1px solid rgba(255, 255, 255, 0.12) !important;
     color: #fff !important;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: inherit;
+    text-decoration: none !important;
+    cursor: pointer;
     backdrop-filter: blur(8px);
+    transition: all 0.2s ease;
   }
   .toolbar-back:hover, button.secondary:hover {
     background: rgba(255, 255, 255, 0.15) !important;
@@ -3840,14 +4010,34 @@
 
   /* Composite Set Container styling */
   .composite-set-container {
-    background: #BCBCC2;
-    border: 1px solid rgba(0, 0, 0, 0.05);
+    background: transparent !important;
+    border: none;
     border-radius: 48px;
     overflow: visible;
     transition: background 0.3s ease, transform 0.3s ease;
   }
   .composite-set-container:hover {
-    background: #B1B1B6;
+    background: transparent !important;
+  }
+
+  /* Theme-specific styles for Composite Sets */
+  #theme-container {
+    --p2-lavender: #FF7F24;
+    --p2-lavender-soft: #FFB380;
+  }
+  
+  #theme-container .composite-set-container {
+    background: rgba(16, 16, 18, 0.06) !important;
+  }
+  #theme-container .composite-set-container:hover {
+    background: rgba(16, 16, 18, 0.1) !important;
+  }
+  
+  .theme-preview-container.composite-set-container {
+    background: rgba(16, 16, 18, 0.06) !important;
+  }
+  .theme-preview-container.composite-set-container:hover {
+    background: rgba(16, 16, 18, 0.1) !important;
   }
   /* Ensure children inside a set don't double-scale or shift, 
      but allow the hiding/expansion transforms to work. */
@@ -4056,3 +4246,123 @@
     color: var(--positive);
     font-size: 11.5px; font-weight: 600;
   }
+
+  /* Dot Matrix Scrolling (Music) */
+  @keyframes dotTimematScroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-48px); } /* Move by multiple of grid step (8px) */
+  }
+  .dot-timemat__onGroup--scroll {
+    animation: dotTimematScroll 4s steps(6) infinite; /* 6 steps of 8px = 48px */
+  }
+
+  /* Scenario Entry Animations */
+  @keyframes scenarioEntrySlideDown {
+    from { opacity: 0; transform: translateY(-40px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  #canvas[data-scenario] .canvas-item {
+    animation: scenarioEntrySlideDown 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  /* Persona 1 Home Stagger */
+  #canvas[data-scenario="tab-root"] .home-persona1-widgets-container > div {
+    opacity: 0;
+    animation: scenarioEntrySlideDown 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  #canvas[data-scenario="tab-root"] .home-persona1-widgets-container > div:nth-child(1) { animation-delay: 0.1s; }
+  #canvas[data-scenario="tab-root"] .home-persona1-widgets-container > div:nth-child(2) { animation-delay: 0.2s; }
+  #canvas[data-scenario="tab-root"] .home-persona1-widgets-container > div:nth-child(3) { animation-delay: 0.3s; }
+
+  /* Persona 2 Lock Screen Stagger */
+  #canvas[data-scenario="lockscreen-persona2"] .canvas-item {
+    opacity: 0;
+    animation: scenarioEntrySlideDown 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  #canvas[data-scenario="lockscreen-persona2"] [data-role="status-bar"] { animation-delay: 0s; }
+  #canvas[data-scenario="lockscreen-persona2"] [data-role="clock"] { animation-delay: 0.1s; }
+  #canvas[data-scenario="lockscreen-persona2"] [data-role="weather-date"] { animation-delay: 0.2s; }
+  #canvas[data-scenario="lockscreen-persona2"] #p2-area { animation-delay: 0.3s; }
+  #canvas[data-scenario="lockscreen-persona2"] #unlock-hint { animation-delay: 0.4s; }
+
+  /* Persona 3 Cooking Animations */
+  @keyframes p3BgFadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+  #canvas[data-scenario="health-mlp"] .p3-bg-overlay {
+    animation: p3BgFadeIn 1.5s ease-in-out 0.2s forwards;
+  }
+  #canvas[data-scenario="health-mlp"] [data-role="cooking-bg"] {
+    opacity: 1 !important;
+    animation: none !important;
+  }
+  @keyframes p3CardSlideDown {
+    from { opacity: 0; transform: translateY(-30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  #canvas[data-scenario="health-mlp"] [data-role^="cooking-"]:not([data-role="cooking-bg"]) {
+    opacity: 0;
+    animation: p3CardSlideDown 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  #canvas[data-scenario="health-mlp"] #p3-greeting { animation-delay: 0.1s; }
+  #canvas[data-scenario="health-mlp"] #p3-subtitle { animation-delay: 0.2s; }
+  #canvas[data-scenario="health-mlp"] #p3-yes-no   { animation-delay: 0.3s; }
+  #canvas[data-scenario="health-mlp"] #p3-recipe   { animation-delay: 0.3s; }
+  #canvas[data-scenario="health-mlp"] #p3-ingredients { animation-delay: 0.4s; }
+  #canvas[data-scenario="health-mlp"] #p3-send     { animation-delay: 0.5s; }
+
+  @keyframes p3AgentPop {
+    0% { opacity: 0; transform: translateY(100px) scale(0.9); }
+    70% { opacity: 1; transform: translateY(-10px) scale(1.02); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  #canvas[data-scenario="health-mlp"] .p3-agent-card-active {
+    animation: p3AgentPop 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+    z-index: 2000;
+  }
+  
+  @keyframes p3AgentPopSecondary {
+    0% { opacity: 0; transform: translateY(150px) scale(0.9); }
+    70% { opacity: 1; transform: translateY(-10px) scale(1.02); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  #canvas[data-scenario="health-mlp"] .p3-agent-card-active.is-stacked {
+    /* Push the first card up */
+    transform: translateY(-160px) scale(0.95);
+    opacity: 0.7;
+    filter: blur(2px);
+    transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  #canvas[data-scenario="health-mlp"] .p3-agent-card-active-2 {
+    animation: p3AgentPopSecondary 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+    z-index: 2010;
+  }
+  
+  .p3-agent-action-btn:active {
+    transform: scale(0.96);
+    filter: brightness(0.9);
+  }
+  .p3-agent-action-btn {
+    transition: all 0.2s ease;
+  }
+  #p2-slot .dot-goal {
+    animation: p2ComponentGrow 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  @keyframes p2ContentSlideIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  #p2-slot .dot-goal__title {
+    animation: p2ContentSlideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
+  }
+  #p2-slot .dot-goal__unit {
+    animation: p2ContentSlideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.4s both;
+  }
+
+  @keyframes p2ComponentGrow {
+    from { opacity: 0; transform: scaleY(0.8) translateY(10px); }
+    to { opacity: 1; transform: scaleY(1) translateY(0); }
+  }
+

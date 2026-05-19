@@ -181,11 +181,22 @@
     // Server resolver: sends the user's request and returns theme + component
     // selection. Falls back to a local default on failure.
     async function resolveFromApi(text) {
+      // Try to get current location coordinates if available
+      var locationInfo = null;
+      if (navigator.geolocation) {
+        try {
+          const pos = await new Promise((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 3000 });
+          });
+          locationInfo = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+        } catch (e) {}
+      }
+
       try {
         var res = await fetch('/api/p2/resolve', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text: text })
+          body: JSON.stringify({ text: text, location: locationInfo })
         });
         if (!res.ok) throw new Error('bad status');
         return await res.json();
@@ -240,8 +251,9 @@
 
     function mountResolvedComponent(component, attempt) {
       var slot = document.getElementById('p2-slot');
-      var result = document.getElementById('p2-result');
-      if (!slot || !result) return;
+      var defaults = document.getElementById('p2-default-widgets');
+      var el = document.getElementById('p2-result');
+      if (!slot || !defaults) return;
 
       // If atomics haven't loaded yet (first render race), retry briefly.
       attempt = attempt || 0;
@@ -254,44 +266,113 @@
 
       var role = component && component.role;
       var variant = (component && component.variant) || {};
-      // Black card slot is 100% size. We render at the canonical sizes for the
-      // chosen role, then CSS scales/centers it inside the slot.
-      var sizeMap = {
-        'dot-schedule-2x2': { w: 168, h: 168 },
-        'dot-weather-2x1-v1-1': { w: 168, h: 82 },
-        'dot-gallery-frame1': { w: 168, h: 168 },
-        'dot-gallery-frame3': { w: 162, h: 218 },
-        'dot-gallery-img': { w: 168, h: 168 }
+      
+      // Persistent Interaction: Check if same component role is already mounted
+      var prevRole = slot.getAttribute('data-current-role');
+      var isSameRole = (prevRole === role);
+      
+      // Look up dimensions based on role, falling back to 340x168
+      var sizes = {
+        'dot-goal': {w: 340, h: 168},
+        'dot-music-1x1': {w: 164, h: 164},
+        'dot-total-steps-2x1': {w: 164, h: 80},
+        'dot-running-compact': {w: 164, h: 80},
+        'dot-time-matrix': {w: 340, h: 180},
+        'dot-weather-2x1-v1-1': {w: 164, h: 80},
+        'dot-weather-2x1-v1-2': {w: 164, h: 80},
+        'dot-temperature-1x1': {w: 80, h: 80},
+        'dot-date-1x1-v1-1': {w: 80, h: 80},
+        'dot-date-1x1-v1-2': {w: 80, h: 80},
+        'dot-schedule-4x2': {w: 340, h: 168},
+        'dot-schedule-2x2': {w: 164, h: 164},
+        'dot-emoji-1x1': {w: 164, h: 164},
+        'dot-gallery-frame1': {w: 164, h: 164},
+        'dot-gallery-img': {w: 164, h: 164},
+        'dot-camera': {w: 164, h: 246},
+        'composite-set': {w: 340, h: 340}
       };
-      var sz = sizeMap[role] || { w: 340, h: 168 };
+      var sz = sizes[role] || { w: 340, h: 168 };
+      
       var html = '';
       try {
-        html = window.renderAtomicForRole({ role: role, variant: variant }, { w: sz.w, h: sz.h }) || '';
+        if (role !== 'composite-set') {
+           html = '<div style="display:flex; justify-content:center; width:100%; overflow:hidden;">' +
+             '<div style="width:' + sz.w + 'px; height:' + sz.h + 'px; position:relative; transform:scale(1); transform-origin:top center;">' +
+               window.renderAtomicForRole({ role: role, variant: variant }, { w: sz.w, h: sz.h }) +
+             '</div></div>';
+        } else {
+           html = window.renderAtomicForRole({ role: role, variant: variant }, { w: sz.w, h: sz.h }) || '';
+        }
       } catch (e) {
+        console.error('renderAtomicForRole failed:', e);
         html = '';
       }
 
+      if (!html && role) {
+        html = '<div class="dot-card" style="width:340px;height:168px;background:rgba(255,255,255,0.05);border-radius:32px;display:flex;align-items:center;justify-content:center;color:#fff;font-family:var(--font);font-weight:600;">' + role + '</div>';
+      }
+
       if (html) {
-        // Entry animation: start from scaled down + transparent
-        slot.style.transition = 'none';
-        slot.style.opacity = '0';
-        slot.style.transform = 'scale(0.8) translateY(20px)';
-        
-        slot.innerHTML = html;
-        
-        // Trigger reflow
-        void slot.offsetWidth;
-        
-        // Final state
-        slot.style.transition = 'all 0.6s cubic-bezier(0.16, 1, 0.3, 1)';
-        slot.style.opacity = '1';
-        slot.style.transform = 'scale(1) translateY(0)';
-        
-        result.classList.add('has-swap');
+        slot.setAttribute('data-current-role', role);
+
+        if (isSameRole) {
+          // INTERACTION: Same component stays, only content updates with a cross-fade
+          var oldCard = slot.querySelector('.dot-card');
+          if (oldCard) {
+            oldCard.style.transition = 'opacity 0.25s ease';
+            oldCard.style.opacity = '0.3';
+            setTimeout(function() {
+              slot.innerHTML = html;
+              var newCard = slot.querySelector('.dot-card');
+              if (newCard) {
+                newCard.style.opacity = '0';
+                void newCard.offsetWidth;
+                newCard.style.transition = 'opacity 0.4s ease';
+                newCard.style.opacity = '1';
+              }
+            }, 250);
+          } else {
+            slot.innerHTML = html;
+          }
+        } else {
+          // INTERACTION: New component enters with "lengthening" interaction
+          slot.style.transition = 'none';
+          slot.style.opacity = '0';
+          slot.style.transform = 'translateY(10px)';
+          slot.style.clipPath = 'inset(0 0 100% 0)'; 
+          slot.style.display = 'block';
+          
+          slot.innerHTML = html;
+          void slot.offsetWidth;
+          
+          if (el) el.classList.add('has-swap');
+          defaults.style.opacity = '0';
+          defaults.style.pointerEvents = 'none';
+          
+          requestAnimationFrame(function() {
+            slot.style.transition = 'opacity 0.5s ease, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), clip-path 0.7s cubic-bezier(0.16, 1, 0.3, 1)';
+            slot.style.opacity = '1';
+            slot.style.transform = 'translateY(0)';
+            slot.style.clipPath = 'inset(0 0 0% 0)';
+            slot.style.pointerEvents = 'auto';
+            
+            setTimeout(function() {
+              if (slot.style.opacity === '1') {
+                defaults.style.display = 'none';
+              }
+            }, 500);
+          });
+        }
       } else {
+        slot.removeAttribute('data-current-role');
+        if (el) el.classList.remove('has-swap');
         slot.innerHTML = '';
         slot.style.opacity = '0';
-        result.classList.remove('has-swap');
+        slot.style.display = 'none';
+        defaults.style.display = 'block';
+        void defaults.offsetWidth;
+        defaults.style.opacity = '1';
+        defaults.style.pointerEvents = 'auto';
       }
     }
 
@@ -333,15 +414,22 @@
           // but the primary UI should be the swapped component.
           if (titleWrap) titleWrap.innerHTML = '최적의 화면을<br>찾았어요';
           if (subWrap) subWrap.textContent = '생성된 컴포넌트로 전환합니다';
+
+          // If the AI returned custom pill texts, update them too.
+          var pillTitle = document.getElementById('p2-pill-title');
+          var pillSub = document.getElementById('p2-pill-sub');
+          if (pillTitle && resolved.pillTitle) pillTitle.innerHTML = resolved.pillTitle;
+          if (pillSub && resolved.pillSub) pillSub.innerHTML = resolved.pillSub;
           
+          // Remove loading state before mounting to avoid CSS opacity conflicts
+          el.classList.remove('is-loading');
           mountResolvedComponent(resolved.component);
         }
       } catch (e) {
         console.error('setResultFromUtterance failed:', e);
+        el.classList.remove('is-loading');
       } finally {
-        setTimeout(function() {
-          el.classList.remove('is-loading');
-        }, 1200);
+        // No-op, handled above
       }
     }
 
@@ -360,11 +448,13 @@
       }
 
       function startListening() {
+        console.log('startListening called');
         if (listening) return;
         listening = true;
         canvas.classList.add('p2-listening');
 
         if (Recognition) {
+          console.log('Using SpeechRecognition');
           try {
             rec = new Recognition();
             rec.lang = 'ko-KR';
@@ -374,6 +464,7 @@
 
             var finalText = '';
 
+            rec.onstart = function() { console.log('SpeechRecognition started'); };
             rec.onresult = function (ev) {
               var txt = '';
               for (var i = ev.resultIndex; i < ev.results.length; i++) {
@@ -381,9 +472,11 @@
                 if (r && r[0] && r[0].transcript) txt += r[0].transcript;
                 if (r.isFinal) finalText = txt;
               }
+              console.log('SpeechRecognition result:', txt);
             };
 
-            rec.onerror = function () {
+            rec.onerror = function (ev) {
+              console.error('SpeechRecognition error:', ev.error);
               stopListening();
               // fallback: prompt for demo on blocked mic permission
               var p = window.prompt('음성 대신 텍스트로 입력해 주세요');
@@ -391,6 +484,7 @@
             };
 
             rec.onend = function () {
+              console.log('SpeechRecognition ended');
               // If end happens without any final result, prompt fallback.
               var utt = finalText;
               stopListening();
@@ -402,11 +496,13 @@
 
             rec.start();
           } catch (e) {
+            console.error('SpeechRecognition start failed:', e);
             stopListening();
             var p2 = window.prompt('음성 대신 텍스트로 입력해 주세요');
             setResultFromUtterance(p2);
           }
         } else {
+          console.log('SpeechRecognition not supported, using prompt');
           // No SpeechRecognition (or unsupported browser) — demo via prompt.
           var p3 = window.prompt('음성 인식 미지원: 텍스트로 입력해 주세요');
           stopListening();
@@ -428,6 +524,9 @@
       document.addEventListener('keydown', function (e) {
         if (e && e.key === 'Escape') stopListening();
       }, true);
+
+      // Expose globally for React access
+      window.startP2VoiceInput = startListening;
     });
   })();
 
@@ -726,16 +825,110 @@
       if (!canvas) return;
 
       var ctaLock = false;
+      var agentTimer = null;
+
+      function showAgentCard() {
+        var card = document.querySelector('[data-role="cooking-agent-card"]');
+        if (card) {
+          card.style.top = '600px'; // Move up to visible area (higher to avoid bottom clipping)
+          card.classList.add('p3-agent-card-active');
+        }
+      }
+
+      function checkScenario() {
+        if (canvas.getAttribute('data-scenario') === 'health-mlp') {
+          // Initial state: hide recipe, send btn, ingredients. Show yes/no
+          var recipe = document.getElementById('p3-recipe');
+          var sendBtn = document.getElementById('p3-send');
+          var yesNoBtn = document.getElementById('p3-yes-no');
+          var ingredients = document.getElementById('p3-ingredients-wrapper');
+          var card1 = document.querySelector('[data-role="cooking-agent-card"]');
+          var card2 = document.querySelector('[data-role="cooking-agent-card-2"]');
+          
+          if (recipe) recipe.style.display = 'none';
+          if (sendBtn) sendBtn.style.display = 'none';
+          if (yesNoBtn) {
+            yesNoBtn.style.display = 'block';
+            yesNoBtn.style.opacity = '1';
+            yesNoBtn.style.pointerEvents = 'auto';
+          }
+          if (ingredients) ingredients.style.display = 'none';
+          if (card1) {
+            card1.classList.remove('p3-agent-card-active', 'is-stacked');
+            card1.style.top = '880px';
+          }
+          if (card2) {
+            card2.classList.remove('p3-agent-card-active-2');
+            card2.style.top = '880px';
+          }
+          
+          // Reset ingredient rows
+          var rows = document.querySelectorAll('.p3-ing-row');
+          rows.forEach(function(r) { 
+            r.classList.remove('is-done'); 
+            if (r.dataset.title === '생연어 필렛' || r.dataset.title === '아스파라거스') {
+              r.classList.add('will-be-checked');
+            } else {
+              r.classList.remove('will-be-checked');
+            }
+          });
+        } else {
+          var card1 = document.querySelector('[data-role="cooking-agent-card"]');
+          var card2 = document.querySelector('[data-role="cooking-agent-card-2"]');
+          if (card1) card1.classList.remove('p3-agent-card-active', 'is-stacked');
+          if (card2) card2.classList.remove('p3-agent-card-active-2');
+        }
+      }
+
+      // Observe scenario changes and child additions
+      var mo = new MutationObserver(checkScenario);
+      mo.observe(canvas, { attributes: true, attributeFilter: ['data-scenario'], childList: true });
+      checkScenario();
 
       document.addEventListener('click', function (e) {
         var t = e.target;
         if (!t) return;
 
+        // Yes/No Buttons
+        var yesNoBtn = t.closest && t.closest('.p3-yes-no-action');
+        if (yesNoBtn && canvas.contains(yesNoBtn)) {
+          var action = yesNoBtn.getAttribute('data-action');
+          if (action === 'yes') {
+            // visual feedback
+            yesNoBtn.style.opacity = '0.5';
+            setTimeout(function() {
+              var container = document.getElementById('p3-yes-no');
+              if (container) {
+                container.style.opacity = '0';
+                container.style.pointerEvents = 'none';
+                setTimeout(function() {
+                  container.style.display = 'none';
+                }, 300);
+              }
+              
+              var recipe = document.getElementById('p3-recipe');
+              var sendBtn = document.getElementById('p3-send');
+              
+              if (recipe) {
+                recipe.style.display = 'block';
+                recipe.style.animation = 'none';
+                void recipe.offsetWidth; // trigger reflow
+                recipe.style.animation = 'p3CardSlideDown 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards';
+              }
+              if (sendBtn) {
+                sendBtn.style.display = 'block';
+                sendBtn.style.animation = 'none';
+                void sendBtn.offsetWidth; // trigger reflow
+                sendBtn.style.animation = 'p3CardSlideDown 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards';
+              }
+            }, 200);
+          }
+        }
+
         // Ingredient row toggle
         var row = t.closest && t.closest('.p3-ing-row');
         if (row && canvas.contains(row)) {
           row.classList.toggle('is-done');
-          // optional: subtle swap of bg via inline filter only (avoid rerender)
           return;
         }
 
@@ -748,11 +941,90 @@
           var label = send.querySelector('div');
           var prev = label ? label.textContent : '';
           if (label) label.textContent = '연동 중…';
+          
+          // Trigger ingredients appearance
+          var ingredients = document.getElementById('p3-ingredients-wrapper');
+          if (ingredients) {
+            ingredients.style.display = 'flex';
+            var rows = ingredients.querySelectorAll('.p3-ing-row');
+            
+            // Set initial state for rows
+            rows.forEach(function(r) {
+              r.style.opacity = '0';
+              r.style.transform = 'translateY(15px)';
+              r.classList.remove('is-done');
+            });
+            
+            // Trigger staggered animation
+            var delay = 100; // wait a bit before starting
+            rows.forEach(function(r, i) {
+              setTimeout(function() {
+                r.style.opacity = '1';
+                r.style.transform = 'translateY(0)';
+                
+                // Add checked class if it should be checked
+                if (r.classList.contains('will-be-checked')) {
+                  setTimeout(function() {
+                    r.classList.add('is-done');
+                  }, 250); // Check shortly after appearing
+                }
+              }, delay + i * 200); // staggered by 200ms
+            });
+            
+            // Show secondary agent card for un-checked items shortly after list appears
+            setTimeout(function() {
+              var card1 = document.querySelector('[data-role="cooking-agent-card"]');
+              var card2 = document.querySelector('[data-role="cooking-agent-card-2"]');
+              if (card1 && card2) {
+                card1.style.top = '660px'; // Existing card
+                card1.classList.add('p3-agent-card-active'); // Show first card
+                
+                // Delay then show second card stacked
+                setTimeout(function() {
+                  card1.style.animation = 'none'; // stop original pop
+                  card1.classList.add('is-stacked'); // push up and blur
+                  card2.style.top = '600px';
+                  card2.classList.add('p3-agent-card-active-2');
+                }, 1000);
+              }
+            }, delay + (rows.length * 200) + 400); // Wait until all rows appeared
+          }
+
           setTimeout(function () {
             if (label) label.textContent = prev || '인덕션 연동 및 조리 시작';
             send.classList.remove('is-loading');
             ctaLock = false;
-          }, 1200);
+          }, 2400);
+        }
+        
+        // Agent Action Button (e.g. Yes to buy ingredients)
+        var actionBtn = t.closest && t.closest('.p3-agent-action-btn-yes');
+        if (actionBtn && canvas.contains(actionBtn)) {
+          var originalText = actionBtn.textContent;
+          actionBtn.textContent = '장바구니에 담았어요';
+          actionBtn.style.background = '#B7E46A';
+          actionBtn.style.color = '#1A1D1C';
+          actionBtn.style.pointerEvents = 'none';
+          
+          // Now mark the un-checked ingredients as done to simulate purchase/prep
+          setTimeout(function() {
+            var rows = document.querySelectorAll('.p3-ing-row:not(.will-be-checked)');
+            rows.forEach(function(r) {
+              r.classList.add('is-done');
+            });
+            
+            // Dismiss agent cards after action
+            setTimeout(function() {
+              var card1 = document.querySelector('[data-role="cooking-agent-card"]');
+              var card2 = document.querySelector('[data-role="cooking-agent-card-2"]');
+              if (card1) {
+                card1.classList.remove('p3-agent-card-active', 'is-stacked');
+              }
+              if (card2) {
+                card2.classList.remove('p3-agent-card-active-2');
+              }
+            }, 1200);
+          }, 400);
         }
       }, true);
     });
