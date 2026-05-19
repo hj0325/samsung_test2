@@ -260,6 +260,7 @@
         'dot-schedule-2x2': { w: 168, h: 168 },
         'dot-weather-2x1-v1-1': { w: 168, h: 82 },
         'dot-gallery-frame1': { w: 168, h: 168 },
+        'dot-gallery-frame3': { w: 162, h: 218 },
         'dot-gallery-img': { w: 168, h: 168 }
       };
       var sz = sizeMap[role] || { w: 340, h: 168 };
@@ -271,8 +272,21 @@
       }
 
       if (html) {
+        // Entry animation: start from scaled down + transparent
+        slot.style.transition = 'none';
+        slot.style.opacity = '0';
+        slot.style.transform = 'scale(0.8) translateY(20px)';
+        
         slot.innerHTML = html;
+        
+        // Trigger reflow
+        void slot.offsetWidth;
+        
+        // Final state
+        slot.style.transition = 'all 0.6s cubic-bezier(0.16, 1, 0.3, 1)';
         slot.style.opacity = '1';
+        slot.style.transform = 'scale(1) translateY(0)';
+        
         result.classList.add('has-swap');
       } else {
         slot.innerHTML = '';
@@ -285,36 +299,49 @@
       var el = document.getElementById('p2-result');
       if (!el) return;
       var slot = document.getElementById('p2-slot');
+      var canvas = document.getElementById('canvas');
       var userText = String(utt || '').trim();
       if (!userText) return;
 
       // Reset visual state so we never end up with an empty black card.
       el.classList.remove('has-swap');
-      if (slot) { slot.innerHTML = ''; slot.style.opacity = '0'; }
+      if (slot) { 
+        slot.style.transition = 'opacity 0.3s ease';
+        slot.style.opacity = '0';
+        setTimeout(function(){ slot.innerHTML = ''; }, 300);
+      }
 
       // optimistic UI: show "thinking" state
       var titleWrap = el.querySelector('.p2-result-title');
       var subWrap = el.querySelector('.p2-result-sub');
-      if (titleWrap) titleWrap.innerHTML = '요청을<br>처리 중…';
-      if (subWrap) subWrap.textContent = userText.slice(0, 28);
+      if (titleWrap) titleWrap.innerHTML = '상황에 맞는 UI를<br>구성하는 중…';
+      if (subWrap) subWrap.textContent = '“' + userText.slice(0, 20) + '”';
       el.classList.add('is-loading');
 
       try {
         var resolved = await resolveFromApi(userText);
+        
+        // Brief pause for dramatic "UI Reconstruction" effect
+        await new Promise(resolve => setTimeout(resolve, 800));
+
         applyTheme(resolved && resolved.themeKey);
         // Weather-like requests can also shift the wallpaper mood.
         applyBackgroundMood(canvas, resolved && resolved.backgroundKey);
+        
         if (resolved && resolved.component) {
           // Update text label (secondary) to reflect the request summary,
           // but the primary UI should be the swapped component.
-          if (titleWrap) titleWrap.innerHTML = '요청을<br>처리했어요';
-          if (subWrap) subWrap.textContent = '“' + userText.slice(0, 18) + (userText.length > 18 ? '…' : '') + '”';
+          if (titleWrap) titleWrap.innerHTML = '최적의 화면을<br>찾았어요';
+          if (subWrap) subWrap.textContent = '생성된 컴포넌트로 전환합니다';
+          
           mountResolvedComponent(resolved.component);
         }
       } catch (e) {
         console.error('setResultFromUtterance failed:', e);
       } finally {
-        el.classList.remove('is-loading');
+        setTimeout(function() {
+          el.classList.remove('is-loading');
+        }, 1200);
       }
     }
 

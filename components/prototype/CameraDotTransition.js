@@ -78,30 +78,6 @@ export default function CameraDotTransition({
 
   useEffect(() => clearHighlight, [clearHighlight]);
 
-  return (
-    <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-      <button
-        type="button"
-        onClick={run}
-        style={{
-          height: 30,
-          padding: "0 12px",
-          borderRadius: 999,
-          border: "1px solid rgba(255,255,255,0.12)",
-          background: "rgba(255,255,255,0.06)",
-          color: "rgba(255,255,255,0.85)",
-          fontSize: 12,
-          fontWeight: 600,
-          letterSpacing: 0.2,
-          cursor: "pointer",
-        }}
-      >
-        Camera dot focus
-      </button>
-      <span style={{ fontSize: 12, color: "rgba(255,255,255,0.55)" }}>
-        {status === "working" ? "찾는 중…" : status === "ready" ? "포커스됨" : ""}
-      </span>
-    </div>
-  );
+  return null;
 }
 

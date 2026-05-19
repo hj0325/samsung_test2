@@ -40,7 +40,7 @@ const TOOLKIT_PREVIEW_SCALE = 0.72;
 function shouldUseZoomPreviewForRole(role) {
   // Dot-matrix cards look blurry when downscaled via transform.
   // Using `zoom` keeps the same visual size but typically preserves dot-font crispness.
-  return role === 'run-panel' || (typeof role === 'string' && role.indexOf('dot-') === 0);
+  return role === 'run-panel' || role === 'composite-set' || (typeof role === 'string' && role.indexOf('dot-') === 0);
 }
 
 function previewRectForCard(card) {
@@ -80,6 +80,7 @@ function previewRectForCard(card) {
   if (role === 'dot-date-1x1-v1-1') return { w: 82, h: 82, scale: TOOLKIT_PREVIEW_SCALE };
   if (role === 'dot-date-1x1-v1-2') return { w: 82, h: 82, scale: TOOLKIT_PREVIEW_SCALE };
   if (role === 'dot-weather-2x1-v1-1') return { w: 168, h: 82, scale: TOOLKIT_PREVIEW_SCALE };
+  if (role === 'composite-set') return { w: 600, h: 600, scale: TOOLKIT_PREVIEW_SCALE };
   if (role === 'focus-block' && variant.kind === 'weather') return { w: 415, h: 218, scale: TOOLKIT_PREVIEW_SCALE };
   if (role === 'focus-block' && variant.kind === 'calendar') return { w: 300, h: 128, scale: TOOLKIT_PREVIEW_SCALE };
   if (role === 'focus-block' && variant.kind === 'input') return { w: 300, h: 168, scale: TOOLKIT_PREVIEW_SCALE };
@@ -1173,10 +1174,15 @@ function renderPreviewGrid() {
   // a token edit shows up in the live phone frame.
   if (PREVIEW_MODE === 'screen') renderScreenPreview();
   const grid = $('preview-grid');
+  if (!grid) return;
   grid.innerHTML = '';
   const orderedPreviewCards = PREVIEW_CARDS
     .map((card, idx) => ({ card, idx, rect: previewRectForCard(card) }))
     .sort((a, b) => {
+      // Prioritize composite sets to the top
+      if (a.card.role === 'composite-set' && b.card.role !== 'composite-set') return -1;
+      if (a.card.role !== 'composite-set' && b.card.role === 'composite-set') return 1;
+
       const h = (a.rect.h * (a.rect.scale || 1)) - (b.rect.h * (b.rect.scale || 1));
       if (Math.abs(h) > 0.5) return h;
       return (a.rect.w * (a.rect.scale || 1)) - (b.rect.w * (b.rect.scale || 1));
@@ -1199,11 +1205,48 @@ function renderPreviewGrid() {
     const useZoomPreview = shouldUseZoomPreviewForRole(card && card.role);
     let html = '';
     try {
-      const comp = { role: card.role, variant: card.variant, content: card.content || {} };
-      if (typeof window.renderAtomicForRole === 'function') {
-        html = window.renderAtomicForRole(comp, { x: 0, y: 0, w: previewRect.w, h: previewRect.h });
+      if (card.role === 'composite-set') {
+        const children = (card.variant && card.variant.children) || [];
+        
+        // Calculate actual bounding box of children for perfect centering
+        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+        if (children.length > 0) {
+          children.forEach(c => {
+            minX = Math.min(minX, c.x);
+            minY = Math.min(minY, c.y);
+            maxX = Math.max(maxX, c.x + c.w);
+            maxY = Math.max(maxY, c.y + c.h);
+          });
+        } else {
+          minX = 0; minY = 0; maxX = 340; maxY = 340;
+        }
+
+        const contentW = maxX - minX;
+        const contentH = maxY - minY;
+        const offsetX = (previewRect.w - contentW) / 2 - minX;
+        const offsetY = (previewRect.h - contentH) / 2 - minY;
+
+        html = '<div class="composite-set-container" style="position:relative; width:' + previewRect.w + 'px; height:' + previewRect.h + 'px;">';
+        if (children.length === 0) {
+          html += '<div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,0.15); font-size:14px; font-weight:600; text-transform:uppercase; letter-spacing:1px;">Empty Set</div>';
+        }
+        children.forEach(child => {
+          if (typeof window.renderAtomicForRole === 'function') {
+            const childHtml = window.renderAtomicForRole({ role: child.role, variant: child.variant || {} }, { w: child.w, h: child.h });
+            const left = child.x + offsetX;
+            const top = child.y + offsetY;
+            const isMusic = child.role === 'dot-music-1x1';
+            html += '<div class="composite-child' + (isMusic ? ' is-orange' : '') + '" data-comp-role="' + child.role + '" style="position:absolute; left:' + left + 'px; top:' + top + 'px; width:' + child.w + 'px; height:' + child.h + 'px;">' + childHtml + '</div>';
+          }
+        });
+        html += '</div>';
       } else {
-        html = '<div style="padding:20px;color:var(--text-3);">renderer not loaded</div>';
+        const comp = { role: card.role, variant: card.variant, content: card.content || {} };
+        if (typeof window.renderAtomicForRole === 'function') {
+          html = window.renderAtomicForRole(comp, { x: 0, y: 0, w: previewRect.w, h: previewRect.h });
+        } else {
+          html = '<div style="padding:20px;color:var(--text-3);">renderer not loaded</div>';
+        }
       }
     } catch (e) {
       html = '<div style="padding:20px;color:var(--warning);">render error: ' + e.message + '</div>';
@@ -1653,13 +1696,16 @@ async function saveAsCustom() {
     });
     ACTIVE_ID = id;
     // 3) Refresh dropdown + active-pill so the UI reflects the new state.
-    const sel = $('theme-select');
+  const sel = $('theme-select');
+  if (sel) {
     const opt = document.createElement('option');
     opt.value = id;
     opt.textContent = name + ' (custom)';
     sel.appendChild(opt);
     sel.value = id;
-    $('active-pill').textContent = 'Active · ' + name;
+  }
+  const pill = $('active-pill');
+  if (pill) pill.textContent = 'Active · ' + name;
     showToast('Saved · "' + name + '" is now active');
     updateOnSelect(id, false);
     _markUnsaved(false);
@@ -1697,7 +1743,8 @@ function discardChanges() {
   INSPECTOR_LAYER = null;
   INSPECTOR_DOM_PATH = null;
   PREVIEW_CELL_VAR_OVERRIDES = {};
-  const id = $('theme-select').value;
+  const sel = $('theme-select');
+  const id = sel ? sel.value : ACTIVE_ID;
   const theme = THEMES.find(t => t.id === id);
   if (!theme) return;
   applyThemeVars(theme.vars);
@@ -1922,7 +1969,8 @@ async function _buildPreviewGalleryHTML(theme) {
 //  via /customize ·Import theme to round-trip into the site.
 // ---------------------------------------------------------------------------
 async function downloadThemeTemplate() {
-  const themeId = $('theme-select').value;
+  const sel = $('theme-select');
+  const themeId = sel ? sel.value : ACTIVE_ID;
   const theme = THEMES.find(t => t.id === themeId);
   if (!theme) { showToast('Pick a theme first'); return; }
 
@@ -2371,10 +2419,12 @@ async function boot() {
     ACTIVE_ID = data._active;
     // Build dropdown
     const sel = $('theme-select');
-    sel.innerHTML = THEMES.map(t =>
-      '<option value="' + t.id + '">' + t.name + '</option>'
-    ).join('');
-    sel.value = ACTIVE_ID;
+    if (sel) {
+      sel.innerHTML = THEMES.map(t =>
+        '<option value="' + t.id + '">' + t.name + '</option>'
+      ).join('');
+      sel.value = ACTIVE_ID;
+    }
     updateOnSelect(ACTIVE_ID, false);
     // Load datasets (no merge).
     PREVIEW_CARDS_NORMAL = (Array.isArray(window.NORMAL_PREVIEW_CARDS) && window.NORMAL_PREVIEW_CARDS.length)
@@ -2408,7 +2458,10 @@ function updateOnSelect(id, applyServer) {
   applyThemeVars(theme.vars);
   if (isFlatThemeActive()) setFlatScheme(FLAT_SCHEME, false);
   else updateFlatSchemeToggle();
-  $('active-pill').textContent = (theme.id === ACTIVE_ID ? 'Active · ' : 'Preview · ') + theme.name;
+  const pill = $('active-pill');
+  if (pill) {
+    pill.textContent = (theme.id === ACTIVE_ID ? 'Active · ' : 'Preview · ') + theme.name;
+  }
   // Re-render preview so any cards that compute color from vars at render
   // time pick up the new values.
   renderPreviewGrid();
@@ -2519,25 +2572,91 @@ document.getElementById('preview-bg-swatches')?.addEventListener('click', functi
   if (!grid || grid.__delegatesBound) return;
   grid.__delegatesBound = true;
   function applyPreviewSelection(idx) {
+    console.log('Applying preview selection:', idx);
     SELECTED_PREVIEW_INDEX = idx;
     updateDetailView(idx);
     renderPreviewGrid();
   }
 
   function updateDetailView(idx) {
+    console.log('Updating detail view for idx:', idx);
     const detail = $('detail-view');
     const stage = $('detail-stage');
     const controls = $('detail-controls');
 
-    if (!detail || !stage) return;
+    if (!detail || !stage) {
+      console.warn('Detail or stage not found');
+      return;
+    }
 
     const card = PREVIEW_CARDS[idx];
-    if (!card) return;
+    if (!card) {
+      console.warn('Card not found for idx:', idx);
+      return;
+    }
 
     // Render component into detail stage
     const rect = previewRectForCard(card);
-    const html = window.renderAtomicForRole(card, rect);
-    stage.innerHTML = html;
+    const previewScale = rect.scale || 1;
+    const useZoomPreview = shouldUseZoomPreviewForRole(card && card.role);
+    let html = '';
+    
+    if (card.role === 'composite-set') {
+      const children = (card.variant && card.variant.children) || [];
+      
+      // Calculate actual bounding box of children for perfect centering
+      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+      if (children.length > 0) {
+        children.forEach(c => {
+          minX = Math.min(minX, c.x);
+          minY = Math.min(minY, c.y);
+          maxX = Math.max(maxX, c.x + c.w);
+          maxY = Math.max(maxY, c.y + c.h);
+        });
+      } else {
+        minX = 0; minY = 0; maxX = 340; maxY = 340;
+      }
+
+      const contentW = maxX - minX;
+      const contentH = maxY - minY;
+      const offsetX = (rect.w - contentW) / 2 - minX;
+      const offsetY = (rect.h - contentH) / 2 - minY;
+
+      html = '<div class="composite-set-container" style="position:relative; width:' + rect.w + 'px; height:' + rect.h + 'px; background:transparent; border:none; box-shadow:none;">';
+      children.forEach(child => {
+        if (typeof window.renderAtomicForRole === 'function') {
+          const childHtml = window.renderAtomicForRole({ role: child.role, variant: child.variant || {} }, { w: child.w, h: child.h });
+          const left = child.x + offsetX;
+          const top = child.y + offsetY;
+          const isMusic = child.role === 'dot-music-1x1';
+          html += '<div class="composite-child' + (isMusic ? ' is-orange' : '') + '" data-comp-role="' + child.role + '" style="position:absolute; left:' + left + 'px; top:' + top + 'px; width:' + child.w + 'px; height:' + child.h + 'px;">' + childHtml + '</div>';
+        }
+      });
+      html += '</div>';
+    } else {
+      html = window.renderAtomicForRole(card, rect);
+    }
+    
+    var scaleStyle = useZoomPreview
+      ? ('zoom:' + previewScale + ';transform:none;')
+      : ('transform:scale(' + previewScale + ');');
+
+    stage.innerHTML =
+      '<div class="stage-scale" style="width:' + rect.w + 'px;' +
+      'min-height:' + rect.h + 'px;height:auto;' +
+      scaleStyle + '">' + html + '</div>';
+    
+    // Ensure stage has correct dimensions for scaling
+    const scaleRoot = stage.firstElementChild;
+    if (scaleRoot) {
+      if (useZoomPreview) {
+        stage.style.width = Math.ceil(rect.w * previewScale) + 'px';
+        stage.style.height = Math.ceil(rect.h * previewScale) + 'px';
+      } else {
+        stage.style.width = Math.ceil(rect.w * previewScale) + 'px';
+        stage.style.height = 'auto'; // Let scaleRoot determine height
+      }
+    }
     
     // Reset state to idle
     const cardEl = stage.querySelector('.dot-card, .focus-block, .notif-card, .now-bar, .media-card, .progress-track');
@@ -2637,6 +2756,9 @@ document.getElementById('preview-bg-swatches')?.addEventListener('click', functi
 
   grid.addEventListener('click', function (e) {
     if (e.detail !== 1) return;
+    const handled = handleCompositeMusicClick(e);
+    if (handled) return;
+
     var cell = e.target.closest('.preview-cell');
     if (!cell || !grid.contains(cell)) return;
     var raw = cell.getAttribute('data-preview-index');
@@ -2646,6 +2768,44 @@ document.getElementById('preview-bg-swatches')?.addEventListener('click', functi
     e.preventDefault();
     applyPreviewSelection(idx);
   });
+
+  const stage = $('detail-stage');
+  if (stage) {
+    stage.addEventListener('click', handleCompositeMusicClick);
+  }
+
+  function handleCompositeMusicClick(e) {
+    // Check for composite set music expansion
+    const compMusic = e.target.closest('.composite-child[data-comp-role="dot-music-1x1"]');
+    if (compMusic) {
+      const container = compMusic.closest('.composite-set-container');
+      if (container) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // Toggle expansion on music card
+        const isNowExpanded = !compMusic.classList.contains('comp-music-expanded');
+        
+        // Apply classes and data-state to all children in this container
+        const children = container.querySelectorAll('.composite-child');
+        children.forEach(child => {
+          const role = child.getAttribute('data-comp-role');
+          if (role === 'dot-music-1x1') {
+            child.classList.toggle('comp-music-expanded', isNowExpanded);
+            const innerCard = child.querySelector('.dot-card');
+            if (innerCard) {
+              innerCard.setAttribute('data-state', isNowExpanded ? 'expanded' : 'idle');
+            }
+          } else if (role !== 'dot-goal') {
+            // Hide everything except the top goal and the music card itself
+            child.classList.toggle('comp-hiding', isNowExpanded);
+          }
+        });
+        return true;
+      }
+    }
+    return false;
+  }
   grid.addEventListener('dblclick', function (e) {
     var stage = e.target.closest && e.target.closest('.preview-cell .stage');
     var cell = e.target.closest && e.target.closest('.preview-cell');
