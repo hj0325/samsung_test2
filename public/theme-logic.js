@@ -1849,7 +1849,7 @@ async function _buildPreviewGalleryHTML(theme) {
     'body.tp-page .tp-section { margin: 56px 0 0; padding: 36px 0 0; border-top: 1px solid rgba(255,255,255,0.08); display: block; }',
     'body.tp-page .tp-section > h2 { font-family: var(--font-family-display, "Inter", sans-serif); font-size: 22px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.3px; display: block; color: var(--text-primary, #efeef2); }',
     'body.tp-page .tp-section > .tp-hint { color: var(--text-tertiary, rgba(239,238,242,0.55)); font-size: 13px; margin: 0 0 28px; max-width: 760px; display: block; line-height: 1.55; }',
-    'body.tp-page .tp-cards-scope { background: var(--preview-bg, #2f6264); border-radius: 28px; padding: 24px; }',
+    'body.tp-page .tp-cards-scope { background: var(--preview-bg, #FFFEF1); border-radius: 28px; padding: 24px; }',
     'body.tp-page .tp-cards-scope .preview-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; padding: 0; }',
     'body.tp-page .tp-screens-wrap { padding: 0; }',
     'body.tp-page .tp-screens-wrap .preview-screen-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }',

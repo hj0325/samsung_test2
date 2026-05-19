@@ -1,5 +1,4 @@
 import { useEffect, useState, useRef, useMemo, useCallback } from "react";
-import { motion } from "motion/react";
 
 const styles = {
   wrapper: {
@@ -47,7 +46,7 @@ export default function DecryptedText({
 
   const availableChars = useMemo(() => {
     return useOriginalCharsOnly
-      ? Array.from(new Set(text.split(""))).filter((char) => char !== " ")
+      ? Array.from(new Set(text.split(""))).filter((char) => char !== " " && char !== "\n")
       : characters.split("");
   }, [useOriginalCharsOnly, text, characters]);
 
@@ -56,7 +55,7 @@ export default function DecryptedText({
       return originalText
         .split("")
         .map((char, i) => {
-          if (char === " ") return " ";
+          if (char === " " || char === "\n") return char;
           if (currentRevealed.has(i)) return originalText[i];
           return availableChars[Math.floor(Math.random() * availableChars.length)];
         })
@@ -359,7 +358,7 @@ export default function DecryptedText({
         : {};
 
   return (
-    <motion.span
+    <span
       className={parentClassName}
       ref={containerRef}
       style={styles.wrapper}
@@ -383,7 +382,7 @@ export default function DecryptedText({
           );
         })}
       </span>
-    </motion.span>
+    </span>
   );
 }
 

@@ -11,6 +11,7 @@ export default function App({ Component, pageProps }) {
       animateOn: "view",
       clickMode: "once",
       encryptedClassName: "dot-decrypted-encrypted",
+      useOriginalCharsOnly: true,
 
       // Per component tuning (tempo)
       steps: {

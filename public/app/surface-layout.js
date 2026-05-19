@@ -61,13 +61,15 @@ window.createOneUILayout = function createOneUILayout(viewport, surfaceType) {
   // visual gap so content doesn't kiss the bezel). Top stays smaller
   // because the status-bar zone already adds visual margin.
   const safe = {
+    // Slightly larger top inset so status-bar never clips
+    // into the device bezel radius (prototype frame uses overflow:hidden).
     top: 16,
-    right: 28,
+    right: 24,
     bottom: 36,
-    left: 28
+    left: 24
   };
 
-  const topSystemH = 28;
+  const topSystemH = 38;
   const appBarExpandedH = Math.round(height * 0.22);
   const appBarCollapsedH = 56;
   const interactionStartY = Math.round(height * 0.58);
@@ -145,6 +147,34 @@ window.composeSurfacePlan = function composeSurfacePlan(surfaceType, layout) {
           { id: 'running-coach', role: 'dot-running',   zone: 'interaction', variant: { state: 'idle' } },
           { id: 'shortcutLeft',  role: 'shortcutLeft',  zone: 'bottomNav', variant: { icon: 'phone' } },
           { id: 'shortcutRight', role: 'shortcutRight', zone: 'bottomNav', variant: { icon: 'camera' } },
+          { id: 'gestureBar',    role: 'gestureBar',    zone: 'bottomAction' }
+        ]
+      };
+
+    case T.LOCKSCREEN_DOT:
+      return {
+        surfaceType,
+        components: [
+          { id: 'status-bar',    role: 'status-bar',    zone: 'topSystem' },
+          { id: 'lockIndicator', role: 'lockIndicator', zone: 'topSystem' },
+          { id: 'lock-dot-widgets', role: 'lock-dot-widgets', zone: 'viewing' },
+          { id: 'lock-dot-shortcuts', role: 'lock-dot-shortcuts', zone: 'bottomNav' },
+          { id: 'gestureBar',    role: 'gestureBar',    zone: 'bottomAction' }
+        ]
+      };
+
+    case 'lockscreen-persona2':
+      return {
+        surfaceType,
+        components: [
+          { id: 'status-bar',    role: 'status-bar',    zone: 'topSystem' },
+          { id: 'weatherDate',   role: 'weatherDate',   zone: 'viewing', variant: { date: 'Sat, May 3', temp: '24', condition: 'moon' } },
+          // Match the intended lockscreen scale (image2)
+          { id: 'clock',         role: 'clock',         zone: 'viewing', variant: { fontSize: 90, lineHeight: 66, gap: 10 } },
+          { id: 'persona2-widgets', role: 'persona2-widgets', zone: 'viewing' },
+          { id: 'shortcutLeft',  role: 'shortcutLeft',  zone: 'bottomNav', variant: { icon: 'phone' } },
+          { id: 'shortcutRight', role: 'shortcutRight', zone: 'bottomNav', variant: { icon: 'camera' } },
+          { id: 'unlock-hint',   role: 'unlock-hint',   zone: 'bottomNav', variant: { showArrow: false } },
           { id: 'gestureBar',    role: 'gestureBar',    zone: 'bottomAction' }
         ]
       };
@@ -298,9 +328,23 @@ window.composeSurfacePlan = function composeSurfacePlan(surfaceType, layout) {
         surfaceType,
         components: [
           { id: 'status-bar', role: 'status-bar', zone: 'topSystem' },
-          { id: 'home-top-widgets', role: 'home-top-widgets', zone: 'viewing' },
-          { id: 'home-time-matrix', role: 'dot-time-matrix', zone: 'viewing' },
-          { id: 'home-mid-widgets', role: 'home-mid-widgets', zone: 'viewing' },
+          // Persona 1 Home (Figma 75:13339) — place atomics by fixed rects
+          // to match the reference screen exactly (388×880).
+          { id: 'p1-goal', role: 'dot-goal', zone: 'viewing',
+            variant: { title: "Today's Goal", time: '01:42:43', timeSuffix: 'Within', distance: '15km' },
+            _rect: { x: 24, y: 42, w: 340, h: 168 } },
+          { id: 'p1-music', role: 'dot-music-1x1', zone: 'viewing',
+            variant: { artist: 'Jimmy Hall', album: 'Album', song: 'Concierto', current: '0:40', remaining: '-1:10', barFull: 120, barTrack: 31.48 },
+            _rect: { x: 24, y: 214, w: 168, h: 168 } },
+          { id: 'p1-steps', role: 'dot-total-steps-2x1', zone: 'viewing',
+            variant: { count: '5,543' },
+            _rect: { x: 196, y: 214, w: 168, h: 82 } },
+          { id: 'p1-run', role: 'dot-running-compact', zone: 'viewing',
+            variant: { label: 'Jogging', time: '10:35' },
+            _rect: { x: 196, y: 300, w: 168, h: 82 } },
+          { id: 'p1-timemat', role: 'dot-time-matrix', zone: 'viewing',
+            variant: { bgColor: 'transparent', dotColor: '#FF7F24', time: '12:45', meta: 'MON', dayDigits: '  ' },
+            _rect: { x: 26, y: 386, w: 335, h: 165 } },
           { id: 'app-dock',   role: 'app-dock',   zone: 'bottomNav',
             content: { apps: ['Camera','Gallery','Maps','YT Music'] } },
           { id: 'gesture-bar', role: 'gestureBar', zone: 'bottomAction' }
@@ -360,14 +404,25 @@ window.composeSurfacePlan = function composeSurfacePlan(surfaceType, layout) {
       return {
         surfaceType,
         components: [
+          // Persona 3 (Figma 76:15282) — Cooking screen
           { id: 'status-bar', role: 'status-bar', zone: 'topSystem', variant: { theme: 'light', carrier: 'TJG' } },
-          { id: 'health-header', role: 'health-header', zone: 'viewing' },
-          { id: 'health-brief', role: 'health-brief', zone: 'viewing' },
-          { id: 'health-goal-card', role: 'health-goal-card', zone: 'viewing' },
-          { id: 'health-course-card', role: 'health-course-card', zone: 'viewing' },
-          { id: 'health-weather-card', role: 'health-weather-card', zone: 'viewing' },
-          { id: 'health-jogging-card', role: 'health-jogging-card', zone: 'viewing' },
-          { id: 'health-music-card', role: 'health-music-card', zone: 'viewing' },
+          { id: 'p3-bg', role: 'cooking-bg', zone: 'full',
+            _rect: { x: 0, y: 0, w: 388, h: 880 } },
+          { id: 'p3-greeting', role: 'cooking-greeting', zone: 'viewing',
+            variant: { line1: '민수님,', line2: '운동 수고하셨어요!' },
+            _rect: { x: 24, y: 70, w: 340, h: 80 } },
+          { id: 'p3-subtitle', role: 'cooking-subtitle', zone: 'viewing',
+            variant: { text: '회복을 돕는 연어스테이크를 준비해볼까요?' },
+            _rect: { x: 24, y: 142, w: 340, h: 32 } },
+          { id: 'p3-recipe', role: 'cooking-recipe', zone: 'viewing',
+            variant: { rightMeta: '85% 데이터 일치' },
+            _rect: { x: 22, y: 184, w: 341, h: 125 } },
+          { id: 'p3-ingredients', role: 'cooking-ingredients', zone: 'viewing',
+            variant: { rightMeta: '스마트싱즈 연동 중' },
+            _rect: { x: 22, y: 317, w: 341, h: 390 } },
+          { id: 'p3-send', role: 'cooking-send-btn', zone: 'viewing',
+            variant: { text: '인덕션 연동 및 조리 시작' },
+            _rect: { x: 24, y: 782, w: 339, h: 56 } },
           { id: 'gesture-bar', role: 'gestureBar', zone: 'bottomAction' }
         ]
       };
@@ -882,7 +937,7 @@ window.resolveComponentRect = function resolveComponentRect(comp, layout, plan) 
     case 'weather-date':
       return {
         x: z.viewing.x,
-        y: 119, // Figma top: 119.67
+        y: 119 + (window.currentSurfaceType === 'lockscreen-persona2' ? 28 : 0), // Figma top: 119.67
         w: z.viewing.w,
         h: 28
       };
@@ -892,7 +947,7 @@ window.resolveComponentRect = function resolveComponentRect(comp, layout, plan) 
     case 'lock-time':
       return {
         x: z.viewing.x,
-        y: 154, // Below weatherDate
+        y: 154 + (window.currentSurfaceType === 'lockscreen-persona2' ? 28 : 0), // Below weatherDate
         w: z.viewing.w,
         h: 176
       };
@@ -913,12 +968,36 @@ window.resolveComponentRect = function resolveComponentRect(comp, layout, plan) 
         h: 56
       };
 
+    case 'persona2-widgets':
+      return {
+        x: 0,
+        y: 338 + 28,
+        w: vw,
+        h: 300
+      };
+
+    case 'lock-dot-widgets':
+      return {
+        x: z.viewing.x,
+        y: 119, // Same as weatherDate
+        w: z.viewing.w,
+        h: z.viewing.h
+      };
+
     case 'dot-running':
       return {
         x: (vw - 310) / 2,
         y: 699,
         w: 310,
         h: 78
+      };
+
+    case 'lock-dot-shortcuts':
+      return {
+        x: z.bottomNav.x,
+        y: z.bottomNav.y,
+        w: z.bottomNav.w,
+        h: z.bottomNav.h
       };
 
     case 'shortcutLeft':
@@ -941,6 +1020,16 @@ window.resolveComponentRect = function resolveComponentRect(comp, layout, plan) 
         y: vh - 22,
         w: vw,
         h: 22
+      };
+
+    case 'home-persona1-widgets':
+      return {
+        x: 0,
+        // Align with the viewing zone top so the first card doesn't clip
+        // against the device bezel on some browser zoom levels.
+        y: 100,
+        w: vw,
+        h: 600
       };
 
     case 'home-top-widgets':
@@ -1088,7 +1177,8 @@ window.resolveComponentRect = function resolveComponentRect(comp, layout, plan) 
     case 'unlock-hint':
       return {
         x: z.bottomNav.x,
-        y: (z.bottomNav.y || vh - 80) - 48,
+        // Move closer to bottom (less floating above shortcuts)
+        y: (z.bottomNav.y || vh - 80) - 24,
         w: z.bottomNav.w,
         h: 32
       };
@@ -1345,6 +1435,116 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
   const A = window.GalaxyAtomics || {};
 
   switch (comp.role) {
+    // (p3-ai-orb / p3-ai-result removed — star interaction belongs to persona2)
+    case 'cooking-bg': {
+      // Persona3 background should follow the unified wallpaper set on the
+      // phone frame (.canvas-inner). Keep this layer transparent.
+      return '<div style="width:100%;height:100%;background:transparent;"></div>';
+    }
+
+    case 'cooking-greeting': {
+      var gv = (comp && comp.variant) || {};
+      var l1 = gv.line1 || '민수님,';
+      var l2 = gv.line2 || '운동 수고하셨어요!';
+      return '<div style="width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;font-family:var(--font);font-weight:700;color:#1a1d1c;letter-spacing:-0.2px;">' +
+        '<div style="font-size:26px;line-height:1.2;">' + l1 + '</div>' +
+        '<div style="font-size:26px;line-height:1.2;">' + l2 + '</div>' +
+      '</div>';
+    }
+
+    case 'cooking-subtitle': {
+      var sv = (comp && comp.variant) || {};
+      var t = sv.text || '회복을 돕는 연어스테이크를 준비해볼까요?';
+      return '<div style="width:100%;height:100%;display:flex;align-items:center;font-family:var(--font);font-weight:500;font-size:16px;line-height:1.3;color:#1a1d1c;opacity:0.9;">' +
+        t +
+      '</div>';
+    }
+
+    case 'cooking-recipe': {
+      var rv = (comp && comp.variant) || {};
+      var right = rv.rightMeta || '85% 데이터 일치';
+      var chip = function (label, value) {
+        return '<div style="width:96px;height:54px;background:rgba(255,255,255,0.10);border:1px solid rgba(255,255,255,0.10);border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--p3-green,#B7E46A);">' +
+          '<div style="font-family:var(--font);font-weight:500;font-size:14px;line-height:1.3;color:rgba(231,255,200,0.92);">' + label + '</div>' +
+          '<div style="font-family:var(--font-dot);font-weight:400;font-size:22px;line-height:1.1;color:var(--p3-green,#B7E46A);letter-spacing:0.06em;">' + value + '</div>' +
+        '</div>';
+      };
+      var alertIcon =
+        '<div style="width:24px;height:24px;display:flex;align-items:center;justify-content:center;">' +
+          '<div style="width:7px;height:18px;display:grid;grid-template-rows:repeat(5,1fr);gap:2px;">' +
+            '<span style="width:4px;height:4px;border-radius:99px;background:#1a1d1c;opacity:0.8;"></span>'.repeat(5) +
+          '</div>' +
+        '</div>';
+      return '<div style="width:100%;height:100%;display:flex;flex-direction:column;gap:8px;">' +
+        '<div style="display:flex;align-items:center;justify-content:space-between;">' +
+          '<div style="display:flex;align-items:center;gap:4px;color:#1a1d1c;">' +
+            alertIcon +
+            '<div style="font-family:var(--font);font-weight:600;font-size:15px;line-height:1.3;">레시피 요약</div>' +
+          '</div>' +
+          '<div style="font-family:var(--font);font-weight:500;font-size:15px;line-height:1.3;opacity:0.5;color:#1a1d1c;">' + right + '</div>' +
+        '</div>' +
+        '<div style="width:339px;height:72px;background:var(--p3-black,rgba(16,16,18,0.92));border-radius:30px;display:flex;align-items:center;justify-content:center;gap:10px;">' +
+          chip('칼로리', '420kcal') +
+          chip('조리 시간', '15min') +
+          chip('난이도', 'M') +
+        '</div>' +
+      '</div>';
+    }
+
+    case 'cooking-ingredients': {
+      var iv = (comp && comp.variant) || {};
+      var right = iv.rightMeta || '스마트싱즈 연동 중';
+      var alertIcon =
+        '<div style="width:24px;height:24px;display:flex;align-items:center;justify-content:center;">' +
+          '<div style="width:7px;height:18px;display:grid;grid-template-rows:repeat(5,1fr);gap:2px;">' +
+            '<span style="width:4px;height:4px;border-radius:99px;background:#1a1d1c;opacity:0.8;"></span>'.repeat(5) +
+          '</div>' +
+        '</div>';
+      function row(bg, title, sub, amount, checked) {
+        var leftCircleBg = checked ? 'rgba(255,255,255,0.92)' : 'rgba(255,255,255,0.55)';
+        var checkColor = checked ? 'var(--p3-ink,#1A1D1C)' : 'rgba(16,16,18,0.35)';
+        return '<button type="button" class="p3-ing-row" data-title="' + (title || '') + '" aria-label="' + (title || 'ingredient') + '" style="width:341px;height:61px;background:' + bg + ';border-radius:93px;display:flex;align-items:center;justify-content:space-between;padding:0 18px 0 15px;box-sizing:border-box;border:1px solid rgba(16,16,18,0.06);cursor:pointer;-webkit-tap-highlight-color:transparent;">' +
+          '<div style="display:flex;align-items:center;gap:17px;min-width:0;">' +
+            '<div style="width:35px;height:35px;border-radius:18px;background:' + leftCircleBg + ';display:flex;align-items:center;justify-content:center;flex-shrink:0;">' +
+              '<div style="width:18px;height:18px;border-radius:99px;border:2px solid ' + checkColor + ';display:flex;align-items:center;justify-content:center;opacity:' + (checked ? '1' : '0.55') + ';">' +
+                (checked ? '<div style="width:8px;height:8px;border-radius:99px;background:' + checkColor + ';"></div>' : '') +
+              '</div>' +
+            '</div>' +
+            '<div style="display:flex;flex-direction:column;gap:3px;min-width:0;">' +
+              '<div style="font-family:var(--font);font-weight:700;font-size:15px;line-height:1.3;color:var(--p3-ink,#1A1D1C);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + title + '</div>' +
+              (sub ? '<div style="font-family:var(--font);font-weight:600;font-size:12px;line-height:1.3;color:rgba(26,29,28,0.62);opacity:' + (checked ? '1' : '0.55') + ';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + sub + '</div>' : '') +
+            '</div>' +
+          '</div>' +
+          '<div style="font-family:var(--font-dot);font-weight:400;font-size:22px;line-height:1.1;color:var(--p3-ink,#1A1D1C);letter-spacing:0.06em;">' + amount + '</div>' +
+        '</button>';
+      }
+      return '<div style="width:100%;height:100%;display:flex;flex-direction:column;gap:8px;">' +
+        '<div style="display:flex;align-items:center;justify-content:space-between;width:341px;">' +
+          '<div style="display:flex;align-items:center;gap:4px;color:#1a1d1c;">' +
+            alertIcon +
+            '<div style="font-family:var(--font);font-weight:600;font-size:15px;line-height:1.3;">재료 준비 현황</div>' +
+          '</div>' +
+          '<div style="font-family:var(--font);font-weight:500;font-size:15px;line-height:1.3;opacity:0.5;color:#1a1d1c;">' + right + '</div>' +
+        '</div>' +
+        '<div style="display:flex;flex-direction:column;gap:7px;">' +
+          row('rgba(183,228,106,0.72)','생연어 필렛','냉장고 2칸 확인됨','200g',true) +
+          row('rgba(183,228,106,0.72)','아스파라거스','신선실 확인됨','4',true) +
+          row('rgba(255,255,255,0.68)','올리브 오일','펜트리 보관 추천','2',false) +
+          row('rgba(255,255,255,0.68)','소금 및 후추','', '2',false) +
+        '</div>' +
+      '</div>';
+    }
+
+    case 'cooking-send-btn': {
+      var bv = (comp && comp.variant) || {};
+      var text = bv.text || '인덕션 연동 및 조리 시작';
+      return '<button id="p3-send" type="button" class="p3-send" aria-label="' + text + '" style="width:100%;height:100%;background:var(--p3-black,rgba(16,16,18,0.92));border-radius:14000px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;box-sizing:border-box;color:#fff;border:0;cursor:pointer;-webkit-tap-highlight-color:transparent;">' +
+        '<div style="font-family:var(--font);font-weight:500;font-size:18px;line-height:1.3;">' + text + '</div>' +
+        '<div class="p3-arrowdots" aria-hidden="true" style="display:grid;grid-template-columns:repeat(2,4px);grid-auto-rows:4px;gap:4px;transform:rotate(90deg);">' +
+          '<span></span><span></span><span></span><span></span><span></span><span></span>' +
+        '</div>' +
+      '</button>';
+    }
     case 'status-bar':
       var sbv = (comp && comp.variant) || {};
       var sbTheme = sbv.theme || (window.currentSurfaceType === window.SURFACE_TYPES.HEALTH_MLP ? 'light' : 'dark');
@@ -3901,6 +4101,7 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
     case 'dot-clock-2x1': {
       var ck = (comp && comp.variant) || {};
       var t = ck.time || '11:33';
+      t = t.replace(':', '<span style="font-family: ui-monospace; margin-top: -3px; display: inline-block;">:</span>');
       var p = ck.period || 'AM';
       return '' +
         '<div class="dot-card dot-clock21" data-state="' + (ck.state || 'idle') + '">' +
@@ -4514,6 +4715,23 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
       '</div>';
     }
 
+    case 'lock-dot-shortcuts': {
+      return '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;gap:12px;">' +
+        '<div style="width:54px;height:54px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1);color:#fff;">' +
+          '<svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 7h3l2-2h6l2 2h3a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2z" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="13" r="3.5" stroke="currentColor" stroke-width="1.6"/></svg>' +
+        '</div>' +
+        '<div style="width:54px;height:54px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1);color:#fff;">' +
+          '<svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" stroke="currentColor" stroke-width="1.6"/></svg>' +
+        '</div>' +
+        '<div style="width:54px;height:54px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:rgba(52,130,246,0.9);color:#fff;">' +
+          '<svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>' +
+        '</div>' +
+        '<div style="width:54px;height:54px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:rgba(239,68,68,0.9);color:#fff;">' +
+          '<svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z" stroke="currentColor" stroke-width="1.6"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>' +
+        '</div>' +
+      '</div>';
+    }
+
     case 'gestureBar': {
       // Full-width bottom home-gesture indicator (Samsung's Android home
       // bar). Thin light pill, 134×5 centered in a 451×24 band.
@@ -4827,6 +5045,96 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
         '</div>' +
       '</div>';
 
+    case 'persona2-widgets':
+      return '<div class="p2-widgets" style="position:relative; width: 100%; height: 350px;">' +
+        // Pill
+        '<div class="p2-pill" style="position:absolute; top:0; left: 24px; right: 24px; height: 80px; background: var(--p2-white); border-radius: 40px; display:flex; align-items:center; padding: 0 24px 0 12px; gap: 16px;">' +
+          '<div class="p2-pill__icon" style="width: 56px; height: 56px; background: var(--p2-lavender); border-radius: 28px; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden;">' +
+             '<div class="p2-dot9" aria-hidden="true">' +
+               '<span></span><span></span><span></span>' +
+               '<span></span><span></span><span></span>' +
+               '<span></span><span></span><span></span>' +
+             '</div>' +
+          '</div>' +
+          '<div style="display:flex; flex-direction:column; flex:1; margin-left:2px;">' +
+            '<span class="p2-grad-text" style="font-family:\'Pretendard\',sans-serif; font-weight:700; font-size:18px; line-height:1.3;">휴가는 즐거우셨나요?</span>' +
+            '<span class="p2-grad-text p2-grad-text--subtle" style="font-family:\'Pretendard\',sans-serif; font-weight:600; font-size:13px;">밀린 일들은 제가 정리할게요..</span>' +
+          '</div>' +
+          '<button id="p2-arrow" type="button" aria-label="AI Action" style="display:flex;justify-content:center;align-items:center;width:30px;height:30px;flex-shrink:0;border:0;padding:0;background:transparent;cursor:pointer;-webkit-tap-highlight-color:transparent;color:var(--p2-lavender);">' +
+            '<div class="dot-running__dots-arrow" style="position:relative;left:auto;top:auto;transform:none;">' +
+              '<svg width="30" height="30" viewBox="0 0 30 30" fill="none">' +
+                '<circle class="dot-run-arrow-dot dot-run-arrow-dot--0" cx="6" cy="15" r="2.1" fill="currentColor" />' +
+                '<circle class="dot-run-arrow-dot dot-run-arrow-dot--1" cx="10.2" cy="15" r="2.1" fill="currentColor" />' +
+                '<circle class="dot-run-arrow-dot dot-run-arrow-dot--2" cx="14.4" cy="15" r="2.1" fill="currentColor" />' +
+                '<circle class="dot-run-arrow-dot dot-run-arrow-dot--3" cx="18.6" cy="15" r="2.1" fill="currentColor" />' +
+                '<circle class="dot-run-arrow-dot dot-run-arrow-dot--4" cx="22.8" cy="15" r="2.1" fill="currentColor" />' +
+                '<circle class="dot-run-arrow-dot dot-run-arrow-dot--5" cx="27" cy="15" r="2.1" fill="currentColor" />' +
+                '<circle class="dot-run-arrow-dot dot-run-arrow-dot--6" cx="22.8" cy="10.8" r="2.1" fill="currentColor" />' +
+                '<circle class="dot-run-arrow-dot dot-run-arrow-dot--7" cx="18.6" cy="6.6" r="2.1" fill="currentColor" />' +
+                '<circle class="dot-run-arrow-dot dot-run-arrow-dot--8" cx="22.8" cy="19.2" r="2.1" fill="currentColor" />' +
+                '<circle class="dot-run-arrow-dot dot-run-arrow-dot--9" cx="18.6" cy="23.4" r="2.1" fill="currentColor" />' +
+              '</svg>' +
+            '</div>' +
+          '</button>' +
+        '</div>' +
+
+        // Message Circle
+        '<div style="position:absolute; top: 88px; left: 24px; width: 80px; height: 80px; background: var(--p2-white); border-radius: 40px; display:flex; flex-direction:column; align-items:center; justify-content:center; color:var(--p2-ink);">' +
+          '<span style="font-family:\'Pretendard\',sans-serif; font-weight:700; font-size:11px; margin-bottom:-4px; opacity:0.78;">메시지</span>' +
+          '<span class="dot-date11__text" style="font-family:var(--font-dot); font-size:38px; letter-spacing:1px; margin-top:2px; color:#000;">14</span>' +
+        '</div>' +
+
+        // Sparkle Circle (AI trigger)
+        '<button id="p2-star" type="button" aria-label="AI Voice" style="position:absolute; top: 176px; left: 24px; width: 80px; height: 80px; background: var(--p2-lavender); border:0; padding:0; border-radius: 40px; display:flex; align-items:center; justify-content:center; cursor:pointer; -webkit-tap-highlight-color:transparent;">' +
+          '<svg width="36" height="36" viewBox="0 0 24 24" fill="none"><path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4L12 2z" fill="#fff"/><path d="M19 4l1 3 3 1-3 1-1 3-1-3-3-1 3-1z" fill="#fff"/></svg>' +
+        '</button>' +
+
+        // Dark Box (AI result card)
+        '<div id="p2-result" class="p2-dark" style="position:absolute; top: 88px; left: 112px; right: 24px; height: 168px; background: var(--p2-black); border-radius: 36px; padding: 24px 26px; display:flex; flex-direction:column; justify-content:space-between; box-sizing:border-box; overflow:hidden;">' +
+          '<div class="p2-dark__stack" style="position:relative;flex:1;min-height:0;">' +
+            '<div class="p2-dark__text" style="display:flex; flex-direction:column; gap:4px;">' +
+              '<span class="p2-result-title p2-grad-text p2-grad-text--lav" style="font-family:\'Pretendard\',sans-serif; font-weight:800; font-size:16px; line-height:1.3;">정산 보고서를<br>수정했어요</span>' +
+              '<span class="p2-result-sub p2-grad-text p2-grad-text--lav p2-grad-text--subtle" style="font-family:\'Pretendard\',sans-serif; font-weight:700; font-size:13px; margin-top:2px;">수식 2곳 자동 교정</span>' +
+            '</div>' +
+            '<div id="p2-slot" class="p2-dark__slot" aria-hidden="true" style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none;"></div>' +
+          '</div>' +
+          '<div style="align-self:flex-end; display:flex; align-items:flex-end; height:45px;">' +
+             '<div class="p2-dotbar" aria-hidden="true">' +
+               '<span></span><span></span><span></span><span></span><span></span><span></span>' +
+             '</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+
+    case 'home-persona1-widgets':
+      // Align to persona2 padding style: fixed 24px side inset, left-aligned grid.
+      return '<div class="home-persona1-widgets-container" style="display:flex;flex-direction:column;align-items:stretch;gap:12px;width:100%;padding:0 24px;box-sizing:border-box;">' +
+        // Row 1: Today's Goal
+        '<div style="display:flex;justify-content:flex-start;">' +
+          '<div style="transform:scale(1.185);transform-origin:top left;">' +
+            window.renderAtomicForRole({ role: 'dot-goal', variant: { title: "Today's Goal", time: '01:42:43', timeSuffix: 'Within', distance: '15km' } }, { w: 340, h: 168 }) +
+          '</div>' +
+        '</div>' +
+        // Row 2: Music, Total Steps, Running compact
+        '<div style="display:flex;gap:8px;width:100%;justify-content:flex-start;">' +
+          '<div style="transform:scale(1.171);transform-origin:top left;display:flex;gap:8px;">' +
+            '<div style="width:168px;height:168px;">' +
+              window.renderAtomicForRole({ role: 'dot-music-1x1' }, { w: 168, h: 168 }) +
+            '</div>' +
+            '<div style="display:flex;flex-direction:column;gap:4px;width:168px;height:168px;">' +
+              window.renderAtomicForRole({ role: 'dot-total-steps-2x1', variant: { count: '5,543' } }, { w: 168, h: 82 }) +
+              window.renderAtomicForRole({ role: 'dot-running-compact', variant: { time: '10:35', label: 'Jogging' } }, { w: 168, h: 82 }) +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+        // Row 3: Time matrix
+        '<div style="display:flex;justify-content:flex-start;margin-top:8px;">' +
+          '<div style="transform:scale(1.185);transform-origin:top left;">' +
+            window.renderAtomicForRole({ role: 'dot-time-matrix', variant: { bgColor: 'transparent', dotColor: '#FF7F24', time: '12:45', meta: 'MON', dayDigits: '  ' } }, { w: 340, h: 180 }) +
+          '</div>' +
+        '</div>' +
+      '</div>';
+
     case 'home-top-widgets':
       return '<div class="home-top-widgets-container" style="display:grid;grid-template-columns:168px 168px;grid-template-rows:82px 82px;gap:6px;">' +
         '<div style="grid-column:1;grid-row:1;">' + window.renderAtomicForRole({ role: 'dot-weather-2x1-v1-1' }, { w: 168, h: 82 }) + '</div>' +
@@ -4876,10 +5184,10 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
 
         // High-fidelity SVG fallbacks for common apps if PNGs are missing
         var svgFallbacks = {
-          'Camera': '<div style="width:56px;height:56px;border-radius:20px;background:#1F1F1F;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.1);"><svg width="32" height="32" viewBox="0 0 24 24" fill="none"><path d="M4 7h3l2-2h6l2 2h3a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2z" stroke="white" stroke-width="2" fill="none"/><circle cx="12" cy="13" r="3" stroke="white" stroke-width="2" fill="none"/></svg></div>',
-          'Gallery': '<div style="width:56px;height:56px;border-radius:20px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.1);"><svg width="40" height="40" viewBox="0 0 24 24" fill="none"><path d="M12 12m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" fill="#FF4B91"/><path d="M12 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM12 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM16 12a2 2 0 1 0 4 0 2 2 0 0 0-4 0zM4 12a2 2 0 1 0 4 0 2 2 0 0 0-4 0zM14.83 9.17a2 2 0 1 0 2.83-2.83 2 2 0 0 0-2.83 2.83zM6.34 17.66a2 2 0 1 0 2.83-2.83 2 2 0 0 0-2.83 2.83zM14.83 14.83a2 2 0 1 0 2.83 2.83 2 2 0 0 0-2.83-2.83zM6.34 6.34a2 2 0 1 0 2.83 2.83 2 2 0 0 0-2.83-2.83z" fill="#FF4B91"/></svg></div>',
-          'Maps': '<div style="width:56px;height:56px;border-radius:20px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.1);"><svg width="36" height="36" viewBox="0 0 24 24" fill="none"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#4285F4"/><circle cx="12" cy="9" r="3" fill="white"/></svg></div>',
-          'YT Music': '<div style="width:56px;height:56px;border-radius:20px;background:#FF0000;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.1);"><svg width="36" height="36" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="white"/><circle cx="12" cy="12" r="8" fill="#FF0000"/><path d="M10.5 9l5 3-5 3V9z" fill="white"/></svg></div>'
+          'Camera': '<div class="dock-icon" style="width:56px;height:56px;border-radius:20px;background:#1F1F1F;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.1);"><svg width="32" height="32" viewBox="0 0 24 24" fill="none"><path d="M4 7h3l2-2h6l2 2h3a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2z" stroke="white" stroke-width="2" fill="none"/><circle cx="12" cy="13" r="3" stroke="white" stroke-width="2" fill="none"/></svg></div>',
+          'Gallery': '<div class="dock-icon" style="width:56px;height:56px;border-radius:20px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.1);"><svg width="40" height="40" viewBox="0 0 24 24" fill="none"><path d="M12 12m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" fill="#FF4B91"/><path d="M12 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM12 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM16 12a2 2 0 1 0 4 0 2 2 0 0 0-4 0zM4 12a2 2 0 1 0 4 0 2 2 0 0 0-4 0zM14.83 9.17a2 2 0 1 0 2.83-2.83 2 2 0 0 0-2.83 2.83zM6.34 17.66a2 2 0 1 0 2.83-2.83 2 2 0 0 0-2.83 2.83zM14.83 14.83a2 2 0 1 0 2.83 2.83 2 2 0 0 0-2.83-2.83zM6.34 6.34a2 2 0 1 0 2.83 2.83 2 2 0 0 0-2.83-2.83z" fill="#FF4B91"/></svg></div>',
+          'Maps': '<div class="dock-icon" style="width:56px;height:56px;border-radius:20px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.1);"><svg width="36" height="36" viewBox="0 0 24 24" fill="none"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#4285F4"/><circle cx="12" cy="9" r="3" fill="white"/></svg></div>',
+          'YT Music': '<div class="dock-icon" style="width:56px;height:56px;border-radius:20px;background:#FF0000;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.1);"><svg width="36" height="36" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="white"/><circle cx="12" cy="12" r="8" fill="#FF0000"/><path d="M10.5 9l5 3-5 3V9z" fill="white"/></svg></div>'
         };
 
         var file = map[appName] || null;
@@ -4887,10 +5195,10 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
           // Check if file actually exists would be ideal, but here we just try to render
           // If we know some files are missing, we can use the SVG fallbacks
           if (svgFallbacks[appName]) return svgFallbacks[appName];
-          return '<img src="app-icons/' + file + '" style="width:56px;height:56px;border-radius:' + _R('widget') + ';object-fit:cover;flex-shrink:0;">';
+          return '<img class="dock-icon" src="app-icons/' + file + '" style="width:56px;height:56px;border-radius:' + _R('widget') + ';object-fit:cover;flex-shrink:0;">';
         }
         var glyph = (appName || '·').charAt(0).toUpperCase();
-        return '<div style="width:56px;height:56px;border-radius:' + _R('widget') + ';background:var(--accent-primary,#4285F4);display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;' +
+        return '<div class="dock-icon" style="width:56px;height:56px;border-radius:' + _R('widget') + ';background:var(--accent-primary,#4285F4);display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;' +
           _T('heading', { weight: 'bold' }) + '">' + glyph + '</div>';
       }
 
@@ -5118,7 +5426,12 @@ window.generateSurfaceScenario = function generateSurfaceScenario(surfaceType) {
 
   window.currentSurfaceType = surfaceType;
 
-  const viewport = { width: 451, height: 978 };
+  // Add support for lockscreen-dot
+  if (surfaceType === 'lockscreen-dot') {
+    window.SURFACE_TYPES.LOCKSCREEN_DOT = 'lockscreen-dot';
+  }
+
+  const viewport = { width: 388, height: 880 };
   const layout = window.createOneUILayout(viewport, surfaceType);
   const plan = window.composeSurfacePlan(surfaceType, layout);
   // Expand compositional roles into individual editable nodes.

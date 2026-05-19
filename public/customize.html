@@ -16,7 +16,7 @@
     --positive:  #34D399;
     --warning:   #F59E0B;
     --font:      -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
-    --preview-bg: #2f6264;
+    --preview-bg: #FFFEF1;
   }
   /* Theme variable defaults ??overridden in real-time by the dropdown.
      Mirrors figma-refs/themes.json#default. */
@@ -150,6 +150,13 @@
     font-family: 'Pretendard', var(--font), -apple-system, BlinkMacSystemFont, sans-serif;
     overflow: hidden;
     contain: paint;
+    transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), opacity 0.2s;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .dot-card:active {
+    transform: scale(0.96);
+    opacity: 0.9;
   }
   .dot-card[data-state="enter"] { animation: dotEnter 420ms cubic-bezier(0.2,0,0,1) both; }
   .dot-card[data-state="exit"]  { animation: dotExit  260ms cubic-bezier(0.2,0,0,1) both; }
@@ -432,7 +439,7 @@
   }
   .preview-col {
     min-width: 0;          /* lets the grid shrink children */
-    background: var(--preview-bg, #2f6264);
+    background: var(--preview-bg, #FFFEF1);
     border: 1px solid rgba(255, 255, 255, 0.055);
     border-radius: 28px;
     padding: 14px;
@@ -876,7 +883,7 @@
   </div>
   <div class="preview-bg-swatches" id="preview-bg-swatches" aria-label="Preview background colors">
     <span class="swatch-label">Preview BG</span>
-    <button type="button" class="preview-bg-swatch" data-preview-bg="#2f6264" style="--swatch:#2f6264" aria-label="?ㅽ겕 誘쇳듃 諛곌꼍" aria-pressed="true"></button>
+    <button type="button" class="preview-bg-swatch" data-preview-bg="#FFFEF1" style="--swatch:#FFFEF1" aria-label="아이보리 배경" aria-pressed="true"></button>
     <button type="button" class="preview-bg-swatch" data-preview-bg="#6f7478" style="--swatch:#6f7478" aria-label="洹몃젅??諛곌꼍" aria-pressed="false"></button>
     <button type="button" class="preview-bg-swatch" data-preview-bg="#0a0a0c" style="--swatch:#0a0a0c" aria-label="釉붾옓 諛곌꼍" aria-pressed="false"></button>
     <button type="button" class="preview-bg-swatch" data-preview-bg="#f4f5f6" style="--swatch:#f4f5f6" aria-label="?붿씠??諛곌꼍" aria-pressed="false"></button>
@@ -2894,7 +2901,7 @@ async function _buildPreviewGalleryHTML(theme) {
     'body.tp-page .tp-section { margin: 56px 0 0; padding: 36px 0 0; border-top: 1px solid rgba(255,255,255,0.08); display: block; }',
     'body.tp-page .tp-section > h2 { font-family: var(--font-family-display, "Inter", sans-serif); font-size: 22px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.3px; display: block; color: var(--text-primary, #efeef2); }',
     'body.tp-page .tp-section > .tp-hint { color: var(--text-tertiary, rgba(239,238,242,0.55)); font-size: 13px; margin: 0 0 28px; max-width: 760px; display: block; line-height: 1.55; }',
-    'body.tp-page .tp-cards-scope { background: var(--preview-bg, #2f6264); border-radius: 28px; padding: 24px; }',
+    'body.tp-page .tp-cards-scope { background: var(--preview-bg, #FFFEF1); border-radius: 28px; padding: 24px; }',
     'body.tp-page .tp-cards-scope .preview-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; padding: 0; }',
     'body.tp-page .tp-screens-wrap { padding: 0; }',
     'body.tp-page .tp-screens-wrap .preview-screen-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }',

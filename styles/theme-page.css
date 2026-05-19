@@ -11,7 +11,7 @@
     --positive:  #34D399;
     --warning:   #F59E0B;
     --font: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
-    --preview-bg: #2f6264;
+    --preview-bg: #D1D1D6;
   }
   /* Theme variable defaults ??overridden in real-time by the dropdown.
      Mirrors figma-refs/themes.json#default. */
@@ -145,6 +145,495 @@
     font-family: 'Pretendard', var(--font), -apple-system, BlinkMacSystemFont, sans-serif;
     overflow: hidden;
     contain: paint;
+    transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), opacity 0.2s;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .dot-card:active {
+    transform: scale(0.96);
+    opacity: 0.9;
+  }
+
+  .dock-icon {
+    transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), opacity 0.2s;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .dock-icon:active {
+    transform: scale(0.92);
+    opacity: 0.8;
+  }
+
+  /* Persona2 widgets — subtle motion affordances (prototype only) */
+  :root {
+    --p2-white: rgba(255,255,255,0.88);
+    --p2-ink: #1a1d1c;
+    --p2-black: rgba(16,16,18,0.90);
+    --p2-lavender: #B9A6FF;
+    --p2-lavender-soft: #E7E0FF;
+  }
+
+  /* Persona3 (Cooking) palette: light green + black + white */
+  :root {
+    --p3-white: rgba(255,255,255,0.90);
+    --p3-white-2: rgba(255,255,255,0.72);
+    --p3-ink: #1A1D1C;
+    --p3-black: rgba(16,16,18,0.92);
+    --p3-green: #B7E46A;
+    --p3-green-soft: #E5FFD0;
+  }
+
+  /* Persona3 interactions (tap feedback + toggles) */
+  .p3-ing-row {
+    transition: transform 180ms cubic-bezier(0.2,0,0,1), filter 180ms ease, opacity 180ms ease;
+  }
+  .p3-ing-row:active {
+    transform: scale(0.985);
+    filter: brightness(0.98);
+  }
+  .p3-ing-row.is-done {
+    filter: saturate(1.05);
+  }
+  #p3-send {
+    transition: transform 180ms cubic-bezier(0.2,0,0,1), filter 180ms ease;
+  }
+  #p3-send:active {
+    transform: scale(0.985);
+    filter: brightness(1.02);
+  }
+  #p3-send.is-loading {
+    filter: brightness(1.04);
+  }
+  .p2-widgets { pointer-events: auto; }
+  /* Persona2: remove internal "wobble/shimmer"; keep static surfaces */
+  .p2-pill, .p2-dark { animation: none !important; }
+  .p2-pill::after, .p2-dark::after { content: none !important; }
+
+  /* Persona2: gradient text flow (no internal wobble) */
+  .p2-grad-text {
+    display: inline-block;
+    color: transparent;
+    background-image: linear-gradient(
+      90deg,
+      rgba(26,29,28,0.92) 0%,
+      rgba(185,166,255,1) 30%,
+      rgba(231,224,255,1) 44%,
+      rgba(26,29,28,0.92) 72%,
+      rgba(26,29,28,0.92) 100%
+    );
+    background-size: 320% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    animation: p2GradFlow 1.35s linear infinite;
+    will-change: background-position;
+  }
+  .p2-grad-text--subtle {
+    background-image: linear-gradient(
+      90deg,
+      rgba(26,29,28,0.55) 0%,
+      rgba(185,166,255,0.65) 42%,
+      rgba(26,29,28,0.55) 84%,
+      rgba(26,29,28,0.55) 100%
+    );
+  }
+  .p2-grad-text--lav {
+    background-image: linear-gradient(
+      90deg,
+      rgba(231,224,255,0.92) 0%,
+      rgba(185,166,255,1) 44%,
+      rgba(231,224,255,0.92) 86%,
+      rgba(231,224,255,0.92) 100%
+    );
+  }
+  @keyframes p2GradFlow {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 100% 50%; }
+  }
+
+  /* Persona2: loading shimmer on the right black card */
+  #p2-result.is-loading::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 36px;
+    pointer-events: none;
+    background: linear-gradient(
+      90deg,
+      rgba(0,0,0,0) 0%,
+      rgba(185,166,255,0.18) 28%,
+      rgba(231,224,255,0.34) 50%,
+      rgba(185,166,255,0.18) 72%,
+      rgba(0,0,0,0) 100%
+    );
+    background-size: 220% 100%;
+    animation: p2LoadShimmer 900ms linear infinite;
+    mix-blend-mode: screen;
+    opacity: 0.95;
+  }
+  @keyframes p2LoadShimmer {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 100% 50%; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .p2-grad-text { animation: none !important; background-position: 50% 50% !important; }
+  }
+  .p2-ellipsis span {
+    width: 4.5px; height: 4.5px; border-radius: 99px;
+    display: inline-block;
+    background: var(--p2-ink);
+    opacity: 0.6;
+    animation: p2DotPulse 1.25s ease-in-out infinite;
+    margin: 0 2px;
+  }
+  .p2-ellipsis span:nth-child(2) { animation-delay: 160ms; opacity: 0.75; }
+  .p2-ellipsis span:nth-child(3) { animation-delay: 320ms; opacity: 0.9; }
+  @keyframes p2DotPulse {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-1.5px); }
+  }
+  .p2-dotbar { display: grid; grid-template-columns: repeat(2, 4px); grid-auto-rows: 4px; gap: 4px; }
+  .p2-dotbar span {
+    width: 4px; height: 4px; border-radius: 99px;
+    background: var(--p2-lavender-soft);
+    opacity: 0.35;
+    animation: p2DotBar 1.4s ease-in-out infinite;
+  }
+
+  /* Persona2 swap slot appearance */
+  #p2-slot .dot-card {
+    transform: scale(0.92);
+    transform-origin: center;
+    filter: drop-shadow(0 14px 28px rgba(0,0,0,0.18));
+  }
+  /* Slot is a full-cover absolute box; center + scale the inserted component */
+  #p2-slot {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  #p2-slot > * {
+    width: auto !important;
+    height: auto !important;
+    transform: scale(0.95);
+    transform-origin: center;
+  }
+  #p2-result .p2-dark__text {
+    transition: opacity 240ms ease;
+  }
+  /* When a component is mounted, hide ONLY the black card's original contents */
+  #p2-result.has-swap .p2-dark__text,
+  #p2-result.has-swap .p2-dotbar {
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+  /* When swapped, the black card itself must disappear (true replacement) */
+  #p2-result.has-swap {
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+  #p2-slot {
+    transition: opacity 240ms ease;
+  }
+
+  /* -----------------------------------------------------------------------
+     Persona2 slot theme skinning
+     Ensure swapped components match the white/black/lavender theme instead of
+     showing their original orange/teal accents.
+     Scope is STRICTLY the right black card slot only.
+     ----------------------------------------------------------------------- */
+  #p2-slot .dot-card {
+    background: var(--p2-white) !important;
+    color: var(--p2-ink) !important;
+  }
+
+  /* Schedule (plan) */
+  #p2-slot .dot-sch__date,
+  #p2-slot .dot-sch__text,
+  #p2-slot .dot-sch__time {
+    color: var(--p2-ink) !important;
+  }
+  #p2-slot .dot-sch__bullet.is-accent {
+    background: var(--p2-lavender) !important;
+    box-shadow: 0 0 0 3px rgba(185,166,255,0.18);
+  }
+  #p2-slot .dot-sch__text.is-accent,
+  #p2-slot .dot-sch__time.is-strong {
+    color: var(--p2-lavender) !important;
+  }
+
+  /* Weather */
+  #p2-slot .dot-w21__loc,
+  #p2-slot .dot-w21__weather {
+    color: var(--p2-ink) !important;
+  }
+  #p2-slot .dot-w21__sun circle {
+    fill: var(--p2-ink) !important;
+  }
+  /* give a hint of lavender on a few dots */
+  #p2-slot .dot-w21__sun circle:nth-child(3),
+  #p2-slot .dot-w21__sun circle:nth-child(12),
+  #p2-slot .dot-w21__sun circle:nth-child(19),
+  #p2-slot .dot-w21__sun circle:nth-child(25) {
+    fill: var(--p2-lavender) !important;
+  }
+
+  /* Contact (call modal) */
+  #p2-slot .dot-call__name { color: var(--p2-ink) !important; }
+  #p2-slot .dot-call__phone { color: rgba(26,29,28,0.55) !important; }
+  #p2-slot .dot-call__arrow svg circle {
+    fill: var(--p2-lavender) !important;
+  }
+
+  /* Photo (camera) */
+  #p2-slot .dot-cam__trigger rect {
+    fill: var(--p2-lavender) !important;
+  }
+  #p2-slot .dot-cam__trigger path {
+    fill: var(--p2-ink) !important;
+  }
+
+  /* Persona2: weather mood background overlays (applied on #canvas) */
+  #canvas.p2-bg-clear::before,
+  #canvas.p2-bg-cloudy::before,
+  #canvas.p2-bg-rain::before,
+  #canvas.p2-bg-snow::before,
+  #canvas.p2-bg-night::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    transition: opacity 420ms ease;
+    opacity: 1;
+  }
+  /* keep rendered items above overlay */
+  #canvas.p2-bg-clear .canvas-item,
+  #canvas.p2-bg-cloudy .canvas-item,
+  #canvas.p2-bg-rain .canvas-item,
+  #canvas.p2-bg-snow .canvas-item,
+  #canvas.p2-bg-night .canvas-item {
+    position: relative;
+    z-index: 1;
+  }
+  #canvas.p2-bg-clear::before {
+    background: radial-gradient(circle at 20% 10%, rgba(122,167,255,0.35), transparent 55%),
+                linear-gradient(180deg, rgba(180,220,255,0.18), rgba(0,0,0,0.0) 60%);
+  }
+  #canvas.p2-bg-cloudy::before {
+    background: radial-gradient(circle at 40% 20%, rgba(255,255,255,0.25), transparent 55%),
+                linear-gradient(180deg, rgba(120,140,170,0.22), rgba(0,0,0,0.0) 65%);
+  }
+  #canvas.p2-bg-rain::before {
+    background: radial-gradient(circle at 30% 15%, rgba(90,130,200,0.28), transparent 55%),
+                linear-gradient(180deg, rgba(50,80,140,0.26), rgba(0,0,0,0.0) 70%);
+  }
+  #canvas.p2-bg-snow::before {
+    background: radial-gradient(circle at 20% 18%, rgba(255,255,255,0.35), transparent 55%),
+                linear-gradient(180deg, rgba(210,230,255,0.20), rgba(0,0,0,0.0) 70%);
+  }
+  #canvas.p2-bg-night::before {
+    background: radial-gradient(circle at 20% 10%, rgba(185,166,255,0.18), transparent 55%),
+                linear-gradient(180deg, rgba(10,12,20,0.35), rgba(0,0,0,0.0) 70%);
+  }
+  .p2-dotbar span:nth-child(2) { animation-delay: 120ms; opacity: 0.45; }
+  .p2-dotbar span:nth-child(3) { animation-delay: 240ms; opacity: 0.55; }
+  .p2-dotbar span:nth-child(4) { animation-delay: 360ms; opacity: 0.65; }
+  .p2-dotbar span:nth-child(5) { animation-delay: 480ms; opacity: 0.75; }
+  .p2-dotbar span:nth-child(6) { animation-delay: 600ms; opacity: 0.85; }
+  @keyframes p2DotBar {
+    0%, 100% { transform: scale(0.9); }
+    50% { transform: scale(1.15); }
+  }
+  .p2-dot9 {
+    position: absolute;
+    inset: 12px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+    opacity: 0.9;
+  }
+  .p2-dot9 span {
+    width: 5px; height: 5px; border-radius: 99px;
+    background: rgba(255,255,255,0.92);
+    animation: p2Dot9 1.8s ease-in-out infinite;
+    opacity: 0.35;
+  }
+  .p2-dot9 span:nth-child(2) { animation-delay: 90ms; }
+  .p2-dot9 span:nth-child(3) { animation-delay: 180ms; }
+  .p2-dot9 span:nth-child(4) { animation-delay: 270ms; }
+  .p2-dot9 span:nth-child(5) { animation-delay: 360ms; opacity: 0.75; }
+  .p2-dot9 span:nth-child(6) { animation-delay: 450ms; }
+  .p2-dot9 span:nth-child(7) { animation-delay: 540ms; }
+  .p2-dot9 span:nth-child(8) { animation-delay: 630ms; }
+  .p2-dot9 span:nth-child(9) { animation-delay: 720ms; }
+  @keyframes p2Dot9 {
+    0%, 100% { transform: scale(0.9); opacity: 0.35; }
+    50% { transform: scale(1.15); opacity: 0.95; }
+  }
+
+  /* Persona1: tap Music expands right, right widgets collapse */
+  #canvas.p1-music-expanded #p1-music {
+    z-index: 560;
+    transition: left 420ms cubic-bezier(0.2, 0, 0, 1),
+                top 420ms cubic-bezier(0.2, 0, 0, 1),
+                width 420ms cubic-bezier(0.2, 0, 0, 1),
+                height 420ms cubic-bezier(0.2, 0, 0, 1),
+                transform 420ms cubic-bezier(0.2, 0, 0, 1);
+  }
+  /* Expand from 1x1 (168x168) to 1x2 (340x168) anchored left */
+  #canvas.p1-music-expanded #p1-music {
+    width: 340px !important;
+    height: 168px !important;
+  }
+  #canvas.p1-music-expanded #p1-music > * {
+    /* ensure atomic fills new wrapper size */
+    width: 100% !important;
+    height: 100% !important;
+  }
+  /* Hide/collapse right widgets briefly */
+  #canvas.p1-music-expanded #p1-steps,
+  #canvas.p1-music-expanded #p1-run {
+    transform: scale(0.92);
+    opacity: 0;
+    transition: opacity 220ms ease, transform 220ms ease;
+    pointer-events: none;
+  }
+
+  /* Persona3 (Cooking) CTA dot motion */
+  .p3-arrowdots span {
+    width: 4px;
+    height: 4px;
+    border-radius: 99px;
+    background: var(--p3-green, #B7E46A);
+    opacity: 0.35;
+    animation: p3DotPulse 1.2s ease-in-out infinite;
+  }
+  .p3-arrowdots span:nth-child(2) { animation-delay: 120ms; opacity: 0.45; }
+  .p3-arrowdots span:nth-child(3) { animation-delay: 240ms; opacity: 0.55; }
+  .p3-arrowdots span:nth-child(4) { animation-delay: 360ms; opacity: 0.65; }
+  .p3-arrowdots span:nth-child(5) { animation-delay: 480ms; opacity: 0.75; }
+  .p3-arrowdots span:nth-child(6) { animation-delay: 600ms; opacity: 0.85; }
+  @keyframes p3DotPulse {
+    0%, 100% { transform: scale(0.9); }
+    50% { transform: scale(1.15); }
+  }
+
+  /* Persona2 star listening pulse */
+  #canvas.p2-listening #p2-star {
+    animation: p2StarPulse 900ms ease-in-out infinite;
+    box-shadow: 0 10px 26px rgba(0,0,0,0.22);
+  }
+  @keyframes p2StarPulse {
+    0%, 100% { transform: scale(1.0); }
+    50% { transform: scale(1.06); }
+  }
+
+  /* Persona1 time-matrix: periodic running overlay (orange dots) */
+  #p1-timemat { overflow: visible; }
+  #p1-timemat .p1-timemat-run-overlay {
+    position: absolute;
+    left: 16px;
+    top: 48px;
+    right: 16px;
+    height: 84px;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(8px);
+    transition: opacity 220ms ease, transform 320ms cubic-bezier(0.2,0,0,1);
+    display: flex;
+    align-items: center;
+    z-index: 5;
+  }
+  #p1-timemat .p1-timemat-run-overlay.is-on {
+    opacity: 1;
+    transform: translateY(0px);
+  }
+  #p1-timemat .p1-runner {
+    flex-shrink: 0;
+    filter: drop-shadow(0 8px 18px rgba(255,127,36,0.22));
+  }
+
+  /* Persona1 time-matrix: weather overlay */
+  #p1-timemat .p1-timemat-weather-overlay {
+    position: absolute;
+    left: 16px;
+    top: 44px;
+    right: 16px;
+    height: 92px;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(10px) scale(0.99);
+    transition: opacity 220ms ease, transform 320ms cubic-bezier(0.2,0,0,1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 6;
+  }
+  #p1-timemat .p1-timemat-weather-overlay.is-on {
+    opacity: 1;
+    transform: translateY(0px) scale(1);
+  }
+  #p1-timemat .p1-timemat-weather-overlay .dot-card {
+    filter: drop-shadow(0 18px 34px rgba(0,0,0,0.22));
+  }
+
+  /* Dot spark: single-burst dot animation on active dots */
+  #p1-timemat .p1-spark-dot {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: p1DotSpark 560ms cubic-bezier(0.2,0,0,1) both;
+    filter: drop-shadow(0 6px 10px rgba(255,127,36,0.18));
+  }
+  @keyframes p1DotSpark {
+    0%   { transform: scale(1);   opacity: 0.9; }
+    35%  { transform: scale(1.55); opacity: 1; }
+    100% { transform: scale(1);   opacity: 0.95; }
+  }
+
+  /* When run overlay is on, de-emphasize the time dots behind it */
+  #p1-timemat.p1-run-mode svg,
+  #p1-timemat.p1-run-mode .dot-matrix,
+  #p1-timemat.p1-run-mode .dot-time-matrix {
+    opacity: 0.35;
+    transition: opacity 220ms ease;
+  }
+
+  /* When weather overlay is on, also de-emphasize the base time dots */
+  #p1-timemat.p1-weather-mode svg,
+  #p1-timemat.p1-weather-mode .dot-matrix,
+  #p1-timemat.p1-weather-mode .dot-time-matrix {
+    opacity: 0.28;
+    transition: opacity 220ms ease;
+  }
+  #p1-timemat .p1-runtrail {
+    margin-left: 12px;
+    flex: 1;
+    height: 22px;
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 10px;
+    align-items: center;
+    opacity: 0.92;
+  }
+  #p1-timemat .p1-runtrail span {
+    width: 6px;
+    height: 6px;
+    border-radius: 99px;
+    background: rgba(255,127,36,0.95);
+    opacity: 0.18;
+    animation: p1TrailPulse 900ms ease-in-out infinite;
+  }
+  #p1-timemat .p1-runtrail span:nth-child(2) { animation-delay: 100ms; opacity: 0.24; }
+  #p1-timemat .p1-runtrail span:nth-child(3) { animation-delay: 200ms; opacity: 0.30; }
+  #p1-timemat .p1-runtrail span:nth-child(4) { animation-delay: 300ms; opacity: 0.36; }
+  #p1-timemat .p1-runtrail span:nth-child(5) { animation-delay: 400ms; opacity: 0.42; }
+  #p1-timemat .p1-runtrail span:nth-child(6) { animation-delay: 500ms; opacity: 0.48; }
+  #p1-timemat .p1-runtrail span:nth-child(7) { animation-delay: 600ms; opacity: 0.54; }
+  #p1-timemat .p1-runtrail span:nth-child(8) { animation-delay: 700ms; opacity: 0.60; }
+  @keyframes p1TrailPulse {
+    0%, 100% { transform: scale(0.9); }
+    50% { transform: scale(1.18); }
   }
   .dot-card[data-state="enter"] { animation: dotEnter 420ms cubic-bezier(0.2,0,0,1) both; }
   .dot-card[data-state="exit"]  { animation: dotExit  260ms cubic-bezier(0.2,0,0,1) both; }
@@ -313,6 +802,7 @@
     justify-content: space-between;
     padding: 16px 20px;
     gap: 8px;
+    background: #1C1C1E;
   }
   .dot-running2__human {
     width: 24px;
@@ -359,7 +849,7 @@
     font-size: 14px;
     line-height: 120%;
     text-align: right;
-    color: #1B1C21;
+    color: #FFFFFF;
     white-space: nowrap;
   }
   .dot-running2__time {
@@ -1095,7 +1585,7 @@
     line-height: 100%;
     text-align: center;
     letter-spacing: 0.1em;
-    font-feature-settings: 'pnum' on, 'lnum' on;
+    /* font-feature-settings: 'pnum' on, 'lnum' on; */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1184,13 +1674,17 @@
   }
   @media (prefers-reduced-motion: reduce) {
     .dot-clock21__time::after,
-    .dot-clock21__time::before,
+    .dot-clock21__time::before {
+      animation: none !important;
+      opacity: 0 !important;
+      transform: none !important;
+    }
     :is(.dot-steps21__count, .dot-temp11__center, .dot-date11__text) {
       animation: none !important;
       -webkit-mask-image: none !important;
       mask-image: none !important;
       clip-path: none !important;
-      opacity: 0 !important;
+      opacity: 1 !important;
       transform: none !important;
     }
   }
@@ -1210,28 +1704,15 @@
     animation: dotTextCycle 3s cubic-bezier(.2,.8,.2,1) infinite;
   }
 
-  /* When React DecryptedText is mounted, disable the legacy mask animation. */
-  .dot-steps21__count.dot-decrypted-mounted {
-    animation: none !important;
-    -webkit-mask-image: none !important;
-    mask-image: none !important;
-    clip-path: none !important;
-    will-change: auto !important;
-  }
+  /* When React DecryptedText is mounted, we keep the legacy mask animation
+     if the user wants that "dot speckle" motion to persist. */
   .dot-steps21__count.dot-decrypted-mounted .dot-decrypted-encrypted {
-    opacity: 0.55;
+    opacity: 0.85;
   }
 
-  .dot-temp11__center.dot-decrypted-mounted,
-  .dot-date11__text.dot-decrypted-mounted {
-    animation: none !important;
-    -webkit-mask-image: none !important;
-    mask-image: none !important;
-    clip-path: none !important;
-    will-change: auto !important;
-  }
-  :is(.dot-temp11__center, .dot-date11__text).dot-decrypted-mounted .dot-decrypted-encrypted {
-    opacity: 0.55;
+  .dot-temp11__center.dot-decrypted-mounted .dot-decrypted-encrypted,
+  .dot-date11__text.dot-decrypted-mounted .dot-decrypted-encrypted {
+    opacity: 0.85;
   }
   .dot-date11__text {
     /* slightly denser so multi-line feels organic */
@@ -1833,7 +2314,7 @@
     margin-top: 4px; /* Visually center offset */
   }
   .dot-temp11__value {
-    font-family: 'NDOT 47 (inspired by NOTHING)', var(--font-dot), sans-serif;
+    font-family: 'Ndot55', var(--font-dot), sans-serif;
     font-style: normal;
     font-weight: 400;
     font-size: 39.114px;
@@ -1898,7 +2379,7 @@
     border-radius: 101.045px;
   }
   .dot-date11__text {
-    font-family: 'NDOT 47 (inspired by NOTHING)', var(--font-dot), sans-serif;
+    font-family: 'Ndot55', var(--font-dot), sans-serif;
     font-style: normal;
     font-weight: 400;
     font-size: 16.4px;
@@ -2903,19 +3384,19 @@
     display: grid;
     grid-template-columns: 460px 1fr;
     gap: 0;
-    height: calc(100vh - 80px);
+    height: 100%;
   }
   .detail-col {
     background: #000000;
     height: 100%;
-    overflow-y: auto;
+    overflow: hidden;
     border-right: 1px solid var(--border);
     display: flex;
     flex-direction: column;
   }
   .preview-col {
     min-width: 0;
-    background: var(--preview-bg, #2f6264);
+    background: var(--preview-bg, #FFFEF1);
     padding: 32px;
     overflow-y: auto;
     height: 100%;
