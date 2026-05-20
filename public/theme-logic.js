@@ -2578,6 +2578,38 @@ document.getElementById('preview-bg-swatches')?.addEventListener('click', functi
     renderPreviewGrid();
   }
 
+  function renderDetailCard(card) {
+    const detail = $('detail-view');
+    const stage = $('detail-stage');
+    const controls = $('detail-controls');
+
+    if (!detail || !stage || !card || typeof window.renderAtomicForRole !== 'function') return;
+
+    const rect = previewRectForCard(card);
+    const previewScale = rect.scale || 1;
+    const useZoomPreview = shouldUseZoomPreviewForRole(card && card.role);
+    const html = window.renderAtomicForRole(card, rect);
+    const scaleStyle = useZoomPreview
+      ? ('zoom:' + previewScale + ';transform:none;')
+      : ('transform:scale(' + previewScale + ');');
+
+    stage.innerHTML =
+      '<div class="stage-scale" style="width:' + rect.w + 'px;' +
+      'min-height:' + rect.h + 'px;height:auto;' +
+      scaleStyle + '">' + html + '</div>';
+
+    stage.style.width = Math.ceil(rect.w * previewScale) + 'px';
+    stage.style.height = useZoomPreview ? Math.ceil(rect.h * previewScale) + 'px' : 'auto';
+
+    const cardEl = stage.querySelector('.dot-card, .focus-block, .notif-card, .now-bar, .media-card, .progress-track');
+    if (cardEl) cardEl.setAttribute('data-state', 'idle');
+
+    if (controls) {
+      controls.innerHTML = '';
+      controls.style.display = 'none';
+    }
+  }
+
   function updateDetailView(idx) {
     console.log('Updating detail view for idx:', idx);
     const detail = $('detail-view');
@@ -2781,32 +2813,26 @@ document.getElementById('preview-bg-swatches')?.addEventListener('click', functi
   }
 
   function handleCompositeMusicClick(e) {
-    // Check for composite set music expansion
     const compMusic = e.target.closest('.composite-child[data-comp-role="dot-music-1x1"]');
     if (compMusic) {
       const container = compMusic.closest('.composite-set-container');
       if (container) {
+        const cell = compMusic.closest('.preview-cell');
+        const raw = cell && cell.getAttribute('data-preview-index');
+        const idx = raw == null || raw === '' ? -1 : parseInt(raw, 10);
+        const parentCard = idx >= 0 ? PREVIEW_CARDS[idx] : null;
+        const children = (parentCard && parentCard.variant && parentCard.variant.children) || [];
+        const musicChild = children.find(child => child && child.role === 'dot-music-1x1') || {};
+
         e.preventDefault();
         e.stopPropagation();
-        
-        // Toggle expansion on music card
-        const isNowExpanded = !compMusic.classList.contains('comp-music-expanded');
-        
-        // Apply classes and data-state to all children in this container
-        const children = container.querySelectorAll('.composite-child');
-        children.forEach(child => {
-          const role = child.getAttribute('data-comp-role');
-          if (role === 'dot-music-1x1') {
-            child.classList.toggle('comp-music-expanded', isNowExpanded);
-            const innerCard = child.querySelector('.dot-card');
-            if (innerCard) {
-              innerCard.setAttribute('data-state', isNowExpanded ? 'expanded' : 'idle');
-            }
-          } else if (role !== 'dot-goal') {
-            // Hide everything except the top goal and the music card itself
-            child.classList.toggle('comp-hiding', isNowExpanded);
-          }
+
+        renderDetailCard({
+          role: 'dot-music-1x1',
+          variant: musicChild.variant || {},
+          editSections: ['Page', 'Card globals']
         });
+
         return true;
       }
     }
