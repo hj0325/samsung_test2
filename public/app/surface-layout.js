@@ -3998,7 +3998,7 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
       var mv = (comp && comp.variant) || {};
       var expandedBarW = mv.expandedBarFull != null ? mv.expandedBarFull : 292;
       var expandedBarTrack = mv.expandedBarTrack != null ? mv.expandedBarTrack : 77;
-      var iconTitle = mv.iconTitle || '오늘 날씨엔 부드럽고 상쾌한\nConcierto가 좋을거같아요!';
+      var iconTitle = mv.iconTitle || '가벼운 런닝에는 부드럽고 상쾌한\nConcierto가 좋을거같아요!';
       var iconSubtitle = mv.iconSubtitle || 'Jim Hall - Concierto';
       var iconHtml = window.renderAtomicForRole({
         role: 'dot-music-1x2-icon',

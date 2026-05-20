@@ -69,7 +69,7 @@
           { role: 'dot-music-1x1', variant: { 
             artist: 'Jim Hall', 
             song: 'Concierto', 
-            iconTitle: '오늘 날씨에 딱 맞는\n플레이리스트', 
+            iconTitle: '가벼운 런닝에는 부드럽고 상쾌한\nConcierto가 좋을거같아요!', 
             iconSubtitle: 'Jim Hall - Concierto' 
           }, x: 0, y: 0, w: 340, h: 168 },
           { role: 'dot-schedule-2x2', variant: {
@@ -168,7 +168,7 @@
       editSections: ['Page', 'Card globals'],
       role: 'dot-music-1x2-icon',
       variant: {
-        title: '오늘 날씨엔 부드럽고 상쾌한\nConcierto가 좋을거같아요!',
+        title: '가벼운 런닝에는 부드럽고 상쾌한\nConcierto가 좋을거같아요!',
         subtitle: 'Jim Hall - Concierto',
         barFull: 292,
         barTrack: 77
