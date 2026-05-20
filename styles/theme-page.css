@@ -2650,8 +2650,8 @@
     color: #FFFFFF;
     -webkit-text-fill-color: #FFFFFF;
     background-image:
-      linear-gradient(90deg, var(--dot-sch-gradient-from, rgba(255, 255, 255, 0.7)) 0%, var(--dot-sch-gradient-to, rgba(255, 255, 255, 0.3)) 12.5%, var(--dot-sch-gradient-from, rgba(255, 255, 255, 0.7)) 25%, var(--dot-sch-gradient-to, rgba(255, 255, 255, 0.3)) 37.5%, var(--dot-sch-gradient-from, rgba(255, 255, 255, 0.7)) 50%, var(--dot-sch-gradient-to, rgba(255, 255, 255, 0.3)) 62.5%, var(--dot-sch-gradient-from, rgba(255, 255, 255, 0.7)) 75%, var(--dot-sch-gradient-to, rgba(255, 255, 255, 0.3)) 87.5%, var(--dot-sch-gradient-from, rgba(255, 255, 255, 0.7)) 100%);
-    background-size: 420% 100%;
+      linear-gradient(90deg, var(--dot-sch-gradient-from, rgba(255, 255, 255, 0.7)) 0%, var(--dot-sch-gradient-to, rgba(255, 255, 255, 0.3)) 35%, var(--dot-sch-gradient-from, rgba(255, 255, 255, 0.7)) 70%, var(--dot-sch-gradient-from, rgba(255, 255, 255, 0.7)) 100%);
+    background-size: 200% 100%;
     background-position: 0% 50%;
     background-clip: text;
     -webkit-background-clip: text;
@@ -2771,8 +2771,8 @@
     color: #FFFFFF;
     -webkit-text-fill-color: #FFFFFF;
     background-image:
-      linear-gradient(90deg, var(--dot-sch-gradient-from, rgba(255, 255, 255, 0.7)) 0%, var(--dot-sch-gradient-to, rgba(255, 255, 255, 0.3)) 12.5%, var(--dot-sch-gradient-from, rgba(255, 255, 255, 0.7)) 25%, var(--dot-sch-gradient-to, rgba(255, 255, 255, 0.3)) 37.5%, var(--dot-sch-gradient-from, rgba(255, 255, 255, 0.7)) 50%, var(--dot-sch-gradient-to, rgba(255, 255, 255, 0.3)) 62.5%, var(--dot-sch-gradient-from, rgba(255, 255, 255, 0.7)) 75%, var(--dot-sch-gradient-to, rgba(255, 255, 255, 0.3)) 87.5%, var(--dot-sch-gradient-from, rgba(255, 255, 255, 0.7)) 100%);
-    background-size: 420% 100%;
+      linear-gradient(90deg, var(--dot-sch-gradient-from, rgba(255, 255, 255, 0.7)) 0%, var(--dot-sch-gradient-to, rgba(255, 255, 255, 0.3)) 35%, var(--dot-sch-gradient-from, rgba(255, 255, 255, 0.7)) 70%, var(--dot-sch-gradient-from, rgba(255, 255, 255, 0.7)) 100%);
+    background-size: 200% 100%;
     background-position: 0% 50%;
     background-clip: text;
     -webkit-background-clip: text;
@@ -3051,8 +3051,8 @@
     }
   }
   @keyframes dotScheduleTextGradientFlow {
-    0%, 100% { background-position: 0% 50%; }
-    50% { background-position: 105% 50%; }
+    0% { background-position: 200% 50%; }
+    100% { background-position: 0% 50%; }
   }
   @keyframes dotSchedulePreviewReveal {
     0%, 48.6% { clip-path: inset(0 172px 0 0 round 32px); }
