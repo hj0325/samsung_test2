@@ -288,11 +288,11 @@ export default function PrototypePage() {
             position: relative !important;
           }
           .mlp-left {
-            width: 140px !important;
+            width: 120px !important;
             flex-shrink: 0 !important;
             display: flex !important;
             flex-direction: column !important;
-            gap: 32px !important;
+            gap: 24px !important;
             align-items: center !important;
             justify-content: center !important;
             position: absolute !important;
@@ -302,20 +302,29 @@ export default function PrototypePage() {
             z-index: 10 !important;
           }
           .persona-circle {
-            width: 100px !important;
-            height: 100px !important;
+            width: 76px !important;
+            height: 76px !important;
             border-radius: 50% !important;
             overflow: hidden !important;
             border: 2px solid rgba(255,255,255,0.1) !important;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.4) !important;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.4) !important;
             transition: all 0.3s ease !important;
             background: #1a1a1e !important;
+            display: block !important;
           }
-          .persona-circle:hover {
-            transform: scale(1.1) !important;
+          .persona-circle.is-disabled {
+            opacity: 0.38 !important;
+            filter: grayscale(0.35) brightness(0.55) !important;
+            cursor: not-allowed !important;
+            pointer-events: none !important;
+            border-color: rgba(255,255,255,0.06) !important;
+            box-shadow: none !important;
+          }
+          .persona-circle:not(.is-disabled):hover {
+            transform: scale(1.08) !important;
             border-color: #64e9e3 !important;
           }
-          .persona-circle:active {
+          .persona-circle:not(.is-disabled):active {
             transform: scale(0.95) !important;
           }
           .persona-img {
@@ -462,9 +471,9 @@ export default function PrototypePage() {
             <Link href="/test2" className="persona-circle" style={{ cursor: 'pointer', border: scenario === 'lockscreen-persona2' ? '3px solid #fff' : 'none' }}>
               <img src="/assets/persona-2.png" alt="Persona 2" className="persona-img" />
             </Link>
-            <Link href="/test3" className="persona-circle" style={{ cursor: 'pointer' }}>
+            <span className="persona-circle is-disabled" aria-disabled="true" title="준비 중">
               <img src="/assets/persona-3.png" alt="Persona 3" className="persona-img" />
-            </Link>
+            </span>
           </aside>
 
           <section className="mlp-right" ref={rightRef}>

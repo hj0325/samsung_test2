@@ -3667,8 +3667,13 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
       var cv = (comp && comp.variant) || {};
       var children = cv.children || [];
       var targetRect = rect || { w: 340, h: 340 };
-      
-      var html = '<div class="composite-set-container" style="position:relative; width:340px; height:'+targetRect.h+'px; overflow:visible; background:transparent !important; border:none !important;">';
+      var maxBottom = 0;
+      children.forEach(function(child) {
+        maxBottom = Math.max(maxBottom, (child.y || 0) + (child.h || 0));
+      });
+      var containerH = Math.max(targetRect.h || 168, maxBottom);
+
+      var html = '<div class="composite-set-container" style="position:relative; width:340px; height:'+containerH+'px; overflow:visible; background:transparent !important; border:none !important;">';
       children.forEach(function(child) {
         var childHtml = window.renderAtomicForRole({ role: child.role, variant: child.variant || {} }, { w: child.w, h: child.h });
         var left = child.x || 0;
@@ -3676,7 +3681,7 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
         var isMusic = child.role === 'dot-music-1x1';
         // For wide child components, ensure they take full width instead of hardcoded width
         var widthStyle = (child.w === 340) ? 'width:100%;' : 'width:' + (child.w || 0) + 'px;';
-        html += '<div class="composite-child' + (isMusic ? ' is-orange' : '') + '" style="position:absolute; left:' + left + 'px; top:' + top + 'px; ' + widthStyle + ' height:' + (child.h || 0) + 'px; overflow:visible;">' + childHtml + '</div>';
+        html += '<div class="composite-child' + (isMusic ? ' is-orange' : '') + '" data-comp-role="' + child.role + '" style="position:absolute; left:' + left + 'px; top:' + top + 'px; ' + widthStyle + ' height:' + (child.h || 0) + 'px; overflow:visible;">' + childHtml + '</div>';
       });
       html += '</div>';
       return html;
@@ -4546,9 +4551,9 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
       var src = iv.src || '/assets/dot-icons/orange-badge.svg';
       return '' +
         '<div class="dot-card dot-icon11 dot-icon11--orange" data-state="' + (iv.state || 'idle') + '">' +
+          '<div class="dot-icon11__grad" aria-hidden="true"></div>' +
           '<img class="dot-icon11__layer dot-icon11__layer--from" src="' + src + '" alt="" />' +
           '<div class="dot-icon11__layer dot-icon11__layer--to" aria-hidden="true">' +
-            '<div class="dot-icon11__grad" aria-hidden="true"></div>' +
             '<svg class="dot-icon11__dotsSvg" width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
               '<circle class="dot-icon11__waveDot dot-icon11__waveDot--a" cx="7.5" cy="36.5" r="2.5" fill="white"/>' +
               '<circle class="dot-icon11__waveDot dot-icon11__waveDot--b" cx="14.5" cy="36.5" r="2.5" fill="white"/>' +
@@ -4583,7 +4588,7 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
         reduceMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
       } catch (_) {}
       var title = bc.title || '보고서 수정 니즈를 포착';
-      var subtitle = bc.subtitle || '정산 보고서를 수정해 노트에 저장\n해드릴게요';
+      var subtitle = bc.subtitle || '필요한 내용을 정리해드릴게요';
       return '' +
         '<div class="dot-card dot-orange-badge-card" data-state="' + (bc.state || 'idle') + '">' +
           '<div class="dot-orange-badge-card__inner">' +
@@ -5280,47 +5285,46 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
     case 'persona2-widgets':
       return '<div class="p2-widgets" style="position:relative; width: 100%; height: 450px;">' +
         // Pill
-        '<div class="p2-pill" style="position:absolute; top:0; left: 24px; right: 24px; height: 80px; background: radial-gradient(130px 90px at 16% 50%, rgba(255,151,72,0.30), transparent 70%), linear-gradient(90deg, rgba(255,255,255,0.96) 0%, rgba(255,241,190,0.94) 58%, rgba(255,197,90,0.92) 100%); border-radius: 40px; display:flex; align-items:center; padding: 0 24px 0 12px; gap: 16px;">' +
+        '<div class="p2-pill" style="position:absolute; top:0; left: 24px; right: 24px; height: 80px; background: #FFFFFF; border-radius: 40px; display:flex; align-items:center; padding: 0 24px 0 12px; gap: 16px;">' +
           '<div class="p2-pill__icon" style="width: 56px; height: 56px; background: #FF9748; border-radius: 28px; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden;">' +
-             '<div class="p2-dot9" aria-hidden="true">' +
-               '<span></span><span></span><span></span>' +
-               '<span></span><span></span><span></span>' +
-               '<span></span><span></span><span></span>' +
+             '<div class="p2-icon-grid" aria-hidden="true">' +
+               '<span></span><span></span>' +
+               '<span></span><span></span>' +
              '</div>' +
           '</div>' +
           '<div style="display:flex; flex-direction:column; flex:1; margin-left:2px;">' +
             '<span id="p2-pill-title" style="font-family:\'Pretendard\',sans-serif; font-weight:800; font-size:18px; line-height:1.3; color:#1F160E;">휴가는 즐거우셨나요?</span>' +
             '<span id="p2-pill-sub" style="font-family:\'Pretendard\',sans-serif; font-weight:700; font-size:13px; color:rgba(255,151,72,0.78);">밀린 일들은 제가 정리할게요..</span>' +
           '</div>' +
-          '<button id="p2-arrow" type="button" aria-label="AI Action" style="display:flex;justify-content:center;align-items:center;width:30px;height:30px;flex-shrink:0;border:0;padding:0;background:transparent;cursor:pointer;-webkit-tap-highlight-color:transparent;color:#FF9748;z-index:5;">' +
-            '<div class="dot-running__dots-arrow" style="position:relative;left:auto;top:auto;transform:none;">' +
-              '<svg width="30" height="30" viewBox="0 0 30 30" fill="none">' +
-                '<circle class="dot-run-arrow-dot dot-run-arrow-dot--0" cx="6" cy="15" r="2.1" fill="currentColor" />' +
-                '<circle class="dot-run-arrow-dot dot-run-arrow-dot--1" cx="10.2" cy="15" r="2.1" fill="currentColor" />' +
-                '<circle class="dot-run-arrow-dot dot-run-arrow-dot--2" cx="14.4" cy="15" r="2.1" fill="currentColor" />' +
-                '<circle class="dot-run-arrow-dot dot-run-arrow-dot--3" cx="18.6" cy="15" r="2.1" fill="currentColor" />' +
-                '<circle class="dot-run-arrow-dot dot-run-arrow-dot--4" cx="22.8" cy="15" r="2.1" fill="currentColor" />' +
-                '<circle class="dot-run-arrow-dot dot-run-arrow-dot--5" cx="27" cy="15" r="2.1" fill="currentColor" />' +
-                '<circle class="dot-run-arrow-dot dot-run-arrow-dot--6" cx="22.8" cy="10.8" r="2.1" fill="currentColor" />' +
-                '<circle class="dot-run-arrow-dot dot-run-arrow-dot--7" cx="18.6" cy="6.6" r="2.1" fill="currentColor" />' +
-                '<circle class="dot-run-arrow-dot dot-run-arrow-dot--8" cx="22.8" cy="19.2" r="2.1" fill="currentColor" />' +
-                '<circle class="dot-run-arrow-dot dot-run-arrow-dot--9" cx="18.6" cy="23.4" r="2.1" fill="currentColor" />' +
-              '</svg>' +
-            '</div>' +
-          '</button>' +
         '</div>' +
 
         // Main Widget Area (Container for placed components)
         '<div id="p2-area" style="position:absolute; top: 88px; left: 24px; right: 24px; height: 168px; overflow:visible;">' +
           // Default State (Message + Star + Result Box)
           '<div id="p2-default-widgets" style="position:relative; width:100%; height:100%; transition: opacity 0.4s ease;">' +
-            // Sparkle Circle (AI trigger)
-            '<button id="p2-star" type="button" aria-label="AI Voice" style="position:absolute; top: 0; left: 0; width: 80px; height: 80px; background: transparent; border:0; padding:0; border-radius: 40px; display:flex; align-items:center; justify-content:center; cursor:pointer; -webkit-tap-highlight-color:transparent; z-index: 1001 !important; overflow:hidden;">' +
+            // Message 14 (New component at top)
+            '<div id="p2-msg14" style="position:absolute; top: 0; left: 0; width: 80px; height: 80px; background: #FFFFFF; border-radius: 40px; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:2px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">' +
+              '<div style="font-family:\'Pretendard\',sans-serif; font-weight:700; font-size:13px; color:#FF9748;">메세지</div>' +
+              '<div style="font-family:\'Ndot 55 V2\', sans-serif; font-weight:800; font-size:36px; color:#1F160E; line-height:1;">14</div>' +
+            '</div>' +
+            // Sparkle Circle (AI trigger) - Moved down
+            '<button id="p2-star" type="button" aria-label="AI Voice" style="position:absolute; top: 88px; left: 0; width: 80px; height: 80px; background: transparent; border:0; padding:0; border-radius: 40px; display:flex; align-items:center; justify-content:center; cursor:pointer; -webkit-tap-highlight-color:transparent; z-index: 1001 !important; overflow:hidden;">' +
+              '<div class="p2-breathing-chord" aria-hidden="true">' +
+                '<span></span><span></span><span></span><span></span><span></span>' +
+              '</div>' +
               window.renderAtomicForRole({ role: 'dot-icon-orange-badge-1x1' }, { w: 80, h: 80 }) +
             '</button>' +
             // Dark Box (Initial text state)
-            '<div id="p2-result" class="p2-dark p2-obc-host" style="position:absolute; top: 0; left: 88px; right: 0; height: 168px; background: transparent; border-radius: 36px; padding: 0; display:block; box-sizing:border-box; overflow:visible;">' +
-              window.renderAtomicForRole({ role: 'dot-orange-badge-card', variant: { title: '보고서 수정 니즈를 포착', subtitle: '정산 보고서를 수정해 노트에 저장\n해드릴게요' } }, { w: 252, h: 168 }) +
+            '<div id="p2-result" class="p2-dark p2-obc-host" style="position:absolute; top: 0; right: 0; left: auto; width: 252px; height: 168px; background: transparent; border-radius: 36px; padding: 0; display:block; box-sizing:border-box; overflow:hidden;">' +
+              '<div class="p2-result-loading" aria-hidden="true">' +
+                '<div class="p2-result-loading__bg"></div>' +
+                '<div class="p2-result-loading__shimmer"></div>' +
+                '<div class="p2-result-loading__content">' +
+                  '<div class="p2-result-loading__title">상황에 맞는 UI를<br>구성하는 중…</div>' +
+                  '<div class="p2-result-loading__sub"></div>' +
+                '</div>' +
+              '</div>' +
+              window.renderAtomicForRole({ role: 'dot-orange-badge-card', variant: { title: '보고서 수정 니즈를 포착', subtitle: '필요한 내용을 정리해드릴게요' } }, { w: 252, h: 168 }) +
             '</div>' +
           '</div>' +
           // Full Slot (For AI-placed components)

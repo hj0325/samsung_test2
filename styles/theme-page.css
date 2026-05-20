@@ -238,8 +238,8 @@
   }
   .p2-widgets { pointer-events: auto; }
   /* Persona2: remove internal "wobble/shimmer"; keep static surfaces */
-  .p2-pill, .p2-dark { animation: none !important; }
-  .p2-pill::after, .p2-dark::after { content: none !important; }
+  .p2-pill, .p2-dark { animation: none; }
+  .p2-pill::after, .p2-dark::after { content: none; }
 
   /* Persona2: gradient text flow (no internal wobble) */
   .p2-grad-text {
@@ -282,53 +282,114 @@
     100% { background-position: 100% 50%; }
   }
 
-  /* Persona2: loading shimmer on the right black card */
-  #p2-result.is-loading::after {
-    content: "";
+  /* Persona2: loading crossfade overlay on the right card */
+  #canvas[data-test-scope="test2"] #p2-result {
+    overflow: hidden;
+  }
+  #canvas[data-test-scope="test2"] .p2-result-loading {
     position: absolute;
     inset: 0;
-    border-radius: 36px;
+    z-index: 5;
+    border-radius: 32px;
+    opacity: 0;
+    visibility: hidden;
     pointer-events: none;
+    transition: opacity 1s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s linear 1s;
+  }
+  #canvas[data-test-scope="test2"] #p2-result.is-loading .p2-result-loading {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transition: opacity 1s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s linear 0s;
+  }
+  #canvas[data-test-scope="test2"] .p2-result-loading__bg {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
     background: linear-gradient(
       90deg,
-      rgba(0,0,0,0) 0%,
-      rgba(185,166,255,0.25) 28%,
-      rgba(231,224,255,0.45) 50%,
-      rgba(185,166,255,0.25) 72%,
-      rgba(0,0,0,0) 100%
+      #FF6E00 0%,
+      #FF8F2E 12%,
+      #FFAE52 24%,
+      #FFD06E 36%,
+      #FFEAA0 48%,
+      #FFF6CC 56%,
+      #FFEAA0 64%,
+      #FFD06E 76%,
+      #FFAE52 88%,
+      #FF6E00 100%
     );
-    background-size: 200% 100%;
-    animation: p2LoadShimmer 1.1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-    mix-blend-mode: screen;
+    background-size: 320% 100%;
+    background-position: 0% 50%;
+    animation: p2LoadingColorFlow 5.5s ease-in-out infinite;
+  }
+  #canvas[data-test-scope="test2"] .p2-result-loading__shimmer {
+    display: none;
+  }
+  #canvas[data-test-scope="test2"] .p2-result-loading__content {
+    position: relative;
+    z-index: 2;
+    padding: 24px 26px;
+    box-sizing: border-box;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+    opacity: 0;
+    transition: opacity 0.5s ease 0.55s;
+  }
+  #canvas[data-test-scope="test2"] #p2-result.is-loading .p2-result-loading__content {
     opacity: 1;
-    z-index: 100;
   }
-  #p2-result.is-loading .p2-dark__text {
-    filter: blur(4px);
-    opacity: 0.5;
-    transform: scale(0.98);
+  #canvas[data-test-scope="test2"] .p2-result-loading__title {
+    font-family: 'Pretendard', var(--font), sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 1.3;
+    background: linear-gradient(90deg, #FF9748 0%, #FFFFFF 41.35%, #FFDF81 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
-  @keyframes p2LoadShimmer {
-    0% { background-position: 150% 50%; }
-    100% { background-position: -50% 50%; }
+  #canvas[data-test-scope="test2"] .p2-result-loading__sub {
+    font-family: 'Pretendard', var(--font), sans-serif;
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 1.3;
+    background: linear-gradient(90deg, #FFC091 0%, #FFEEDA 15.38%, #FFFF93 75%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  /* Black card fades out as orange overlay fades in */
+  #canvas[data-test-scope="test2"] #p2-result .dot-orange-badge-card {
+    position: relative;
+    z-index: 1;
+    opacity: 1;
+    transition: opacity 1s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  #canvas[data-test-scope="test2"] #p2-result.is-loading .dot-orange-badge-card {
+    opacity: 0;
+    pointer-events: none;
+  }
+  #canvas[data-test-scope="test2"] #p2-result.is-resolving .dot-orange-badge-card {
+    opacity: 0 !important;
+    pointer-events: none;
+  }
+  @keyframes p2LoadingColorFlow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
   }
   
-  /* Dramatic Reconstruction dots */
+  /* Dramatic Reconstruction dots - REMOVED */
   #p2-result.is-loading::before {
-    content: "● ● ●";
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 14px;
-    color: var(--p2-lavender);
-    letter-spacing: 8px;
-    animation: p2DotsFly 0.8s ease-in-out infinite alternate;
-    z-index: 101;
-    opacity: 0;
+    display: none;
   }
   #p2-result.is-loading .p2-result-title {
     opacity: 1 !important;
+    color: #FFFFFF !important;
     transition: all 0.4s ease;
   }
   @keyframes p2DotsFly {
@@ -362,9 +423,13 @@
   }
 
   /* Persona2 swap slot appearance */
+  #p2-area {
+    transition: height 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    overflow: visible;
+  }
   #p2-slot {
     display: flex !important;
-    align-items: center !important;
+    align-items: flex-start !important;
     justify-content: center !important;
     z-index: 10 !important;
     pointer-events: none; /* Controlled via JS toggle */
@@ -399,15 +464,127 @@
   #p2-result.has-swap {
     background: transparent !important;
     box-shadow: none !important;
-    transition: background 0.5s ease, box-shadow 0.5s ease;
   }
   #p2-slot {
-    transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1);
     width: 100% !important;
     height: 100% !important;
     display: block !important;
     overflow: visible !important;
   }
+
+  /* Persona2 staged reveal — 3 phases */
+  /* 1) left circles fade (opacity) */
+  #p2-default-widgets #p2-msg14,
+  #p2-default-widgets #p2-star {
+    transition: opacity 0.58s ease;
+  }
+  #p2-default-widgets #p2-msg14.p2-default-hiding,
+  #p2-default-widgets #p2-star.p2-default-hiding {
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+  /* 2) right card expands left — anchor right edge, animate width only */
+  #p2-default-widgets #p2-result {
+    right: 0;
+    left: auto;
+    width: 252px;
+    transition:
+      width 0.92s cubic-bezier(0.16, 1, 0.3, 1),
+      opacity 0.86s ease;
+  }
+  #p2-result.p2-result-expanded {
+    width: 340px !important;
+  }
+  #p2-result.p2-default-hiding {
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+  /* 3) staged content: color → title → list rows */
+  #p2-result.p2-crossfade-out .p2-result-loading {
+    opacity: 0 !important;
+    pointer-events: none !important;
+    visibility: visible !important;
+    transition: opacity 1.1s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  }
+  #p2-result.p2-crossfade-out .p2-result-loading__content {
+    opacity: 0 !important;
+    transition: opacity 0.95s ease !important;
+  }
+
+  #p2-slot.p2-reveal-waiting {
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+  #p2-slot.p2-reveal-swap {
+    z-index: 12 !important;
+  }
+  #p2-slot.p2-reveal-swap .p2-reveal-stage {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: auto;
+    width: 340px;
+    height: var(--p2-reveal-h, 168px);
+    overflow: hidden;
+    opacity: 1;
+  }
+  #p2-slot.p2-reveal-swap.p2-seq-done .p2-reveal-stage {
+    overflow: visible;
+  }
+
+  /* Step A: card shell color (orange → semi-transparent), text hidden */
+  #p2-slot.p2-reveal-swap .dot-sch {
+    opacity: 0;
+    background-color: rgba(255, 130, 40, 0.95);
+    transition:
+      opacity 1.1s cubic-bezier(0.4, 0, 0.2, 1),
+      background-color 0.85s cubic-bezier(0.4, 0, 0.2, 1) 0.25s;
+  }
+  #p2-slot.p2-seq-color-active .dot-sch {
+    opacity: 1;
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+  #p2-slot.p2-reveal-swap .dot-card:not(.dot-sch) {
+    opacity: 0;
+    transition: opacity 1.1s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  #p2-slot.p2-seq-color-active .dot-card:not(.dot-sch) {
+    opacity: 1;
+  }
+
+  /* Step B & C: title then rows — never flash visible early */
+  #p2-slot .p2-seq-text-hidden {
+    opacity: 0 !important;
+    transform: translateY(6px);
+    pointer-events: none;
+  }
+  #p2-slot .p2-seq-text-visible {
+    opacity: 1 !important;
+    transform: translateY(0);
+    transition: opacity 0.48s ease, transform 0.52s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  #p2-slot.p2-reveal-swap .p2-seq-text-visible {
+    transform: translateY(0) !important;
+  }
+
+  /* P2 schedule list: first dot orange, rest white */
+  #p2-slot .dot-sch42 .dot-sch__row .dot-sch__bullet,
+  #p2-slot .dot-sch22 .dot-sch__row .dot-sch__bullet {
+    background: rgba(255, 255, 255, 0.92) !important;
+  }
+  #p2-slot .dot-sch42 .dot-sch__row:nth-child(1) .dot-sch__bullet,
+  #p2-slot .dot-sch22 .dot-sch__row:nth-child(1) .dot-sch__bullet {
+    background: #FF7F24 !important;
+  }
+
+  #p2-slot.p2-reveal-swap .dot-card {
+    animation: none !important;
+  }
+
   #p2-slot .dot-card {
     /* Allow components to keep their original colors if intended, 
        but for P2 we often want to unify them. */
@@ -516,31 +693,24 @@
     0%, 100% { transform: scale(0.9); }
     50% { transform: scale(1.15); }
   }
-  .p2-dot9 {
+  .p2-icon-grid {
     position: absolute;
-    inset: 12px;
+    left: 31.25%;
+    right: 31.25%;
+    top: 31.25%;
+    bottom: 31.25%;
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 4px;
-    opacity: 0.9;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 2px;
   }
-  .p2-dot9 span {
-    width: 5px; height: 5px; border-radius: 99px;
-    background: rgba(255,255,255,0.92);
-    animation: p2Dot9 1.8s ease-in-out infinite;
-    opacity: 0.35;
+  .p2-icon-grid span {
+    background: #FFFFFF;
+    border-radius: 2px;
   }
-  .p2-dot9 span:nth-child(2) { animation-delay: 90ms; }
-  .p2-dot9 span:nth-child(3) { animation-delay: 180ms; }
-  .p2-dot9 span:nth-child(4) { animation-delay: 270ms; }
-  .p2-dot9 span:nth-child(5) { animation-delay: 360ms; opacity: 0.75; }
-  .p2-dot9 span:nth-child(6) { animation-delay: 450ms; }
-  .p2-dot9 span:nth-child(7) { animation-delay: 540ms; }
-  .p2-dot9 span:nth-child(8) { animation-delay: 630ms; }
-  .p2-dot9 span:nth-child(9) { animation-delay: 720ms; }
-  @keyframes p2Dot9 {
-    0%, 100% { transform: scale(0.9); opacity: 0.35; }
-    50% { transform: scale(1.15); opacity: 0.95; }
+  .p2-icon-grid span:nth-child(2) {
+    transform: rotate(45deg) scale(0.85);
+    border-radius: 1px;
   }
 
   /* Persona1: tap Music expands right, right widgets collapse */
@@ -591,9 +761,38 @@
   }
 
   /* Persona2 star listening pulse */
-  #canvas.p2-listening #p2-star {
-    animation: p2StarPulse 900ms ease-in-out infinite;
+  #canvas.p2-listening #p2-star,
+  #canvas.p2-generating #p2-star {
+    animation: none !important;
     box-shadow: 0 10px 26px rgba(0,0,0,0.22);
+  }
+  #canvas.p2-listening #p2-star .dot-icon11,
+  #canvas.p2-generating #p2-star .dot-icon11 {
+    display: none !important;
+  }
+  .p2-breathing-chord {
+    display: none;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    inset: 0;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    background: #FF7F24;
+    border-radius: 50%;
+    z-index: 2;
+  }
+  #canvas.p2-listening .p2-breathing-chord,
+  #canvas.p2-generating .p2-breathing-chord {
+    display: flex;
+  }
+  .p2-breathing-chord span {
+    width: 7px;
+    height: 7px;
+    background: #FFFFFF;
+    border-radius: 50%;
+    will-change: transform, opacity;
   }
   @keyframes p2StarPulse {
     0%, 100% { transform: scale(1.0); }
@@ -607,9 +806,7 @@
     --p2-lavender-soft: #FFD189;
   }
   #canvas[data-test-scope="test2"] .p2-pill {
-    background:
-      radial-gradient(130px 90px at 16% 50%, rgba(255, 151, 72, 0.30), transparent 70%),
-      linear-gradient(90deg, rgba(255, 255, 255, 0.96) 0%, rgba(255, 241, 190, 0.94) 58%, rgba(255, 197, 90, 0.92) 100%) !important;
+    background: #FFFFFF !important;
   }
   #canvas[data-test-scope="test2"] .p2-pill__icon {
     background: #FF9748 !important;
@@ -626,11 +823,8 @@
     color: rgba(255, 151, 72, 0.78);
     animation: none;
   }
-  #canvas[data-test-scope="test2"] #p2-arrow {
-    color: #1F160E !important;
-  }
-  #canvas[data-test-scope="test2"] .p2-dot9 span {
-    background: rgba(255, 255, 255, 0.92);
+  #canvas[data-test-scope="test2"] .p2-icon-grid span {
+    background: #FFFFFF !important;
   }
 
   /* Persona1 time-matrix: periodic running overlay (orange dots) */
@@ -2868,7 +3062,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  .dot-sch__text.is-muted { color: rgba(255, 255, 255, 0.4); }
+  .dot-sch__text.is-muted { color: rgba(255, 255, 255, 0.78); }
   .dot-sch__text.is-accent { color: #FF7F24; }
   .dot-sch__text.is-strong { color: #FFFFFF; }
 
@@ -2883,7 +3077,7 @@
     text-align: right;
     white-space: nowrap;
   }
-  .dot-sch__time.is-time { color: rgba(255, 255, 255, 0.8); }
+  .dot-sch__time.is-time { color: rgba(255, 255, 255, 0.92); }
   .dot-sch__time.is-strong { color: #FFFFFF; }
   .dot-sch__time-note {
     margin-left: auto;
@@ -3291,7 +3485,7 @@
     --dot-icon-cycle: 12s;
   }
   .dot-icon11--orange {
-    background: #FF7F24;
+    background: transparent;
     --dot-mask-bg: #FF7F24;
   }
   .dot-icon11__layer {
@@ -3307,11 +3501,15 @@
   .dot-icon11__layer--from {
     opacity: 1;
     filter: blur(0px);
-    animation: dotIconFromLoop var(--dot-icon-cycle) ease-in-out 0ms infinite;
   }
   .dot-icon11__layer--to {
     opacity: 0;
     filter: blur(10px);
+  }
+  .dot-icon11[data-state="active"] .dot-icon11__layer--from {
+    animation: dotIconFromLoop var(--dot-icon-cycle) ease-in-out 0ms infinite;
+  }
+  .dot-icon11[data-state="active"] .dot-icon11__layer--to {
     animation: dotIconToLoop var(--dot-icon-cycle) ease-in-out 0ms infinite;
   }
   .dot-icon11__grad {
@@ -3319,38 +3517,28 @@
     inset: 0;
     border-radius: inherit;
     overflow: hidden;
-    background: linear-gradient(90deg, #FF8517 0%, #FF8517 58%, #F9FF8B 100%);
+    background: repeating-linear-gradient(
+      90deg,
+      rgba(255, 241, 118, 0) 0px,
+      rgba(255, 241, 118, 0.05) 60px,
+      rgba(255, 255, 150, 0.4) 140px,
+      rgba(255, 241, 118, 0.05) 220px,
+      rgba(255, 241, 118, 0) 444px
+    );
+    background-size: 444px 100%;
+    background-position: 0 50%;
+    animation: dotCallGradientFlow 5s linear infinite;
+    mix-blend-mode: screen;
+    opacity: 0.8;
+    z-index: 1;
+  }
+  @keyframes dotGradFlow {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 100% 50%; }
   }
   .dot-icon11__grad::before,
   .dot-icon11__grad::after {
-    content: "";
-    position: absolute;
-    inset: -52%;
-    border-radius: 999px;
-    filter: blur(12px);
-    opacity: 0.9;
-    will-change: transform;
-    mix-blend-mode: normal;
-  }
-  .dot-icon11__grad::before {
-    opacity: 0.72;
-    background: radial-gradient(circle at 40% 45%, rgba(249, 255, 139, 1) 0%, rgba(249, 255, 139, 0) 68%);
-    animation: dotGradBlobA 3600ms ease-in-out 0ms infinite alternate;
-  }
-  .dot-icon11__grad::after {
-    opacity: 1;
-    background: radial-gradient(circle at 55% 55%, rgba(255, 133, 23, 1) 0%, rgba(255, 133, 23, 0) 78%);
-    animation: dotGradBlobB 4200ms ease-in-out 0ms infinite alternate;
-  }
-  @keyframes dotGradBlobA {
-    0% { transform: translate(-6%, -4%) scale(1.05); }
-    50% { transform: translate(10%, 6%) scale(1.12); }
-    100% { transform: translate(-2%, 14%) scale(1.06); }
-  }
-  @keyframes dotGradBlobB {
-    0% { transform: translate(10%, 8%) scale(1.08); }
-    50% { transform: translate(-8%, -10%) scale(1.14); }
-    100% { transform: translate(-14%, 4%) scale(1.07); }
+    display: none;
   }
   .dot-icon11__dotsSvg {
     position: absolute;

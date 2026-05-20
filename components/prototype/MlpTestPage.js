@@ -12,7 +12,7 @@ const HOME_BG = "/assets/bg-new.png?v=2";
 const TESTS = [
   { id: "test1", href: "/test1", label: "Persona 1", img: "/assets/persona-1.png" },
   { id: "test2", href: "/test2", label: "Persona 2", img: "/assets/persona-2.png" },
-  { id: "test3", href: "/test3", label: "Persona 3", img: "/assets/persona-3.png" },
+  { id: "test3", href: "/test3", label: "Persona 3", img: "/assets/persona-3.png", disabled: true },
 ];
 
 function TestScripts() {
@@ -256,11 +256,11 @@ export default function MlpTestPage({
             position: relative !important;
           }
           .mlp-left {
-            width: 140px !important;
+            width: 120px !important;
             flex-shrink: 0 !important;
             display: flex !important;
             flex-direction: column !important;
-            gap: 32px !important;
+            gap: 24px !important;
             align-items: center !important;
             justify-content: center !important;
             position: absolute !important;
@@ -270,12 +270,12 @@ export default function MlpTestPage({
             z-index: 10 !important;
           }
           .persona-circle {
-            width: 100px !important;
-            height: 100px !important;
+            width: 76px !important;
+            height: 76px !important;
             border-radius: 50% !important;
             overflow: hidden !important;
             border: 2px solid rgba(255,255,255,0.1) !important;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.4) !important;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.4) !important;
             transition: all 0.3s ease !important;
             background: #1a1a1e !important;
             display: block !important;
@@ -283,8 +283,16 @@ export default function MlpTestPage({
           .persona-circle.is-active {
             border: 3px solid #fff !important;
           }
-          .persona-circle:hover {
-            transform: scale(1.1) !important;
+          .persona-circle.is-disabled {
+            opacity: 0.38 !important;
+            filter: grayscale(0.35) brightness(0.55) !important;
+            cursor: not-allowed !important;
+            pointer-events: none !important;
+            border-color: rgba(255,255,255,0.06) !important;
+            box-shadow: none !important;
+          }
+          .persona-circle:not(.is-disabled):hover {
+            transform: scale(1.08) !important;
             border-color: #64e9e3 !important;
           }
           .persona-img {
@@ -414,15 +422,21 @@ export default function MlpTestPage({
 
         <div className="mlp-workspace">
           <aside className="mlp-left">
-            {TESTS.map((test) => (
-              <Link
-                key={test.id}
-                href={test.href}
-                className={`persona-circle${test.id === testId ? " is-active" : ""}`}
-              >
-                <img src={test.img} alt={test.label} className="persona-img" />
-              </Link>
-            ))}
+            {TESTS.map((test) => {
+              const className = `persona-circle${test.id === testId ? " is-active" : ""}${test.disabled ? " is-disabled" : ""}`;
+              if (test.disabled) {
+                return (
+                  <span key={test.id} className={className} aria-disabled="true" title="준비 중">
+                    <img src={test.img} alt={test.label} className="persona-img" />
+                  </span>
+                );
+              }
+              return (
+                <Link key={test.id} href={test.href} className={className}>
+                  <img src={test.img} alt={test.label} className="persona-img" />
+                </Link>
+              );
+            })}
           </aside>
 
           <section className="mlp-right" ref={rightRef}>

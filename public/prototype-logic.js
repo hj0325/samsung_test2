@@ -173,6 +173,123 @@
   // Uses Web Speech API when available; falls back to prompt() for dev.
   // -------------------------------------------------------------------------
   (function _persona2VoiceStar() {
+    var listening = false;
+    var generating = false;
+    var chordRaf = null;
+    var chordTime = 0;
+    var formationLerp = 0; // 0 = breathing, 1 = circular
+
+    // --- Audio Analysis Variables ---
+    var audioContext = null;
+    var analyser = null;
+    var dataArray = null;
+    var micStream = null;
+    var currentVolume = 0;
+
+    async function initAudioAnalysis() {
+      if (audioContext) return;
+      try {
+        var AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        audioContext = new AudioContextClass();
+        micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        var source = audioContext.createMediaStreamSource(micStream);
+        analyser = audioContext.createAnalyser();
+        analyser.fftSize = 256;
+        var bufferLength = analyser.frequencyBinCount;
+        dataArray = new Uint8Array(bufferLength);
+        source.connect(analyser);
+      } catch (e) {
+        console.error('Audio analysis init failed:', e);
+      }
+    }
+
+    function updateVolume() {
+      if (!analyser || !dataArray) return 0;
+      analyser.getByteFrequencyData(dataArray);
+      var sum = 0;
+      for (var i = 0; i < dataArray.length; i++) {
+        sum += dataArray[i];
+      }
+      var average = sum / dataArray.length;
+      // Normalize and smooth
+      var targetVolume = Math.min(1, average / 128);
+      currentVolume += (targetVolume - currentVolume) * 0.2;
+      return currentVolume;
+    }
+
+    function updateChordAnimation() {
+      if (!listening && !generating) {
+        if (chordRaf) cancelAnimationFrame(chordRaf);
+        chordRaf = null;
+        return;
+      }
+
+      var container = document.querySelector('.p2-breathing-chord');
+      if (!container) {
+        chordRaf = requestAnimationFrame(updateChordAnimation);
+        return;
+      }
+
+      var dots = container.querySelectorAll('span');
+      if (!dots || dots.length === 0) {
+        chordRaf = requestAnimationFrame(updateChordAnimation);
+        return;
+      }
+
+        chordTime += 0.04;
+        var t = chordTime;
+        var N = dots.length;
+
+        var vol = updateVolume();
+        // Voice-reactive amplitude: base breathing (14) + voice boost (up to 26 more)
+        var dynamicAmp = 14 + (vol * 26);
+
+        // Smoothly transition between breathing and circular formation
+        if (generating) {
+          formationLerp += (1 - formationLerp) * 0.1;
+        } else {
+          formationLerp += (0 - formationLerp) * 0.1;
+        }
+
+        for (var i = 0; i < N; i++) {
+          var dot = dots[i];
+          
+          // --- Breathing State Calculation ---
+          var off = i * ((Math.PI * 2) / N);
+          var off2 = i * ((Math.PI * 2) / N) * 0.45;
+          var sin1 = Math.sin(t * 1.6 - off);
+          var sin2 = Math.sin(t * 0.7 - off2);
+          var sin3 = Math.sin(t * 0.3 + i * 0.8);
+          var yMix = (sin1 * 0.5 + sin2 * 0.3 + sin3 * 0.2);
+          var spacing = 11;
+          var startX = (80 - (N - 1) * spacing) / 2;
+          var bx = startX + i * spacing;
+          var bxDrift = Math.sin(t * 0.5 + i) * 2;
+          var by = 40 + yMix * dynamicAmp; // Use dynamicAmp here
+
+        // --- Circular Generating State Calculation ---
+        var rotSpeed = t * 0.8; // Slow rotation
+        var angle = rotSpeed + (i * (Math.PI * 2) / N);
+        var radius = 22; // Circle radius
+        var cx = 40 + Math.cos(angle) * radius;
+        var cy = 40 + Math.sin(angle) * radius;
+
+        // --- Lerp between states ---
+        var finalX = bx + bxDrift + (cx - (bx + bxDrift)) * formationLerp;
+        var finalY = by + (cy - by) * formationLerp;
+
+        dot.style.position = 'absolute';
+        dot.style.left = '0';
+        dot.style.top = '0';
+        dot.style.transform = 'translate(' + (finalX - 3.5) + 'px, ' + (finalY - 3.5) + 'px)';
+        
+        // Subtle opacity pulse
+        dot.style.opacity = 0.6 + (yMix + 1) * 0.2;
+      }
+
+      chordRaf = requestAnimationFrame(updateChordAnimation);
+    }
+
     function onReady(fn) {
       if (document.readyState === 'complete' || document.readyState === 'interactive') fn();
       else document.addEventListener('DOMContentLoaded', fn, { once: true });
@@ -249,6 +366,187 @@
       if (c) canvas.classList.add(c);
     }
 
+    var P2_AREA_DEFAULT_H = 168;
+    var P2_AREA_MAX_H = 362; // p2-widgets (450) - p2-area top offset (88)
+
+    function computeP2ContentHeight(role, variant, sizes) {
+      var sz = sizes[role] || { w: 340, h: P2_AREA_DEFAULT_H };
+      if (role === 'composite-set') {
+        var children = (variant && variant.children) || [];
+        var maxBottom = 0;
+        children.forEach(function (c) {
+          maxBottom = Math.max(maxBottom, (c.y || 0) + (c.h || 0));
+        });
+        return Math.max(P2_AREA_DEFAULT_H, Math.min(maxBottom || sz.h, P2_AREA_MAX_H));
+      }
+      return Math.min(Math.max(sz.h, P2_AREA_DEFAULT_H), P2_AREA_MAX_H);
+    }
+
+    function setP2AreaHeight(h) {
+      var area = document.getElementById('p2-area');
+      if (!area) return;
+      area.style.height = Math.round(h) + 'px';
+    }
+
+    function resetP2AreaHeight() {
+      setP2AreaHeight(P2_AREA_DEFAULT_H);
+    }
+
+    function clearP2DefaultRevealState() {
+      ['p2-msg14', 'p2-star', 'p2-result'].forEach(function (id) {
+        var node = document.getElementById(id);
+        if (node) {
+          node.classList.remove(
+            'p2-default-hiding',
+            'p2-result-expanded',
+            'p2-crossfade-out'
+          );
+          node.style.removeProperty('--p2-reveal-h');
+        }
+      });
+      var slot = document.getElementById('p2-slot');
+      if (slot) {
+        slot.classList.remove(
+          'p2-reveal-waiting', 'p2-reveal-swap', 'p2-reveal-visible',
+          'p2-seq-color', 'p2-seq-color-active', 'p2-seq-title', 'p2-seq-done'
+        );
+        slot.style.removeProperty('--p2-reveal-h');
+        slot.querySelectorAll('.p2-seq-text-hidden, .p2-seq-text-visible').forEach(function (el) {
+          el.classList.remove('p2-seq-text-hidden', 'p2-seq-text-visible');
+        });
+      }
+    }
+
+    var P2_REVEAL_TIMING = {
+      phase1: 580,
+      phase2: 920,
+      phase2Pause: 320,
+      seqColor: 1100,
+      seqAfterTitle: 380,
+      seqRowStagger: 100
+    };
+
+    function wrapP2RevealStage(innerHtml, contentH) {
+      return '<div class="p2-reveal-stage" style="--p2-reveal-h:' + Math.round(contentH) + 'px">' + innerHtml + '</div>';
+    }
+
+    function prepareP2ContentSequence(slot) {
+      var textSelectors = [
+        '.dot-sch__date',
+        '.dot-sch__row',
+        '.dot-goal__title',
+        '.dot-goal__distance',
+        '.dot-goal__time',
+        '.dot-w11__location',
+        '.dot-w11__weather',
+        '.dot-temp11__value',
+        '.dot-date11__text'
+      ].join(',');
+      slot.querySelectorAll(textSelectors).forEach(function (el) {
+        el.classList.add('p2-seq-text-hidden');
+        el.classList.remove('p2-seq-text-visible');
+      });
+    }
+
+    function revealP2Titles(slot) {
+      slot.querySelectorAll(
+        '.dot-sch__date, .dot-goal__title, .dot-w11__location, .dot-w11__weather'
+      ).forEach(function (el) {
+        el.classList.remove('p2-seq-text-hidden');
+        el.classList.add('p2-seq-text-visible');
+      });
+    }
+
+    function revealP2Rows(slot, onDone) {
+      var rows = slot.querySelectorAll('.dot-sch__row');
+      if (!rows.length) {
+        if (onDone) onDone();
+        return;
+      }
+      rows.forEach(function (row, i) {
+        setTimeout(function () {
+          row.classList.remove('p2-seq-text-hidden');
+          row.classList.add('p2-seq-text-visible');
+          if (i === rows.length - 1 && onDone) {
+            setTimeout(onDone, 280);
+          }
+        }, i * P2_REVEAL_TIMING.seqRowStagger);
+      });
+    }
+
+    function finishP2ContentSequence(slot, defaults, result) {
+      slot.classList.add('p2-seq-done');
+      slot.style.pointerEvents = 'auto';
+      if (result) {
+        result.classList.remove('is-loading', 'p2-crossfade-out');
+        result.classList.add('has-swap', 'p2-default-hiding');
+      }
+      defaults.style.opacity = '0';
+      defaults.style.display = 'none';
+    }
+
+    function runP2ContentSequence(slot, defaults, result, contentH) {
+      var t = P2_REVEAL_TIMING;
+
+      if (contentH > P2_AREA_DEFAULT_H) {
+        setP2AreaHeight(contentH);
+      }
+
+      slot.classList.remove('p2-reveal-waiting');
+      slot.classList.add('p2-reveal-swap', 'p2-seq-color');
+      if (result) result.classList.add('p2-crossfade-out');
+      void slot.offsetWidth;
+
+      requestAnimationFrame(function () {
+        slot.classList.add('p2-seq-color-active');
+      });
+
+      setTimeout(function () {
+        slot.classList.add('p2-seq-title');
+        revealP2Titles(slot);
+
+        setTimeout(function () {
+          revealP2Rows(slot, function () {
+            finishP2ContentSequence(slot, defaults, result);
+          });
+        }, t.seqAfterTitle);
+      }, t.seqColor);
+    }
+
+    function runP2RevealAnimation(slot, defaults, resultEl, contentH) {
+      var msg14 = document.getElementById('p2-msg14');
+      var star = document.getElementById('p2-star');
+      var result = resultEl || document.getElementById('p2-result');
+
+      slot.style.setProperty('--p2-reveal-h', Math.round(contentH) + 'px');
+      if (result) result.style.setProperty('--p2-reveal-h', Math.round(contentH) + 'px');
+      setP2AreaHeight(P2_AREA_DEFAULT_H);
+
+      slot.classList.remove('p2-reveal-swap', 'p2-reveal-visible', 'p2-seq-color', 'p2-seq-color-active', 'p2-seq-title', 'p2-seq-done');
+      slot.classList.add('p2-reveal-waiting');
+      slot.style.display = 'block';
+      slot.style.opacity = '1';
+      slot.style.pointerEvents = 'none';
+      slot.style.clipPath = 'none';
+
+      requestAnimationFrame(function () {
+        if (msg14) msg14.classList.add('p2-default-hiding');
+        if (star) star.classList.add('p2-default-hiding');
+        defaults.style.pointerEvents = 'none';
+      });
+
+      setTimeout(function () {
+        if (result) {
+          result.classList.add('p2-result-expanded');
+          void result.offsetWidth;
+        }
+
+        setTimeout(function () {
+          runP2ContentSequence(slot, defaults, result, contentH);
+        }, P2_REVEAL_TIMING.phase2Pause);
+      }, P2_REVEAL_TIMING.phase1);
+    }
+
     function mountResolvedComponent(component, attempt) {
       var slot = document.getElementById('p2-slot');
       var defaults = document.getElementById('p2-default-widgets');
@@ -292,16 +590,22 @@
         'composite-set': {w: 340, h: 340}
       };
       var sz = sizes[role] || { w: 340, h: 168 };
-      
+      var contentH = computeP2ContentHeight(role, variant, sizes);
+
       var html = '';
       try {
         if (role !== 'composite-set') {
-           html = '<div style="display:flex; justify-content:center; width:100%; overflow:hidden;">' +
-             '<div style="width:' + sz.w + 'px; height:' + sz.h + 'px; position:relative; transform:scale(1); transform-origin:top center;">' +
+           html = wrapP2RevealStage(
+             '<div style="width:' + sz.w + 'px; height:' + sz.h + 'px; position:relative; transform-origin:top left;">' +
                window.renderAtomicForRole({ role: role, variant: variant }, { w: sz.w, h: sz.h }) +
-             '</div></div>';
+             '</div>',
+             contentH
+           );
         } else {
-           html = window.renderAtomicForRole({ role: role, variant: variant }, { w: sz.w, h: sz.h }) || '';
+           html = wrapP2RevealStage(
+             window.renderAtomicForRole({ role: role, variant: variant }, { w: sz.w, h: contentH }) || '',
+             contentH
+           );
         }
       } catch (e) {
         console.error('renderAtomicForRole failed:', e);
@@ -316,6 +620,7 @@
         slot.setAttribute('data-current-role', role);
 
         if (isSameRole) {
+          setP2AreaHeight(contentH);
           // INTERACTION: Same component stays, only content updates with a cross-fade
           var oldCard = slot.querySelector('.dot-card');
           if (oldCard) {
@@ -335,35 +640,12 @@
             slot.innerHTML = html;
           }
         } else {
-          // INTERACTION: New component enters with "lengthening" interaction
-          slot.style.transition = 'none';
-          slot.style.opacity = '0';
-          slot.style.transform = 'translateY(10px)';
-          slot.style.clipPath = 'inset(0 0 100% 0)'; 
-          slot.style.display = 'block';
-          
           slot.innerHTML = html;
-          void slot.offsetWidth;
-          
-          if (el) el.classList.add('has-swap');
-          defaults.style.opacity = '0';
-          defaults.style.pointerEvents = 'none';
-          
-          requestAnimationFrame(function() {
-            slot.style.transition = 'opacity 0.5s ease, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), clip-path 0.7s cubic-bezier(0.16, 1, 0.3, 1)';
-            slot.style.opacity = '1';
-            slot.style.transform = 'translateY(0)';
-            slot.style.clipPath = 'inset(0 0 0% 0)';
-            slot.style.pointerEvents = 'auto';
-            
-            setTimeout(function() {
-              if (slot.style.opacity === '1') {
-                defaults.style.display = 'none';
-              }
-            }, 500);
-          });
+          prepareP2ContentSequence(slot);
+          runP2RevealAnimation(slot, defaults, el, contentH);
         }
       } else {
+        resetP2AreaHeight();
         slot.removeAttribute('data-current-role');
         if (el) el.classList.remove('has-swap');
         slot.innerHTML = '';
@@ -380,54 +662,86 @@
       var el = document.getElementById('p2-result');
       if (!el) return;
       var slot = document.getElementById('p2-slot');
+      var defaults = document.getElementById('p2-default-widgets');
       var canvas = document.getElementById('canvas');
       var userText = String(utt || '').trim();
       if (!userText) return;
 
-      // Reset visual state so we never end up with an empty black card.
-      el.classList.remove('has-swap');
-      if (slot) { 
-        slot.style.transition = 'opacity 0.3s ease';
-        slot.style.opacity = '0';
-        setTimeout(function(){ slot.innerHTML = ''; }, 300);
+      resetP2AreaHeight();
+      clearP2DefaultRevealState();
+
+      // Restore default widgets if a previous swap hid them
+      if (defaults) {
+        defaults.style.display = 'block';
+        defaults.style.opacity = '1';
+        defaults.style.pointerEvents = 'auto';
       }
 
-      // optimistic UI: show "thinking" state
-      var titleWrap = el.querySelector('.p2-result-title');
-      var subWrap = el.querySelector('.p2-result-sub');
-      if (titleWrap) titleWrap.innerHTML = '상황에 맞는 UI를<br>구성하는 중…';
-      if (subWrap) subWrap.textContent = '“' + userText.slice(0, 20) + '”';
-      el.classList.add('is-loading');
+      // Reset visual state so we never end up with an empty black card.
+      el.classList.remove('has-swap', 'is-resolving');
+      if (slot) {
+        slot.style.transition = 'opacity 0.3s ease';
+        slot.style.opacity = '0';
+        slot.style.pointerEvents = 'none';
+        slot.style.display = 'none';
+        slot.style.clipPath = 'none';
+        slot.classList.remove('p2-reveal-waiting', 'p2-reveal-swap', 'p2-reveal-visible', 'p2-seq-color', 'p2-seq-color-active', 'p2-seq-title', 'p2-seq-done');
+        slot.style.removeProperty('--p2-reveal-h');
+        setTimeout(function () { slot.innerHTML = ''; }, 300);
+      }
+
+      // Ensure loading overlay exists (handles hot-reload / older DOM)
+      var loadingLayer = el.querySelector('.p2-result-loading');
+      if (!loadingLayer) {
+        loadingLayer = document.createElement('div');
+        loadingLayer.className = 'p2-result-loading';
+        loadingLayer.setAttribute('aria-hidden', 'true');
+        loadingLayer.innerHTML =
+          '<div class="p2-result-loading__bg"></div>' +
+          '<div class="p2-result-loading__shimmer"></div>' +
+          '<div class="p2-result-loading__content">' +
+            '<div class="p2-result-loading__title">상황에 맞는 UI를<br>구성하는 중…</div>' +
+            '<div class="p2-result-loading__sub"></div>' +
+          '</div>';
+        el.insertBefore(loadingLayer, el.firstChild);
+      }
+
+      // optimistic UI: show "thinking" state (crossfade overlay, keep base card intact)
+      var loadingSub = el.querySelector('.p2-result-loading__sub');
+      if (loadingSub) loadingSub.textContent = '“' + userText.slice(0, 20) + '”';
+      el.classList.remove('is-loading');
+      void el.offsetWidth;
+      requestAnimationFrame(function () {
+        el.classList.add('is-loading');
+      });
+      if (canvas) canvas.classList.add('p2-generating');
+      
+      // Start generating animation for chord
+      generating = true;
+      if (!chordRaf) updateChordAnimation();
 
       try {
         var resolved = await resolveFromApi(userText);
         
         // Brief pause for dramatic "UI Reconstruction" effect
-        await new Promise(resolve => setTimeout(resolve, 800));
+        await new Promise(resolve => setTimeout(resolve, 1500)); // Increased for better visual of generating state
 
         applyTheme(resolved && resolved.themeKey);
         // Weather-like requests can also shift the wallpaper mood.
         applyBackgroundMood(canvas, resolved && resolved.backgroundKey);
         
         if (resolved && resolved.component) {
-          // Update text label (secondary) to reflect the request summary,
-          // but the primary UI should be the swapped component.
-          if (titleWrap) titleWrap.innerHTML = '최적의 화면을<br>찾았어요';
-          if (subWrap) subWrap.textContent = '생성된 컴포넌트로 전환합니다';
+          if (canvas) canvas.classList.remove('p2-generating');
+          generating = false;
 
-          // If the AI returned custom pill texts, update them too.
-          var pillTitle = document.getElementById('p2-pill-title');
-          var pillSub = document.getElementById('p2-pill-sub');
-          if (pillTitle && resolved.pillTitle) pillTitle.innerHTML = resolved.pillTitle;
-          if (pillSub && resolved.pillSub) pillSub.innerHTML = resolved.pillSub;
-          
-          // Remove loading state before mounting to avoid CSS opacity conflicts
-          el.classList.remove('is-loading');
+          // Staged reveal: keep loading card through expand, morph at phase 3
           mountResolvedComponent(resolved.component);
         }
       } catch (e) {
         console.error('setResultFromUtterance failed:', e);
         el.classList.remove('is-loading');
+        if (canvas) canvas.classList.remove('p2-generating');
+        generating = false;
       } finally {
         // No-op, handled above
       }
@@ -439,12 +753,23 @@
 
       var Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       var rec = null;
-      var listening = false;
 
       function stopListening() {
         listening = false;
         canvas.classList.remove('p2-listening');
         try { rec && rec.stop && rec.stop(); } catch (e) {}
+        
+        // Clean up audio analysis
+        if (micStream) {
+          micStream.getTracks().forEach(function(track) { track.stop(); });
+          micStream = null;
+        }
+        if (audioContext) {
+          audioContext.close();
+          audioContext = null;
+        }
+        analyser = null;
+        dataArray = null;
       }
 
       function startListening() {
@@ -452,6 +777,12 @@
         if (listening) return;
         listening = true;
         canvas.classList.add('p2-listening');
+        chordTime = 0;
+        formationLerp = 0;
+        currentVolume = 0;
+        
+        initAudioAnalysis(); // Start tracking volume
+        updateChordAnimation();
 
         if (Recognition) {
           console.log('Using SpeechRecognition');
