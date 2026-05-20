@@ -337,6 +337,24 @@ window.composeSurfacePlan = function composeSurfacePlan(surfaceType, layout) {
           ]
         };
       }
+      if (window.__mlpTestConfig && window.__mlpTestConfig.id === 'test3') {
+        return {
+          surfaceType,
+          components: [
+            { id: 'status-bar', role: 'status-bar', zone: 'topSystem' },
+            { id: 'test3-time-matrix', role: 'dot-time-matrix', zone: 'viewing',
+              variant: { bgColor: 'transparent', bgDotColor: 'rgba(25,45,74,0.34)', dotColor: '#FF9748', time: '12:45', meta: 'MON', dayDigits: '  ' },
+              _rect: { x: 28, y: 56, w: 322, h: 142 } },
+            { id: 'test3-orange-badge', role: 'dot-icon-orange-badge-1x1', zone: 'viewing',
+              _rect: { x: 38, y: 244, w: 58, h: 58 } },
+            { id: 'test3-page-dots', role: 'test3-page-dots', zone: 'viewing',
+              _rect: { x: 0, y: 714, w: 388, h: 24 } },
+            { id: 'app-dock', role: 'app-dock', zone: 'bottomNav',
+              content: { apps: ['Camera','Gallery','Maps','YT Music'] } },
+            { id: 'gesture-bar', role: 'gestureBar', zone: 'bottomAction' }
+          ]
+        };
+      }
       return {
         surfaceType,
         components: [
@@ -1024,11 +1042,11 @@ window.resolveComponentRect = function resolveComponentRect(comp, layout, plan) 
     case 'shortcutRight': {
       var isRight = comp.role === 'shortcutRight';
       var sideGap = 28;
-      var bottomGap = 36;
+      var bottomGap = 16;
       var size = 54;
       return {
         x: isRight ? (vw - sideGap - size) : sideGap,
-        y: vh - bottomGap - size - 44, // Figma top: 791.82
+        y: vh - bottomGap - size - 8,
         w: size,
         h: size
       };
@@ -1095,7 +1113,7 @@ window.resolveComponentRect = function resolveComponentRect(comp, layout, plan) 
     case 'gestureBar':
       return {
         x: 0,
-        y: vh - 24,
+        y: vh - 10,
         w: vw,
         h: 24
       };
@@ -1197,8 +1215,8 @@ window.resolveComponentRect = function resolveComponentRect(comp, layout, plan) 
     case 'unlock-hint':
       return {
         x: z.bottomNav.x,
-        // Move closer to bottom (less floating above shortcuts)
-        y: (z.bottomNav.y || vh - 80) - 24,
+        // Keep the text close to the lowered shortcut row.
+        y: (z.bottomNav.y || vh - 80) + 12,
         w: z.bottomNav.w,
         h: 32
       };
@@ -1483,8 +1501,17 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
 
     case 'cooking-yes-no-btn': {
       return '<div style="width:100%;height:100%;display:flex;gap:12px;">' +
-        '<button class="p3-yes-no-action" data-action="no" style="flex:1;height:56px;border-radius:28px;background:rgba(255,255,255,0.4);color:#1A1D1C;font-family:var(--font);font-weight:600;font-size:16px;border:none;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:opacity 0.2s;">아니요</button>' +
-        '<button class="p3-yes-no-action" data-action="yes" style="flex:1;height:56px;border-radius:28px;background:#B7E46A;color:#1A1D1C;font-family:var(--font);font-weight:600;font-size:16px;border:none;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:opacity 0.2s;">네, 준비해볼게요</button>' +
+        '<button class="p3-yes-no-action" data-action="no" aria-label="아니요" style="flex:1;height:56px;border-radius:28px;background:rgba(255,255,255,0.4);color:#1A1D1C;font-family:var(--font);font-weight:600;font-size:16px;border:none;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:opacity 0.2s;"></button>' +
+        '<button class="p3-yes-no-action" data-action="yes" aria-label="네, 준비해볼게요" style="flex:1;height:56px;border-radius:28px;background:#B7E46A;color:#1A1D1C;font-family:var(--font);font-weight:600;font-size:16px;border:none;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:opacity 0.2s;"></button>' +
+      '</div>';
+    }
+
+    case 'test3-page-dots': {
+      return '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;gap:7px;">' +
+        '<span style="width:6px;height:6px;border-radius:50%;background:rgba(11,27,44,0.58);display:block;box-shadow:0 1px 3px rgba(255,255,255,0.12);"></span>' +
+        '<span style="width:6px;height:6px;border-radius:50%;background:rgba(11,27,44,0.58);display:block;box-shadow:0 1px 3px rgba(255,255,255,0.12);"></span>' +
+        '<span style="width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.55);display:block;box-shadow:0 1px 3px rgba(0,0,0,0.18);"></span>' +
+        '<span style="width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.94);display:block;box-shadow:0 1px 3px rgba(0,0,0,0.18);"></span>' +
       '</div>';
     }
 
@@ -5635,6 +5662,7 @@ window.generateSurfaceScenario = function generateSurfaceScenario(surfaceType) {
   const canvas = document.getElementById('canvas');
   if (!canvas) return;
 
+  const testScope = window.__mlpTestConfig && window.__mlpTestConfig.id;
   window.currentSurfaceType = surfaceType;
 
   // Add support for lockscreen-dot
@@ -5648,6 +5676,11 @@ window.generateSurfaceScenario = function generateSurfaceScenario(surfaceType) {
   // Expand compositional roles into individual editable nodes.
   window.expandContainerComponents(plan, layout);
   window.renderSurfacePlan(canvas, plan, layout);
+  if (testScope) {
+    canvas.setAttribute('data-test-scope', testScope);
+  } else {
+    canvas.removeAttribute('data-test-scope');
+  }
 
   // Single hydrate — emits one 'hydrate' event to subscribers.
   if (window.DesignDoc && typeof window.DesignDoc.hydrateFromPlan === 'function') {
