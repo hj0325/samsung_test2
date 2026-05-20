@@ -1057,7 +1057,7 @@
     position: absolute;
     inset: -64px;
     opacity: 0;
-    background: linear-gradient(137.88deg, #FF7F24 2.12%, #FFCAA4 94.17%);
+    background: linear-gradient(137.88deg, #FF7F24 2.12%, #FED580 94.17%);
     border-radius: 32px;
     pointer-events: none;
     transform: translate3d(-18px, -18px, 0);
@@ -1115,14 +1115,20 @@
     background: #FF9950;
     border-radius: 83.3167px;
   }
+  @property --dot-music1-ring-angle {
+    syntax: '<angle>';
+    inherits: false;
+    initial-value: 0deg;
+  }
   .dot-music1__iconBg::before,
   .dot-music1__secondIconBg::before {
+    --dot-music1-ring-angle: 0deg;
     content: '';
     position: absolute;
     inset: 0;
     border-radius: inherit;
     padding: 2px;
-    background: conic-gradient(from 0deg, #000000 0deg, #000000 35deg, #DADADA 130deg, #DADADA 230deg, #000000 325deg, #000000 360deg);
+    background: conic-gradient(from var(--dot-music1-ring-angle), #000000 0deg, #000000 35deg, #DADADA 130deg, #DADADA 230deg, #000000 325deg, #000000 360deg);
     -webkit-mask:
       linear-gradient(#000 0 0) content-box,
       linear-gradient(#000 0 0);
@@ -1132,7 +1138,6 @@
     -webkit-mask-composite: xor;
     mask-composite: exclude;
     pointer-events: none;
-    transform-origin: center;
   }
   .dot-music1__iconBg::before {
     opacity: 0;
@@ -1216,7 +1221,7 @@
     position: relative;
     width: 168px;
     height: 168px;
-    background: linear-gradient(137.88deg, #FF7F24 2.12%, #FFCAA4 94.17%);
+    background: linear-gradient(137.88deg, #FF7F24 2.12%, #FED580 94.17%);
     border-radius: 32px;
     overflow: hidden;
   }
@@ -1672,8 +1677,8 @@
     60%, 100% { opacity: 1; }
   }
   @keyframes dotMusicFirstIconBgStrokeRotate {
-    0%, 41.67% { transform: rotate(0deg); }
-    96%, 100% { transform: rotate(1440deg); }
+    0%, 41.67% { --dot-music1-ring-angle: 0deg; }
+    96%, 100% { --dot-music1-ring-angle: 1440deg; }
   }
   @keyframes dotMusicFirstIconToSecond {
     0%, 41.67% {
@@ -1798,8 +1803,8 @@
     37.89%, 89.47% { opacity: 1; }
   }
   @keyframes dotMusicPreviewFirstIconBgStrokeRotate {
-    0%, 26.32%, 92%, 100% { transform: rotate(0deg); }
-    63.16%, 89.47% { transform: rotate(1440deg); }
+    0%, 26.32%, 92%, 100% { --dot-music1-ring-angle: 0deg; }
+    63.16%, 89.47% { --dot-music1-ring-angle: 1440deg; }
   }
   @keyframes dotMusicPreviewFirstIconHold {
     0%, 26.32%, 92%, 100% {
