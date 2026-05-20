@@ -1037,8 +1037,8 @@
     position: absolute;
     width: 78px;
     height: 18px;
-    left: 50px;
-    top: 128px;
+    left: 49px;
+    top: 130.5px;
     font-family: 'Pretendard', var(--font), -apple-system, BlinkMacSystemFont, sans-serif;
     font-style: normal;
     font-weight: 600;
@@ -1132,6 +1132,7 @@
     -webkit-mask-composite: xor;
     mask-composite: exclude;
     pointer-events: none;
+    transform-origin: center;
   }
   .dot-music1__iconBg::before {
     opacity: 0;
@@ -1197,7 +1198,9 @@
     animation: dotMusicFirstIconBgToSecond 12s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
   .detail-stage .dot-music1__compact--layout .dot-music1__iconBg::before {
-    animation: dotMusicFirstIconBgStrokeToSecond 12s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation:
+      dotMusicFirstIconBgStrokeToSecond 12s cubic-bezier(0.16, 1, 0.3, 1) forwards,
+      dotMusicFirstIconBgStrokeRotate 12s linear forwards;
   }
   .detail-stage .dot-music1__compact--layout .dot-music1__musicIcon {
     animation: dotMusicFirstIconToSecond 12s cubic-bezier(0.16, 1, 0.3, 1) forwards;
@@ -1248,8 +1251,8 @@
     position: absolute;
     width: 78px;
     height: 18px;
-    left: 50px;
-    top: 128px;
+    left: 49px;
+    top: 130.5px;
     font-family: 'Pretendard', var(--font), -apple-system, BlinkMacSystemFont, sans-serif;
     font-style: normal;
     font-weight: 600;
@@ -1445,7 +1448,9 @@
     animation: dotMusicPreviewFirstIconBgHold 19s cubic-bezier(0.16, 1, 0.3, 1) infinite;
   }
   .preview-cell .dot-music1__compact--layout .dot-music1__iconBg::before {
-    animation: dotMusicPreviewFirstIconBgStrokeHold 19s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+    animation:
+      dotMusicPreviewFirstIconBgStrokeHold 19s cubic-bezier(0.16, 1, 0.3, 1) infinite,
+      dotMusicPreviewFirstIconBgStrokeRotate 19s linear infinite;
   }
   .preview-cell .dot-music1__compact--layout .dot-music1__musicIcon {
     animation: dotMusicPreviewFirstIconHold 19s cubic-bezier(0.16, 1, 0.3, 1) infinite;
@@ -1665,6 +1670,10 @@
     0%, 41.67% { opacity: 0; }
     60%, 100% { opacity: 1; }
   }
+  @keyframes dotMusicFirstIconBgStrokeRotate {
+    0%, 41.67% { transform: rotate(0deg); }
+    60%, 96%, 100% { transform: rotate(1080deg); }
+  }
   @keyframes dotMusicFirstIconToSecond {
     0%, 41.67% {
       width: 24.87px;
@@ -1785,6 +1794,10 @@
   @keyframes dotMusicPreviewFirstIconBgStrokeHold {
     0%, 26.32%, 92%, 100% { opacity: 0; }
     37.89%, 89.47% { opacity: 1; }
+  }
+  @keyframes dotMusicPreviewFirstIconBgStrokeRotate {
+    0%, 26.32%, 92%, 100% { transform: rotate(0deg); }
+    37.89%, 63.16%, 89.47% { transform: rotate(1080deg); }
   }
   @keyframes dotMusicPreviewFirstIconHold {
     0%, 26.32%, 92%, 100% {
