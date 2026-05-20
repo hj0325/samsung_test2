@@ -3046,11 +3046,11 @@
   @keyframes dotScheduleTimeNoteIn {
     from {
       opacity: 0;
-      transform: translate(12px, 2px);
+      transform: translate(12px, 1px);
     }
     to {
       opacity: 1;
-      transform: translate(0, 2px);
+      transform: translate(0, 1px);
     }
   }
   @keyframes dotScheduleTextGradientIn {
@@ -3171,15 +3171,15 @@
   @keyframes dotSchedulePreviewTimeNoteIn {
     0%, 62.8% {
       opacity: 0;
-      transform: translate(12px, 2px);
+      transform: translate(12px, 1px);
     }
     65.2%, 91% {
       opacity: 1;
-      transform: translate(0, 2px);
+      transform: translate(0, 1px);
     }
     93%, 100% {
       opacity: 0;
-      transform: translate(12px, 2px);
+      transform: translate(12px, 1px);
     }
   }
   @keyframes dotSchedulePreviewTextGradient {
