@@ -971,44 +971,93 @@
   #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1 {
     width: 168px;
     clip-path: inset(0 0 0 0 round 32px);
-    animation: test3MusicRevealCard 12s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+    animation: dotMusicRevealCard 12s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+    will-change: width, clip-path;
   }
   #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact {
     width: 168px;
-    animation: test3MusicCompactOut 12s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+    animation: dotMusicCompactOut 12s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
   }
   #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__expanded {
     animation: dotMusicExpandedIn 12s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
   }
   #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__icon {
-    animation: test3MusicIconIn 12s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+    animation: dotMusicIconIn 12s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
   }
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__player::before {
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__icon .dot-music3::before {
+    animation: dotMusicHorizontalBgFlowIn 4.2s linear 12s forwards !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__player {
+    animation: none !important;
+  }
+  /* 1×1 compact phase: reuse Music 1×1 asset movement from theme detail/preview */
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__player::before {
     animation:
       dotMusicSecondBgIn 12s cubic-bezier(0.16, 1, 0.3, 1) forwards,
       dotMusicSecondBgFlow 9s linear 5s forwards !important;
   }
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__player::after {
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__player::after {
     animation:
       dotMusicSecondTextIn 12s cubic-bezier(0.16, 1, 0.3, 1) forwards,
       dotMusicSecondTitleGradient 2.2s linear 6.6s infinite !important;
   }
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__singer-name {
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__singer-name {
     animation:
       dotMusicSingerGradient 2.2s linear 3s infinite,
+      dotMusicSingerGradientFillIn 680ms cubic-bezier(0.16, 1, 0.3, 1) 3s forwards,
       dotMusicFirstTextOut 12s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
   }
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__iconBg {
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__iconBg {
     animation: dotMusicFirstIconBgToSecond 12s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
   }
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__musicIcon {
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__iconBg::before {
+    animation:
+      dotMusicFirstIconBgStrokeToSecond 12s cubic-bezier(0.16, 1, 0.3, 1) forwards,
+      dotMusicFirstIconBgStrokeRotate 12s linear forwards !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__musicIcon {
     animation: dotMusicFirstIconToSecond 12s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
   }
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__noteSvg circle {
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle {
     animation:
       dotMusicIconDotSweep 1.8s steps(1, end) 3s 1 forwards,
-      dotMusicIconDotSweep 1.8s steps(1, end) 6.4s infinite;
+      dotMusicIconDotSweep 1.8s steps(1, end) 6.4s infinite,
+      dotMusicSecondDotFillWave 1.8s steps(1, end) 8s infinite !important;
   }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(1) { animation-delay: 3.000s, 6.400s, 8.000s; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(7) { animation-delay: 3.018s, 6.418s, 8.018s; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(2) { animation-delay: 3.036s, 6.436s, 8.036s; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(3) { animation-delay: 3.054s, 6.454s, 8.054s; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(8) { animation-delay: 3.072s, 6.472s, 8.072s; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(13) { animation-delay: 3.090s, 6.490s, 8.090s; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(9) { animation-delay: 3.108s, 6.508s, 8.108s; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(14) { animation-delay: 3.126s, 6.526s, 8.126s; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(4) { animation-delay: 3.144s, 6.544s, 8.144s; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(19) { animation-delay: 3.162s, 6.562s, 8.162s; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(15) { animation-delay: 3.180s, 6.580s, 8.180s; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(10) { animation-delay: 3.198s, 6.598s, 8.198s; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(5) { animation-delay: 3.216s, 6.616s, 8.216s; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(21) { animation-delay: 3.234s, 6.634s, 8.234s; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(25) { animation-delay: 3.252s, 6.652s, 8.252s; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(16) { animation-delay: 3.270s, 6.670s, 8.270s; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(11) { animation-delay: 3.288s, 6.688s, 8.288s; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(6) { animation-delay: 3.306s, 6.706s, 8.306s; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(31) { animation-delay: 3.324s, 6.724s, 8.324s; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(26) { animation-delay: 3.342s, 6.742s, 8.342s; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(23) { animation-delay: 3.360s, 6.760s, 8.360s; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(12) { animation-delay: 3.378s, 6.778s, 8.378s; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(17) { animation-delay: 3.396s, 6.796s, 8.396s; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(32) { animation-delay: 3.414s, 6.814s, 8.414s; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(27) { animation-delay: 3.432s, 6.832s, 8.432s; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(18) { animation-delay: 3.450s, 6.850s, 8.450s; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(20) { animation-delay: 3.468s, 6.868s, 8.468s; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(22) { animation-delay: 3.486s, 6.886s, 8.486s; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(28) { animation-delay: 3.504s, 6.904s, 8.504s; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(33) { animation-delay: 3.522s, 6.922s, 8.522s; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(24) { animation-delay: 3.540s, 6.940s, 8.540s; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(29) { animation-delay: 3.558s, 6.958s, 8.558s; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(34) { animation-delay: 3.576s, 6.976s, 8.576s; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(30) { animation-delay: 3.594s, 6.994s, 8.594s; }
   #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-weather {
     animation: test3WeatherShift 0.98s cubic-bezier(0.22, 1, 0.36, 1) both !important;
     will-change: transform;

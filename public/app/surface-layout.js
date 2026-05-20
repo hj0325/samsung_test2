@@ -393,7 +393,6 @@ window.composeSurfacePlan = function composeSurfacePlan(surfaceType, layout) {
               _rect: { x: 24, y: 42, w: 340, h: 168 } },
             musicShifted ? { id: 'test3-music', role: 'dot-music-1x1', zone: 'viewing',
               variant: {
-                compactTitle: '햇빛이 쨍쨍한\n날씨에 듣기 좋은\n곡을 찾아드릴게요',
                 iconTitle: '가벼운 러닝에는 부드럽고 상쾌한\nConcierto가 좋을거같아요!',
                 iconSubtitle: 'Jim Hall - Concierto'
               },
