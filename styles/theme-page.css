@@ -2579,7 +2579,7 @@
     will-change: opacity, transform;
     animation:
       dotScheduleBgGradientIn 520ms cubic-bezier(0.16, 1, 0.3, 1) 5.86s forwards,
-      dotScheduleBgGradientFlow 2.1s ease-in-out 5.86s infinite,
+      dotScheduleBgGradientFlow 4s linear 5.86s infinite,
       dotScheduleBgGradientOut 900ms cubic-bezier(0.16, 1, 0.3, 1) 9.8s forwards;
   }
   .detail-stage .dot-sch22__expanded {
@@ -2643,7 +2643,7 @@
     -webkit-text-fill-color: #FF7F24;
     animation:
       dotScheduleDateTextureIn 760ms cubic-bezier(0.16, 1, 0.3, 1) 3s forwards,
-      dotScheduleDateGradientFlow 3.5s linear 3s infinite,
+      dotScheduleDateGradientFlow 4s linear 3s infinite,
       dotScheduleDateSettleOrange 240ms ease-out 10.10s forwards;
   }
   .detail-stage .dot-sch22__compact .dot-sch__list .dot-sch__text {
@@ -2657,7 +2657,7 @@
     -webkit-background-clip: text;
     animation:
       dotScheduleTextGradientIn 460ms cubic-bezier(0.16, 1, 0.3, 1) 3s forwards,
-      dotScheduleTextGradientFlow 2.8s linear 3s infinite;
+      dotScheduleTextGradientFlow 4s linear 3s infinite;
   }
   .detail-stage .dot-sch22__compact .dot-sch__list .dot-sch__text.is-muted,
   .detail-stage .dot-sch22__compact .dot-sch__list .dot-sch__text.is-accent,
@@ -2708,7 +2708,7 @@
     pointer-events: none;
     z-index: 0;
     will-change: opacity, transform;
-    animation: dotSchedulePreviewBgGradient 18.2s linear infinite, dotScheduleBgGradientFlow 2.1s ease-in-out infinite;
+    animation: dotSchedulePreviewBgGradient 18.2s linear infinite, dotScheduleBgGradientFlow 4s linear infinite;
   }
   .preview-cell .dot-sch22__compact .dot-sch__row {
     animation: dotSchedulePreviewRowOut 18.2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
@@ -2726,7 +2726,7 @@
     -webkit-text-fill-color: #FF7F24;
     animation:
       dotSchedulePreviewDateTexture 18.2s cubic-bezier(0.16, 1, 0.3, 1) infinite,
-      dotScheduleDateGradientFlow 5.6s linear infinite;
+      dotScheduleDateGradientFlow 4s linear infinite;
   }
   .preview-cell .dot-sch22__expanded {
     opacity: 1;
@@ -2778,7 +2778,7 @@
     -webkit-background-clip: text;
     animation:
       dotSchedulePreviewTextGradient 18.2s cubic-bezier(0.16, 1, 0.3, 1) infinite,
-      dotScheduleTextGradientFlow 2.8s linear infinite;
+      dotScheduleTextGradientFlow 4s linear infinite;
   }
   .preview-cell .dot-sch22__compact .dot-sch__list .dot-sch__text.is-muted,
   .preview-cell .dot-sch22__compact .dot-sch__list .dot-sch__text.is-accent,
@@ -2999,8 +2999,8 @@
     }
   }
   @keyframes dotScheduleDateGradientFlow {
-    0% { background-position: 0% 50%; }
-    100% { background-position: 100% 50%; }
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 105% 50%; }
   }
   @keyframes dotScheduleDateSettleOrange {
     from {
@@ -3021,8 +3021,8 @@
     to { opacity: 0; visibility: hidden; }
   }
   @keyframes dotScheduleBgGradientFlow {
-    0% { transform: translate3d(-10%, -10%, 0) scale(1.08); }
-    100% { transform: translate3d(10%, 10%, 0) scale(1.08); }
+    0%, 100% { transform: translate3d(-8%, -8%, 0) scale(1.08); }
+    50% { transform: translate3d(8%, 8%, 0) scale(1.08); }
   }
   @keyframes dotSchedulePreviewBgGradient {
     0%, 32% { opacity: 0; visibility: hidden; }
@@ -3051,8 +3051,8 @@
     }
   }
   @keyframes dotScheduleTextGradientFlow {
-    0% { background-position: 0% 50%; }
-    100% { background-position: 100% 50%; }
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 105% 50%; }
   }
   @keyframes dotSchedulePreviewReveal {
     0%, 48.6% { clip-path: inset(0 172px 0 0 round 32px); }
