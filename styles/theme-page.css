@@ -1668,11 +1668,12 @@
   }
   @keyframes dotMusicFirstIconBgStrokeToSecond {
     0%, 41.67% { opacity: 0; }
+    50% { opacity: 0.45; }
     60%, 100% { opacity: 1; }
   }
   @keyframes dotMusicFirstIconBgStrokeRotate {
     0%, 41.67% { transform: rotate(0deg); }
-    60%, 96%, 100% { transform: rotate(1080deg); }
+    96%, 100% { transform: rotate(1440deg); }
   }
   @keyframes dotMusicFirstIconToSecond {
     0%, 41.67% {
@@ -1793,11 +1794,12 @@
   }
   @keyframes dotMusicPreviewFirstIconBgStrokeHold {
     0%, 26.32%, 92%, 100% { opacity: 0; }
+    32.63% { opacity: 0.45; }
     37.89%, 89.47% { opacity: 1; }
   }
   @keyframes dotMusicPreviewFirstIconBgStrokeRotate {
     0%, 26.32%, 92%, 100% { transform: rotate(0deg); }
-    37.89%, 63.16%, 89.47% { transform: rotate(1080deg); }
+    63.16%, 89.47% { transform: rotate(1440deg); }
   }
   @keyframes dotMusicPreviewFirstIconHold {
     0%, 26.32%, 92%, 100% {
