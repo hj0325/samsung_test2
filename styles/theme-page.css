@@ -1194,12 +1194,13 @@
     overflow: hidden;
   }
   .dot-music1__secondIconBg {
+    box-sizing: border-box;
     position: absolute;
     width: 96.77px;
     height: 96.77px;
     left: 35.08px;
     top: 19.54px;
-    background: linear-gradient(306.8deg, #FF6A00 -2.23%, #FFCE73 90.04%);
+    background: transparent;
     border-radius: 149.684px;
     opacity: 0;
   }
@@ -1629,7 +1630,7 @@
       left: 35.08px;
       top: 19.54px;
       border-radius: 149.684px;
-      background: linear-gradient(306.8deg, #FF6A00 -2.23%, #FFCE73 90.04%);
+      background: transparent;
       opacity: 1;
     }
   }
@@ -1746,7 +1747,7 @@
       left: 35.08px;
       top: 19.54px;
       border-radius: 149.684px;
-      background: linear-gradient(306.8deg, #FF6A00 -2.23%, #FFCE73 90.04%);
+      background: transparent;
       opacity: 1;
     }
   }
