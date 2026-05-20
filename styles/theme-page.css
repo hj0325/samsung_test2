@@ -3043,6 +3043,16 @@
       transform: translateX(0);
     }
   }
+  @keyframes dotScheduleTimeNoteIn {
+    from {
+      opacity: 0;
+      transform: translateX(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
   @keyframes dotScheduleTextGradientIn {
     from {
       -webkit-text-fill-color: #FFFFFF;
