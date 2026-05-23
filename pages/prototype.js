@@ -322,7 +322,7 @@ export default function PrototypePage() {
           }
           .persona-circle:not(.is-disabled):hover {
             transform: scale(1.08) !important;
-            border-color: #64e9e3 !important;
+            border-color: #8FFF2D !important;
           }
           .persona-circle:not(.is-disabled):active {
             transform: scale(0.95) !important;
@@ -465,9 +465,9 @@ export default function PrototypePage() {
 
         <div className="mlp-workspace">
           <aside className="mlp-left">
-            <span className="persona-circle is-disabled" aria-disabled="true" title="준비 중">
+            <Link href="/test1" className="persona-circle" style={{ cursor: 'pointer' }}>
               <img src="/assets/persona-1.png" alt="Persona 1" className="persona-img" />
-            </span>
+            </Link>
             <Link href="/test2" className="persona-circle" style={{ cursor: 'pointer', border: scenario === 'lockscreen-persona2' ? '3px solid #fff' : 'none' }}>
               <img src="/assets/persona-2.png" alt="Persona 2" className="persona-img" />
             </Link>

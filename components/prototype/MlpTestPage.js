@@ -10,7 +10,7 @@ const PHONE_RADIUS = 30;
 const HOME_BG = "/assets/bg-new.png?v=2";
 
 const TESTS = [
-  { id: "test1", href: "/test1", label: "Persona 1", img: "/assets/persona-1.png", disabled: true },
+  { id: "test1", href: "/test1", label: "Persona 1", img: "/assets/persona-1.png" },
   { id: "test2", href: "/test2", label: "Persona 2", img: "/assets/persona-2.png" },
   { id: "test3", href: "/test3", label: "Persona 3", img: "/assets/persona-3.png" },
 ];
@@ -299,7 +299,7 @@ export default function MlpTestPage({
           }
           .persona-circle:not(.is-disabled):hover {
             transform: scale(1.08) !important;
-            border-color: #64e9e3 !important;
+            border-color: #8FFF2D !important;
           }
           .persona-img {
             width: 100% !important;

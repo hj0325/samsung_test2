@@ -356,7 +356,7 @@ window.composeSurfacePlan = function composeSurfacePlan(surfaceType, layout) {
               variant: { label: 'Jogging', time: '10:35' },
               _rect: { x: 196, y: 300, w: 168, h: 82 } },
             { id: 'p1-timemat', role: 'dot-time-matrix', zone: 'viewing',
-              variant: { bgColor: 'transparent', dotColor: '#FF7F24', time: '12:45', meta: 'MON', dayDigits: '  ' },
+              variant: { bgColor: 'transparent', dotColor: '#8FFF2D', time: '12:45', meta: 'MON', dayDigits: '  ' },
               _rect: { x: 26, y: 386, w: 335, h: 165 } },
             { id: 'app-dock', role: 'app-dock', zone: 'bottomNav',
               content: { apps: ['Camera','Gallery','Maps','YT Music'] } },
