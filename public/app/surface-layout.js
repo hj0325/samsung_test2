@@ -5366,6 +5366,11 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
       if (window.__mlpTestConfig && window.__mlpTestConfig.id === 'test2') {
         return '<div class="p2-widgets p2-widgets--compact" style="position:relative; width:100%; height:240px;">' +
           '<div id="p2-area" class="p2-agent-shell" style="position:absolute; top:0; left:24px; right:24px; height:148px; overflow:hidden;">' +
+            '<div class="p2-agent-fill" aria-hidden="true">' +
+              '<div class="p2-agent-fill__bloom"></div>' +
+              '<div class="p2-agent-fill__mist"></div>' +
+              '<div class="p2-agent-fill__wave"></div>' +
+            '</div>' +
             '<div id="p2-default-widgets" class="p2-agent-main" style="position:relative; width:100%; flex:1; min-height:0; transition:opacity 0.4s ease;">' +
               '<div id="p2-result" class="p2-dark p2-obc-host p2-agent-card" style="position:absolute; inset:0; background:transparent; border-radius:36px; padding:0; box-sizing:border-box; overflow:hidden;">' +
                 '<div class="p2-result-loading" aria-hidden="true">' +
@@ -5951,6 +5956,38 @@ window.attachReorderHandlers = function attachReorderHandlers(el, nodeId) {
 // Callers (scene buttons, agent fallback, skeleton loader) rely on this
 // single-event contract so scene-inspector + interaction-overlay don't
 // double-refresh.
+
+function installTest2P2TransitionBridge(canvas) {
+  if (!canvas || canvas.dataset.test2P2Bridge === '1') return;
+  if (!(window.__mlpTestConfig && window.__mlpTestConfig.id === 'test2')) return;
+  canvas.dataset.test2P2Bridge = '1';
+
+  function softenSlotInlineStyles(slot) {
+    if (!slot) return;
+    var inReveal =
+      slot.classList.contains('p2-reveal-waiting') ||
+      slot.classList.contains('p2-reveal-swap') ||
+      slot.classList.contains('p2-seq-done');
+    if (!inReveal) return;
+    slot.style.removeProperty('opacity');
+    slot.style.removeProperty('transition');
+  }
+
+  function bindSlot(slot) {
+    if (!slot || slot.dataset.test2P2Bound === '1') return;
+    slot.dataset.test2P2Bound = '1';
+    new MutationObserver(function () {
+      softenSlotInlineStyles(slot);
+    }).observe(slot, { attributes: true, attributeFilter: ['class', 'style'] });
+    softenSlotInlineStyles(slot);
+  }
+
+  bindSlot(document.getElementById('p2-slot'));
+  new MutationObserver(function () {
+    bindSlot(document.getElementById('p2-slot'));
+  }).observe(canvas, { childList: true, subtree: true });
+}
+
 window.generateSurfaceScenario = function generateSurfaceScenario(surfaceType) {
   const canvas = document.getElementById('canvas');
   if (!canvas) return;
@@ -6007,6 +6044,11 @@ window.generateSurfaceScenario = function generateSurfaceScenario(surfaceType) {
     canvas.removeAttribute('data-test3-music-shift');
   }
   window.renderSurfacePlan(canvas, plan, layout);
+  if (testScope === 'test2') {
+    try {
+      installTest2P2TransitionBridge(canvas);
+    } catch (_) {}
+  }
   // test3: flip prep → enter on next frame, then tear down enter after animations complete
   if (testScope === 'test3' && canvas.getAttribute('data-test3-home-prep') === '1') {
     requestAnimationFrame(function () {
