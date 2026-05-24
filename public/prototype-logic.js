@@ -185,21 +185,53 @@
     var dataArray = null;
     var micStream = null;
     var currentVolume = 0;
+    var audioInitId = 0;
+
+    function cleanupAudioAnalysis() {
+      if (micStream) {
+        micStream.getTracks().forEach(function (track) { track.stop(); });
+        micStream = null;
+      }
+      if (audioContext) {
+        audioContext.close();
+        audioContext = null;
+      }
+      analyser = null;
+      dataArray = null;
+    }
 
     async function initAudioAnalysis() {
       if (audioContext) return;
+
+      var initId = audioInitId;
+      var ctx = null;
+      var stream = null;
       try {
         var AudioContextClass = window.AudioContext || window.webkitAudioContext;
-        audioContext = new AudioContextClass();
-        micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        var source = audioContext.createMediaStreamSource(micStream);
-        analyser = audioContext.createAnalyser();
+        if (!AudioContextClass || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return;
+
+        ctx = new AudioContextClass();
+        audioContext = ctx;
+        stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+        // stopListening() may run while awaiting mic permission/stream
+        if (initId !== audioInitId || !listening || audioContext !== ctx) {
+          stream.getTracks().forEach(function (track) { track.stop(); });
+          if (audioContext === ctx) cleanupAudioAnalysis();
+          return;
+        }
+
+        micStream = stream;
+        var source = ctx.createMediaStreamSource(stream);
+        analyser = ctx.createAnalyser();
         analyser.fftSize = 256;
         var bufferLength = analyser.frequencyBinCount;
         dataArray = new Uint8Array(bufferLength);
         source.connect(analyser);
       } catch (e) {
         console.error('Audio analysis init failed:', e);
+        if (stream) stream.getTracks().forEach(function (track) { track.stop(); });
+        if (audioContext === ctx) cleanupAudioAnalysis();
       }
     }
 
@@ -241,6 +273,7 @@
         var N = dots.length;
 
         var vol = updateVolume();
+        if (window.P2AgentFillGL) window.P2AgentFillGL.setAudio(vol);
         // Voice-reactive amplitude: base breathing (14) + voice boost (up to 26 more)
         var dynamicAmp = 14 + (vol * 26);
 
@@ -483,6 +516,7 @@
       }
       defaults.style.opacity = '0';
       defaults.style.display = 'none';
+      if (window.P2AgentFillGL) window.P2AgentFillGL.setPhase('fadeOut');
     }
 
     function runP2ContentSequence(slot, defaults, result, contentH) {
@@ -715,6 +749,7 @@
         el.classList.add('is-loading');
       });
       if (canvas) canvas.classList.add('p2-generating');
+      if (window.P2AgentFillGL) window.P2AgentFillGL.setPhase('generating');
       
       // Start generating animation for chord
       generating = true;
@@ -733,6 +768,7 @@
         if (resolved && resolved.component) {
           if (canvas) canvas.classList.remove('p2-generating');
           generating = false;
+          if (window.P2AgentFillGL) window.P2AgentFillGL.setPhase('settling');
 
           // Staged reveal: keep loading card through expand, morph at phase 3
           mountResolvedComponent(resolved.component);
@@ -742,6 +778,7 @@
         el.classList.remove('is-loading');
         if (canvas) canvas.classList.remove('p2-generating');
         generating = false;
+        if (window.P2AgentFillGL) window.P2AgentFillGL.setPhase('idle');
       } finally {
         // No-op, handled above
       }
@@ -751,25 +788,36 @@
       var canvas = document.getElementById('canvas');
       if (!canvas) return;
 
+      function bindP2FillGl() {
+        if (window.P2AgentFillGL) window.P2AgentFillGL.ensureBound();
+      }
+
+      bindP2FillGl();
+      if (typeof MutationObserver !== 'undefined') {
+        var mo = new MutationObserver(function () {
+          bindP2FillGl();
+        });
+        mo.observe(canvas, { childList: true, subtree: true });
+      } else {
+        var bindAttempts = 0;
+        var bindTimer = setInterval(function () {
+          bindP2FillGl();
+          bindAttempts += 1;
+          if (bindAttempts > 40) clearInterval(bindTimer);
+        }, 250);
+      }
+
       var Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       var rec = null;
 
       function stopListening() {
         listening = false;
+        audioInitId++;
         canvas.classList.remove('p2-listening');
         try { rec && rec.stop && rec.stop(); } catch (e) {}
         
-        // Clean up audio analysis
-        if (micStream) {
-          micStream.getTracks().forEach(function(track) { track.stop(); });
-          micStream = null;
-        }
-        if (audioContext) {
-          audioContext.close();
-          audioContext = null;
-        }
-        analyser = null;
-        dataArray = null;
+        // Clean up audio analysis (also cancels in-flight init after getUserMedia resolves)
+        cleanupAudioAnalysis();
       }
 
       function startListening() {
@@ -780,6 +828,11 @@
         chordTime = 0;
         formationLerp = 0;
         currentVolume = 0;
+
+        if (window.P2AgentFillGL) {
+          window.P2AgentFillGL.ensureBound();
+          window.P2AgentFillGL.setPhase('listening');
+        }
         
         initAudioAnalysis(); // Start tracking volume
         updateChordAnimation();

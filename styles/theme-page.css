@@ -954,6 +954,7 @@
     border-radius: 36px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
     overflow: hidden;
+    isolation: isolate;
     --p2-fill-x: calc(100% - 36px);
     --p2-fill-y: calc(100% - 40px);
     transition: background 0.55s ease, box-shadow 0.85s ease, height 0.65s cubic-bezier(0.16, 1, 0.3, 1);
@@ -968,6 +969,33 @@
     overflow: hidden;
     will-change: opacity;
     transition: opacity 0.55s cubic-bezier(0.22, 0.82, 0.24, 1);
+  }
+  #canvas[data-test-scope="test2"] .p2-agent-fill__gl {
+    position: absolute;
+    inset: 0;
+    width: 100% !important;
+    height: 100% !important;
+    display: block;
+    pointer-events: none;
+    border-radius: inherit;
+  }
+  #canvas[data-test-scope="test2"] .p2-agent-fill--gl-ready.p2-agent-fill--gl-active {
+    opacity: 1;
+    transition: opacity 0.32s cubic-bezier(0.22, 0.82, 0.24, 1);
+  }
+  #canvas[data-test-scope="test2"] .p2-agent-fill--gl-ready:not(.p2-agent-fill--gl-active) {
+    opacity: 0;
+    transition: opacity 0.85s cubic-bezier(0.22, 0.82, 0.24, 1) 0.35s;
+  }
+  #canvas[data-test-scope="test2"] .p2-agent-fill--gl-ready.p2-agent-fill--gl-fading {
+    opacity: 0 !important;
+    transition: opacity 1.25s cubic-bezier(0.22, 0.82, 0.24, 1) 0.15s;
+  }
+  #canvas[data-test-scope="test2"] .p2-agent-fill--gl-ready .p2-agent-fill__bloom,
+  #canvas[data-test-scope="test2"] .p2-agent-fill--gl-ready .p2-agent-fill__mist,
+  #canvas[data-test-scope="test2"] .p2-agent-fill--gl-ready .p2-agent-fill__wave,
+  #canvas[data-test-scope="test2"] .p2-agent-fill--gl-ready::after {
+    display: none !important;
   }
   #canvas[data-test-scope="test2"] .p2-agent-fill::after {
     content: "";
@@ -1158,8 +1186,16 @@
   #canvas[data-test-scope="test2"] .p2-agent-shell:not(:has(#p2-result.is-loading)):not(:has(#p2-slot.p2-reveal-swap)):not(:has(#p2-slot.p2-seq-done)) {
     height: 148px !important;
   }
-  #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-result.is-loading) {
+  #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-result.is-loading):not(.p2-agent-shell--gl-fill) {
     background: linear-gradient(135deg, #FF8F28 0%, #FFB347 55%, #FFD06E 100%);
+    box-shadow: 0 10px 36px rgba(255, 151, 72, 0.28);
+    height: 148px !important;
+    padding: 0;
+    gap: 0;
+    overflow: hidden;
+  }
+  #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-result.is-loading).p2-agent-shell--gl-fill {
+    background: #121210;
     box-shadow: 0 10px 36px rgba(255, 151, 72, 0.28);
     height: 148px !important;
     padding: 0;
@@ -1424,6 +1460,9 @@
       animation: none !important;
       opacity: 0;
       transition: none !important;
+    }
+    #canvas[data-test-scope="test2"] .p2-agent-fill__gl {
+      display: none !important;
     }
   }
 

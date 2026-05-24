@@ -5367,6 +5367,7 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
         return '<div class="p2-widgets p2-widgets--compact" style="position:relative; width:100%; height:240px;">' +
           '<div id="p2-area" class="p2-agent-shell" style="position:absolute; top:0; left:24px; right:24px; height:148px; overflow:hidden;">' +
             '<div class="p2-agent-fill" aria-hidden="true">' +
+              '<canvas class="p2-agent-fill__gl"></canvas>' +
               '<div class="p2-agent-fill__bloom"></div>' +
               '<div class="p2-agent-fill__mist"></div>' +
               '<div class="p2-agent-fill__wave"></div>' +
