@@ -40,7 +40,7 @@
     'float fbm(vec2 p) {',
     '  float v = 0.0;',
     '  float a = 0.5;',
-    '  for (int i = 0; i < 3; i++) {',
+    '  for (int i = 0; i < 4; i++) {',
     '    v += a * noise(p);',
     '    p = p * 2.02 + vec2(1.7, 2.3);',
     '    a *= 0.5;',
@@ -59,19 +59,64 @@
     '  return p;',
     '}',
     '',
+    'float organicReveal(vec2 uv, vec2 rel, float sdf, float spread, float time, float audio) {',
+    '  float s = clamp(spread, 0.0, 1.45);',
+    '  if (s < 0.001) return 0.0;',
+    '  float onset = smoothstep(0.0, 0.09, s);',
+    '  float early = (1.0 - smoothstep(0.0, 0.58, s)) * onset;',
+    '  vec2 target = vec2(0.05, 0.95);',
+    '  vec2 diag = vec2((target.x - u_origin.x) * u_aspect, target.y - u_origin.y);',
+    '  vec2 diagN = diag / max(length(diag), 0.0001);',
+    '  vec2 ellRel = rel * vec2(0.72, 1.0);',
+    '  float dist = length(ellRel);',
+    '  float align = max(0.0, dot(normalize(rel + vec2(0.001)), diagN));',
+    '  dist *= 1.0 - align * 0.10;',
+    '  float depthIn = clamp(-sdf / max(u_radius * 2.4, 0.08), 0.0, 1.0);',
+    '  float edgeProx = 1.0 - smoothstep(0.0, 0.26, depthIn);',
+    '  float wobble = (fbm(uv * 2.0 + time * 0.018) - 0.5)',
+    '    * (0.055 + early * 0.065) * max(s, 0.06);',
+    '  float revealAt = s * 1.24 + early * 0.14;',
+    '  float edgeBoost = edgeProx * (0.38 + early * 0.20);',
+    '  float centerLag = depthIn * 0.20 * (1.0 - smoothstep(0.44, 1.08, s));',
+    '  float localFront = revealAt + edgeBoost - centerLag;',
+    '  float softLead = max(0.26, 0.42 * s + early * 0.24 + audio * 0.028);',
+    '  float softTrail = softLead * 1.45;',
+    '  float revealCore = 1.0 - smoothstep(',
+    '    localFront - softLead * 0.72 + wobble,',
+    '    localFront + softTrail * 0.85 + wobble,',
+    '    dist',
+    '  );',
+    '  float revealWide = 1.0 - smoothstep(',
+    '    localFront - softLead * 1.65 + wobble * 0.8,',
+    '    localFront + softTrail * 2.05 + wobble * 0.8,',
+    '    dist',
+    '  );',
+    '  float reveal = max(revealCore, revealWide * 0.62);',
+    '  float rel2 = dot(rel, rel);',
+    '  float originCore = exp(-rel2 * 4.8) * (1.0 + early * 0.22);',
+    '  float originHalo = exp(-rel2 * 1.6) * (0.68 + early * 0.34);',
+    '  float originWide = exp(-dist * 2.0) * (0.42 + early * 0.38);',
+    '  float originMist = exp(-dist * 0.95) * early * 0.52;',
+    '  float originPulse = (originCore + originHalo + originWide + originMist)',
+    '    * (1.0 - smoothstep(0.18, 0.82, s)) * onset;',
+    '  float travelMist = exp(-max(dist - localFront * 0.35, 0.0) * 2.4) * s * 0.28 * onset;',
+    '  reveal *= mix(0.12, 1.0, onset);',
+    '  return clamp(max(reveal, max(originPulse, travelMist)), 0.0, 1.0);',
+    '}',
+    '',
     'vec3 meshWarmGradient(vec2 uv, float time, float audio) {',
-    '  float warpAmt = 0.016 + audio * 0.010;',
+    '  float warpAmt = 0.018 + audio * 0.008;',
     '  vec2 warp = vec2(',
-    '    fbm(uv * 2.0 + time * 0.08) - 0.5,',
-    '    fbm(uv * 2.0 + vec2(17.3, 9.1) + time * 0.07) - 0.5',
+    '    fbm(uv * 1.8 + time * 0.045) - 0.5,',
+    '    fbm(uv * 1.8 + vec2(17.3, 9.1) + time * 0.04) - 0.5',
     '  ) * warpAmt;',
     '  vec2 u = uv + warp;',
     '',
-    '  vec2 a1 = u_origin + vec2(sin(time * 0.31) * 0.034, cos(time * 0.26) * 0.028);',
-    '  vec2 a2 = vec2(0.12, 0.88) + vec2(cos(time * 0.22) * 0.044, sin(time * 0.20) * 0.038);',
-    '  vec2 a3 = vec2(0.50, 0.50) + vec2(sin(time * 0.18) * 0.048, cos(time * 0.24) * 0.040);',
-    '  vec2 a4 = vec2(0.82, 0.78) + vec2(cos(time * 0.27) * 0.038, sin(time * 0.23) * 0.034);',
-    '  vec2 a5 = vec2(0.22, 0.18) + vec2(sin(time * 0.21) * 0.036, cos(time * 0.19) * 0.032);',
+    '  vec2 a1 = u_origin + vec2(sin(time * 0.22) * 0.018, cos(time * 0.19) * 0.015);',
+    '  vec2 a2 = u_origin + vec2(-0.14, 0.10) + vec2(cos(time * 0.16) * 0.020, sin(time * 0.15) * 0.018);',
+    '  vec2 a3 = u_origin + vec2(-0.26, 0.20) + vec2(sin(time * 0.14) * 0.022, cos(time * 0.17) * 0.020);',
+    '  vec2 a4 = u_origin + vec2(-0.38, 0.30) + vec2(cos(time * 0.18) * 0.018, sin(time * 0.16) * 0.016);',
+    '  vec2 a5 = u_origin + vec2(-0.48, 0.38) + vec2(sin(time * 0.15) * 0.016, cos(time * 0.14) * 0.014);',
     '',
     '  vec3 orange = vec3(1.0, 0.498, 0.12);',
     '  vec3 amber = vec3(1.0, 0.650, 0.18);',
@@ -79,12 +124,12 @@
     '  vec3 cream = vec3(1.0, 0.930, 0.58);',
     '  vec3 pale = vec3(1.0, 0.980, 0.780);',
     '',
-    '  float falloff = 1.65;',
-    '  float w1 = 1.0 / (pow(length(u - a1), falloff) + 0.055);',
-    '  float w2 = 1.0 / (pow(length(u - a2), falloff) + 0.055);',
-    '  float w3 = 1.0 / (pow(length(u - a3), falloff) + 0.055);',
-    '  float w4 = 1.0 / (pow(length(u - a4), falloff) + 0.055);',
-    '  float w5 = 1.0 / (pow(length(u - a5), falloff) + 0.055);',
+    '  float falloff = 1.38;',
+    '  float w1 = 1.0 / (pow(length(u - a1), falloff) + 0.078);',
+    '  float w2 = 1.0 / (pow(length(u - a2), falloff) + 0.078);',
+    '  float w3 = 1.0 / (pow(length(u - a3), falloff) + 0.078);',
+    '  float w4 = 1.0 / (pow(length(u - a4), falloff) + 0.078);',
+    '  float w5 = 1.0 / (pow(length(u - a5), falloff) + 0.078);',
     '  float wSum = w1 + w2 + w3 + w4 + w5;',
     '  vec3 col = (orange * w1 + pale * w2 + cream * w3 + gold * w4 + amber * w5) / wSum;',
     '  return col * 1.06;',
@@ -101,32 +146,20 @@
     '  float depth = clamp(-sdf / 0.36, 0.0, 1.0);',
     '  float rimBand = smoothstep(0.06, 0.0, -sdf) * (1.0 - smoothstep(0.0, -0.18, -sdf));',
     '',
-    '  vec2 target = vec2(0.05, 0.95);',
     '  vec2 rel = vec2((uv.x - u_origin.x) * u_aspect, uv.y - u_origin.y);',
-    '  vec2 diag = vec2((target.x - u_origin.x) * u_aspect, target.y - u_origin.y);',
-    '  float diagLen = max(length(diag), 0.0001);',
-    '  float along = clamp(dot(rel, diag) / (diagLen * diagLen), 0.0, 1.35);',
     '',
-    '  float front = clamp(u_spread, 0.0, 1.25);',
-    '  float soft = max(0.07, 0.24 * front + u_audio * 0.045);',
-    '  float edgeWarp = (fbm(uv * 3.8 + u_time * 0.05) - 0.5) * 0.038 * front;',
-    '  float reveal = 1.0 - smoothstep(max(0.0, front - soft) + edgeWarp, front + 0.04 + edgeWarp, along);',
-    '',
-    '  float originDist = length(rel);',
-    '  float originBloom = exp(-originDist * originDist * 18.0) * 0.55;',
-    '  reveal = clamp(reveal + originBloom * (1.0 - smoothstep(0.15, 0.55, front)), 0.0, 1.0);',
-    '',
-    '  float fullFill = smoothstep(0.02, 0.96, u_fill);',
-    '  reveal = mix(reveal, 1.0, fullFill);',
+    '  float reveal = organicReveal(uv, rel, sdf, u_spread, u_time, u_audio);',
     '',
     '  vec3 mesh = meshWarmGradient(uv, u_time, u_audio);',
-    '  float shimmer = 1.0 + 0.035 * sin(u_time * 1.25 + uv.x * 7.0 + uv.y * 5.5);',
+    '  float shimmer = 1.0 + 0.028 * sin(u_time * 0.85 + uv.x * 4.5 + uv.y * 3.2);',
     '  vec3 color = mesh * shimmer;',
     '',
     '  vec3 rimTint = mix(vec3(1.0, 0.880, 0.520), vec3(1.0, 0.980, 0.820), depth);',
-    '  color += rimTint * rimBand * reveal * 0.42;',
+    '  color += rimTint * rimBand * reveal * 0.44;',
+    '  float grain = (hash(floor(uv * 520.0) + floor(u_time * 6.0)) - 0.5) * 0.028;',
+    '  color += grain * reveal;',
     '',
-    '  float alpha = pow(reveal, 0.82) * u_intensity * shapeAlpha;',
+    '  float alpha = pow(reveal, 0.56) * u_intensity * shapeAlpha;',
     '  if (alpha < 0.004) discard;',
     '  gl_FragColor = vec4(color * alpha, alpha);',
     '}'
@@ -134,9 +167,9 @@
 
   var PHASES = {
     idle: { spread: 0.0, intensity: 0.0, fill: 0.0, duration: 850 },
-    listening: { spread: 1.22, intensity: 1.0, fill: 0.0, duration: 5800 },
-    generating: { spread: 1.0, intensity: 1.0, fill: 1.0, duration: 2600 },
-    settling: { spread: 1.0, intensity: 0.72, fill: 0.88, duration: 1800 },
+    listening: { spread: 0.92, intensity: 1.0, fill: 0.0, duration: 7200 },
+    generating: { spread: 1.42, intensity: 1.0, fill: 0.0, duration: 1600 },
+    settling: { spread: 1.42, intensity: 0.68, fill: 0.0, duration: 1400 },
     fadeOut: { spread: 0.0, intensity: 0.0, fill: 0.0, duration: 1250 }
   };
 
@@ -152,6 +185,32 @@
     return t < 0.5
       ? 4 * t * t * t
       : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  }
+
+  function easeOutQuint(t) {
+    return 1 - Math.pow(1 - t, 5);
+  }
+
+  function easeSmoothFill(t) {
+    return t * t * t * (t * (t * 6.0 - 15.0) + 10.0);
+  }
+
+  function easeOutCubic(t) {
+    return 1 - Math.pow(1 - t, 3);
+  }
+
+  function easeInSoft(t) {
+    return t * t * t;
+  }
+
+  function easeListenIntensity(t) {
+    if (t < 0.11) return easeInSoft(t / 0.11) * 0.48;
+    return 0.48 + (1.0 - 0.48) * easeOutQuint((t - 0.11) / 0.89);
+  }
+
+  function easeListeningSpread(t) {
+    if (t < 0.11) return easeInSoft(t / 0.11) * 0.20;
+    return 0.20 + easeSmoothFill((t - 0.11) / 0.89) * 0.80;
   }
 
   function lerp(a, b, t) {
@@ -214,6 +273,7 @@
     this.phaseDuration = 0;
     this.values = { spread: 0, intensity: 0, fill: 0 };
     this.audio = 0;
+    this.smoothAudio = 0;
     this.startTime = 0;
     this.layout = { aspect: 1, radius: 0.24 };
     this.resizeObserver = null;
@@ -230,15 +290,19 @@
   };
 
   AgentFillGL.prototype._getOrigin = function () {
-    if (!this.shellEl) return [0.82, 0.18];
+    if (!this.shellEl) return [0.92, 0.10];
     var shell = this.shellEl.getBoundingClientRect();
-    if (!shell.width || !shell.height) return [0.82, 0.18];
+    if (!shell.width || !shell.height) return [0.92, 0.10];
     var star = document.getElementById('p2-star');
-    if (!star) return [0.82, 0.18];
+    if (!star) return [0.92, 0.10];
     var btn = star.getBoundingClientRect();
+    var btnX = (btn.left + btn.width * 0.5 - shell.left) / shell.width;
+    var btnY = 1 - (btn.top + btn.height * 0.5 - shell.top) / shell.height;
+    var cornerX = clamp((shell.width - 8) / shell.width, 0, 1);
+    var cornerY = clamp(8 / shell.height, 0, 1);
     return [
-      clamp((btn.left + btn.width * 0.5 - shell.left) / shell.width, 0, 1),
-      clamp(1 - (btn.top + btn.height * 0.5 - shell.top) / shell.height, 0, 1)
+      clamp(btnX * 0.35 + cornerX * 0.65, 0, 1),
+      clamp(btnY * 0.35 + cornerY * 0.65, 0, 1)
     ];
   };
 
@@ -301,6 +365,7 @@
       this.values.spread = 0;
       this.values.intensity = 0;
       this.values.fill = 0;
+      this.smoothAudio = 0;
     }
     this._setPhaseTargets(phaseName || 'idle');
     if (phaseName !== 'idle') this._startLoop();
@@ -316,20 +381,17 @@
       ? clamp((now - this.phaseStart) / this.phaseDuration, 0, 1)
       : 1;
     var eased = this.phase === 'listening'
-      ? easeInOutCubic(t)
-      : easeOutExpo(t);
+      ? easeListeningSpread(t)
+      : this.phase === 'generating'
+        ? easeOutCubic(t)
+        : easeOutExpo(t);
     this.values.spread = lerp(this.phaseFrom.spread, this.phaseTo.spread, eased);
     this.values.intensity = lerp(
       this.phaseFrom.intensity,
       this.phaseTo.intensity,
-      this.phase === 'listening' ? easeOutExpo(t) : eased
+      this.phase === 'listening' ? easeListenIntensity(t) : eased
     );
     this.values.fill = lerp(this.phaseFrom.fill, this.phaseTo.fill, eased);
-
-    if (this.phase === 'listening' && t >= 1) {
-      var breathe = 0.012 * Math.sin((now - this.phaseStart) * 0.0014);
-      this.values.spread = this.phaseTo.spread + breathe;
-    }
   };
 
   AgentFillGL.prototype._draw = function (now) {
@@ -337,6 +399,7 @@
     var gl = this.gl;
     this._resize();
     this._updateValues(now);
+    this.smoothAudio += (this.audio - this.smoothAudio) * (this.phase === 'listening' && this.values.spread < 0.18 ? 0.028 : 0.055);
 
     var origin = this._getOrigin();
     var elapsed = (now - this.startTime) * 0.001;
@@ -349,7 +412,7 @@
     gl.uniform1f(this.uniforms.spread, this.values.spread);
     gl.uniform1f(this.uniforms.intensity, this.values.intensity);
     gl.uniform1f(this.uniforms.fill, this.values.fill);
-    gl.uniform1f(this.uniforms.audio, this.audio);
+    gl.uniform1f(this.uniforms.audio, this.smoothAudio);
 
     gl.clearColor(0, 0, 0, 0);
     gl.clear(gl.COLOR_BUFFER_BIT);

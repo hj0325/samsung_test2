@@ -981,7 +981,7 @@
   }
   #canvas[data-test-scope="test2"] .p2-agent-fill--gl-ready.p2-agent-fill--gl-active {
     opacity: 1;
-    transition: opacity 0.32s cubic-bezier(0.22, 0.82, 0.24, 1);
+    transition: opacity 0.78s cubic-bezier(0.22, 0.82, 0.24, 1);
   }
   #canvas[data-test-scope="test2"] .p2-agent-fill--gl-ready:not(.p2-agent-fill--gl-active) {
     opacity: 0;
@@ -1107,6 +1107,11 @@
   #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-slot.p2-reveal-swap) .p2-agent-fill {
     opacity: 1;
     transition: opacity 0.32s cubic-bezier(0.22, 0.82, 0.24, 1);
+  }
+  #canvas[data-test-scope="test2"]:is(.p2-listening, .p2-generating) .p2-agent-fill--gl-ready,
+  #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-result.is-loading) .p2-agent-fill--gl-ready,
+  #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-slot.p2-reveal-swap) .p2-agent-fill--gl-ready {
+    transition: opacity 0.78s cubic-bezier(0.22, 0.82, 0.24, 1);
   }
   #canvas[data-test-scope="test2"].p2-listening .p2-agent-fill__bloom {
     transform: translate(0%, 0%) scale(1);
