@@ -5473,13 +5473,17 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
                   '<div class="p2-result-loading__bg"></div>' +
                   '<div class="p2-result-loading__shimmer"></div>' +
                   '<div class="p2-result-loading__content">' +
-                    '<div class="p2-result-loading__text">' +
-                      '<div class="p2-result-loading__title">상황에 맞는 UI를 구성하는 중…</div>' +
-                      '<div class="p2-result-loading__sub"></div>' +
+                    '<div class="p2-result-loading__head">' +
+                      '<div class="p2-result-loading__title">상황에 맞는 UI 생성중...</div>' +
+                      '<div class="p2-result-loading__status">요청하신 내용을 정리중입니다.</div>' +
+                      '<div class="p2-result-loading__sub" aria-hidden="true"></div>' +
                     '</div>' +
-                    '<div class="p2-result-loading__icon" aria-hidden="true">' +
-                      '<div class="p2-loading-dots">' +
-                        '<span></span><span></span><span></span><span></span><span></span>' +
+                    '<div class="p2-result-loading__footer">' +
+                      '<div class="p2-result-loading__input">업무용 연락 정리해줘</div>' +
+                      '<div class="p2-result-loading__icon" aria-hidden="true">' +
+                        '<div class="p2-loading-dots">' +
+                          '<span></span><span></span><span></span><span></span><span></span>' +
+                        '</div>' +
                       '</div>' +
                     '</div>' +
                   '</div>' +
@@ -6174,12 +6178,6 @@ function patchTest2ContactListLayout(slot) {
       result.style.setProperty('--p2-reveal-h', contentHpx);
     }
 
-    slot.querySelectorAll('.p2-contact-list .dot-sch__date, .p2-contact-list .dot-sch__row').forEach(function (el) {
-      if (!el.classList.contains('p2-seq-text-hidden')) return;
-      el.classList.remove('p2-seq-text-hidden');
-      el.classList.add('p2-seq-text-visible');
-    });
-
     slot.dataset.p2LayoutReady = layoutKey;
   }
 
@@ -6200,6 +6198,74 @@ function schedulePatchTest2ContactListLayout(slot) {
   requestAnimationFrame(function () {
     _p2LayoutPatchScheduled = false;
     patchTest2ContactListLayout(slot);
+  });
+}
+
+function deriveTest2LoadingStatus(userText) {
+  var t = String(userText || '').trim().replace(/[.…]+$/g, '');
+  if (!t) return '요청하신 내용을 정리중입니다.';
+  if (/업무|연락/.test(t)) return '업무 관련 연락을 정리중입니다.';
+  if (/피드백|디자인/.test(t)) return '디자인 피드백 관련 연락을 정리중입니다.';
+  if (/메시지|알림/.test(t)) return '메시지와 알림을 정리중입니다.';
+  var core = t.replace(/\s*(해\s*줘|해줘|부탁해).*$/i, '').trim();
+  if (!core) return '요청하신 내용을 정리중입니다.';
+  return core + ' 관련 내용을 정리중입니다.';
+}
+
+function syncTest2LoadingPresentation(result) {
+  if (!_isTest2Scope() || !result) return;
+  var loading = result.querySelector('.p2-result-loading');
+  if (!loading) return;
+
+  var sub = loading.querySelector('.p2-result-loading__sub');
+  var status = loading.querySelector('.p2-result-loading__status');
+  var input = loading.querySelector('.p2-result-loading__input');
+  var agentInput = document.querySelector('.p2-agent-input');
+  var raw = '';
+
+  if (sub && sub.textContent) {
+    raw = sub.textContent.replace(/^[\s"“]+|[\s"”]+$/g, '');
+  }
+  if (!raw && agentInput) raw = String(agentInput.textContent || '').trim();
+  if (!raw) return;
+
+  if (input && input.textContent !== raw) input.textContent = raw;
+  if (status) {
+    var nextStatus = deriveTest2LoadingStatus(raw);
+    if (status.textContent !== nextStatus) status.textContent = nextStatus;
+  }
+}
+
+function staggerTest2ContactListRows(slot) {
+  if (!_isTest2Scope() || !slot) return;
+  if (slot.dataset.test2ContactStagger === '1') return;
+  if (!slot.classList.contains('p2-seq-color-active')) return;
+  var list = slot.querySelector('.p2-contact-list');
+  if (!list) return;
+
+  slot.dataset.test2ContactStagger = '1';
+  var header = list.querySelector('.p2-contact-list__header');
+  var rows = list.querySelectorAll('.p2-contact-list__item');
+
+  if (header) {
+    header.classList.add('p2-seq-text-hidden');
+    header.classList.remove('p2-seq-text-visible');
+    setTimeout(function () {
+      header.classList.remove('p2-seq-text-hidden');
+      header.classList.add('p2-seq-text-visible');
+    }, 60);
+  }
+
+  rows.forEach(function (row) {
+    row.classList.add('p2-seq-text-hidden');
+    row.classList.remove('p2-seq-text-visible');
+  });
+
+  rows.forEach(function (row, i) {
+    setTimeout(function () {
+      row.classList.remove('p2-seq-text-hidden');
+      row.classList.add('p2-seq-text-visible');
+    }, 140 + i * 110);
   });
 }
 
@@ -6276,6 +6342,9 @@ function installTest2P2TransitionBridge(canvas) {
     if (!slot || !slot.querySelector('.p2-contact-list')) return;
     softenSlotInlineStyles(slot);
     slot.dataset.p2LayoutReady = '';
+    if (slot.classList.contains('p2-seq-color-active')) {
+      staggerTest2ContactListRows(slot);
+    }
     schedulePatchTest2ContactListLayout(slot);
   }
 
@@ -6289,6 +6358,7 @@ function installTest2P2TransitionBridge(canvas) {
         if (m.type === 'childList') {
           shouldPatch = true;
           slot.dataset.p2LayoutReady = '';
+          slot.dataset.test2ContactStagger = '';
           break;
         }
         if (m.type === 'attributes' && m.attributeName === 'class' && m.target === slot) {
@@ -6306,12 +6376,16 @@ function installTest2P2TransitionBridge(canvas) {
     result.dataset.test2P2ResultBound = '1';
     new MutationObserver(function () {
       if (!result.classList.contains('is-loading')) return;
+      syncTest2LoadingPresentation(result);
       var slot = document.getElementById('p2-slot');
       if (slot && slot.querySelector('.p2-contact-list')) {
         activateTest2ContactListLayout(slot);
         schedulePatchTest2ContactListLayout(slot);
       }
     }).observe(result, { attributes: true, attributeFilter: ['class'] });
+    if (result.classList.contains('is-loading')) {
+      syncTest2LoadingPresentation(result);
+    }
   }
 
   bindSlot(document.getElementById('p2-slot'));
