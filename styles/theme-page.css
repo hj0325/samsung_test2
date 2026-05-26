@@ -1929,9 +1929,9 @@
       drop-shadow(0 0 5px rgba(255, 255, 255, 0.55))
       drop-shadow(0 0 12px rgba(255, 240, 200, 0.35));
   }
-  #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-result.is-loading) .p2-agent-footer .p2-agent-input::before,
-  #canvas[data-test-scope="test2"].p2-generating .p2-agent-footer .p2-agent-input::before,
-  #canvas[data-test-scope="test2"] .p2-agent-input.p2-agent-input--glow::before {
+  #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-result.is-loading):not(.p2-contact-layout-active):not(:has(#p2-slot.p2-seq-color-active)):not(:has(#p2-slot.p2-contact-reveal-active)) .p2-agent-footer .p2-agent-input::before,
+  #canvas[data-test-scope="test2"].p2-generating:not(:has(.p2-contact-layout-active)) .p2-agent-footer .p2-agent-input::before,
+  #canvas[data-test-scope="test2"] .p2-agent-input.p2-agent-input--glow:not(.p2-agent-input--settled)::before {
     content: "";
     position: absolute;
     inset: 0;
@@ -1944,10 +1944,14 @@
     opacity: 1;
     transition: opacity 0.58s cubic-bezier(0.22, 0.82, 0.24, 1);
   }
+  #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-slot.p2-seq-color-active) .p2-agent-footer .p2-agent-input::before,
+  #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-slot.p2-contact-reveal-active) .p2-agent-footer .p2-agent-input::before,
+  #canvas[data-test-scope="test2"] .p2-agent-shell.p2-agent-shell--glow-retire .p2-agent-footer .p2-agent-input::before,
   #canvas[data-test-scope="test2"] .p2-agent-shell.p2-contact-layout-active .p2-agent-footer .p2-agent-input::before,
   #canvas[data-test-scope="test2"] .p2-agent-input.p2-agent-input--settled::before {
-    opacity: 0;
-    pointer-events: none;
+    content: none !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
   }
   #canvas[data-test-scope="test2"] #p2-result.has-swap .p2-agent-card__body,
   #canvas[data-test-scope="test2"] #p2-result.p2-default-hiding .p2-agent-card__body {
@@ -2117,6 +2121,7 @@
   #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-slot.p2-seq-color-active) .p2-agent-footer,
   #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-slot.p2-seq-done) .p2-agent-footer,
   #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-slot.p2-contact-reveal-active) .p2-agent-footer,
+  #canvas[data-test-scope="test2"] .p2-agent-shell.p2-agent-shell--glow-retire .p2-agent-footer,
   #canvas[data-test-scope="test2"] .p2-agent-shell.p2-contact-layout-active .p2-agent-footer,
   #canvas[data-test-scope="test2"] .p2-agent-shell.p2-contact-layout-active:has(#p2-slot.p2-reveal-swap) .p2-agent-footer,
   #canvas[data-test-scope="test2"] .p2-agent-shell.p2-contact-layout-active:has(#p2-slot.p2-seq-done) .p2-agent-footer {
@@ -2126,13 +2131,64 @@
     flex-shrink: 0;
     z-index: 2;
     opacity: 1 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
     height: 56px !important;
-    padding: 4px 16px 10px !important;
+    min-height: 56px !important;
+    padding: 0 16px 0 !important;
     gap: 10px !important;
     overflow: visible !important;
     pointer-events: auto !important;
     background: transparent !important;
     border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+  /* test2 contact flow: single dark input pill — no stacked glass ::before bar */
+  #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-slot.p2-seq-color-active) .p2-agent-footer .p2-agent-input,
+  #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-slot.p2-contact-reveal-active) .p2-agent-footer .p2-agent-input,
+  #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-slot.p2-seq-done) .p2-agent-footer .p2-agent-input,
+  #canvas[data-test-scope="test2"] .p2-agent-shell.p2-agent-shell--glow-retire .p2-agent-footer .p2-agent-input,
+  #canvas[data-test-scope="test2"] .p2-agent-shell.p2-contact-layout-active .p2-agent-footer .p2-agent-input,
+  #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-slot.p2-seq-color-active) .p2-agent-input,
+  #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-slot.p2-contact-reveal-active) .p2-agent-input,
+  #canvas[data-test-scope="test2"] .p2-agent-shell.p2-agent-shell--glow-retire .p2-agent-input {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    max-width: calc(100% - 66px) !important;
+    height: 44px !important;
+    align-self: center !important;
+    margin: 0 !important;
+    padding: 0 14px 0 20px !important;
+    border-radius: 999px !important;
+    background: rgba(0, 0, 0, 0.28) !important;
+    background-image: none !important;
+    color: rgba(255, 255, 255, 0.72) !important;
+    -webkit-text-fill-color: rgba(255, 255, 255, 0.72) !important;
+    animation: none !important;
+    filter: none !important;
+    box-shadow: none !important;
+    transition:
+      background-color 0.72s cubic-bezier(0.22, 0.82, 0.24, 1),
+      color 0.72s cubic-bezier(0.22, 0.82, 0.24, 1),
+      -webkit-text-fill-color 0.72s cubic-bezier(0.22, 0.82, 0.24, 1) !important;
+  }
+  #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-slot.p2-seq-color-active) .p2-agent-footer #p2-star,
+  #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-slot.p2-contact-reveal-active) .p2-agent-footer #p2-star,
+  #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-slot.p2-seq-done) .p2-agent-footer #p2-star,
+  #canvas[data-test-scope="test2"] .p2-agent-shell.p2-agent-shell--glow-retire .p2-agent-footer #p2-star,
+  #canvas[data-test-scope="test2"] .p2-agent-shell.p2-contact-layout-active .p2-agent-footer #p2-star {
+    position: relative !important;
+    top: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+    align-self: center !important;
+    flex-shrink: 0 !important;
+    width: 56px !important;
+    height: 56px !important;
+    margin: 0 !important;
+    transform: none !important;
   }
   #canvas[data-test-scope="test2"] #p2-slot .p2-contact-list {
     width: 100% !important;
@@ -2298,53 +2354,47 @@
     overflow: visible !important;
     contain: none !important;
   }
-  #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-slot.p2-seq-color-active) .p2-agent-input,
-  #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-slot.p2-seq-done) .p2-agent-input,
-  #canvas[data-test-scope="test2"] .p2-agent-shell.p2-contact-layout-active .p2-agent-footer .p2-agent-input,
   #canvas[data-test-scope="test2"] .p2-agent-input.p2-agent-input--settled {
     flex: 1 1 auto;
     max-width: calc(100% - 66px);
-    background: rgba(0, 0, 0, 0.28);
-    background-image: none;
-    color: rgba(255, 255, 255, 0.72);
-    -webkit-text-fill-color: rgba(255, 255, 255, 0.72);
+    height: 44px;
     padding: 0 14px 0 20px;
     border-radius: 999px;
-    animation: none;
-    filter: none;
+    align-self: center;
   }
   #canvas[data-test-scope="test2"] .p2-agent-footer #p2-star.p2-agent-star--settled {
     opacity: 1 !important;
     transform: none !important;
     filter: none !important;
     pointer-events: auto !important;
+    align-self: center !important;
   }
-  #canvas[data-test-scope="test2"] .p2-agent-input.p2-seq-text-hidden {
+  #canvas[data-test-scope="test2"] .p2-agent-footer .p2-agent-input.p2-seq-text-hidden {
     opacity: 0 !important;
-    transform: translateY(22px) scale(0.985);
+    transform: translateY(10px) scale(0.985);
     filter: blur(3px);
     pointer-events: none;
     will-change: opacity, transform, filter;
   }
-  #canvas[data-test-scope="test2"] .p2-agent-input.p2-seq-text-visible {
+  #canvas[data-test-scope="test2"] .p2-agent-footer .p2-agent-input.p2-seq-text-visible {
     opacity: 1 !important;
-    transform: translateY(0) scale(1);
+    transform: none !important;
     filter: blur(0);
     transition:
       opacity 0.52s cubic-bezier(0.22, 1, 0.36, 1),
       transform 0.58s cubic-bezier(0.22, 1, 0.36, 1),
       filter 0.48s cubic-bezier(0.22, 1, 0.36, 1);
   }
-  #canvas[data-test-scope="test2"] .p2-agent-shell.p2-contact-layout-active #p2-star.p2-seq-text-hidden {
+  #canvas[data-test-scope="test2"] .p2-agent-footer #p2-star.p2-seq-text-hidden {
     opacity: 0 !important;
-    transform: translateY(22px) scale(0.88);
+    transform: translateY(10px) scale(0.94);
     filter: blur(3px);
     pointer-events: none;
     will-change: opacity, transform, filter;
   }
-  #canvas[data-test-scope="test2"] .p2-agent-shell.p2-contact-layout-active #p2-star.p2-seq-text-visible {
+  #canvas[data-test-scope="test2"] .p2-agent-footer #p2-star.p2-seq-text-visible {
     opacity: 1 !important;
-    transform: translateY(0) scale(1);
+    transform: none !important;
     filter: blur(0);
     transition:
       opacity 0.52s cubic-bezier(0.22, 1, 0.36, 1),

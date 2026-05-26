@@ -6171,9 +6171,7 @@ function activateTest2ContactListLayout(slot) {
     star.classList.remove('p2-seq-text-hidden', 'p2-seq-text-visible', 'p2-default-hiding');
     star.classList.add('p2-agent-star--settled');
   }
-  requestAnimationFrame(function () {
-    setTest2AgentInputGlow(false);
-  });
+  setTest2AgentInputGlow(false);
 
   _unlockTest2ContactListNodes(slot);
   syncTest2VoiceStarState(document.getElementById('canvas'));
