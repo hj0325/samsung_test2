@@ -5481,7 +5481,7 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
                       '<div class="p2-result-loading__sub" aria-hidden="true"></div>' +
                     '</div>' +
                     '<div class="p2-result-loading__footer">' +
-                      '<div class="p2-result-loading__input"><span class="p2-input-text">업무용 연락 정리해줘</span></div>' +
+                      '<div class="p2-result-loading__input"><span class="p2-input-text">놓친 보고서 요약해줘</span></div>' +
                       '<div class="p2-result-loading__icon" aria-hidden="true">' +
                         '<div class="p2-loading-dots">' +
                           '<span></span><span></span><span></span><span></span><span></span>' +
@@ -5500,7 +5500,7 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
             '</div>' +
             '<div id="p2-slot" class="p2-agent-slot" style="opacity:0; pointer-events:none; overflow:hidden;"></div>' +
             '<div class="p2-agent-footer">' +
-              '<div class="p2-agent-input"><span class="p2-input-text">업무용 연락 정리해줘</span></div>' +
+              '<div class="p2-agent-input"><span class="p2-input-text">놓친 보고서 요약해줘</span></div>' +
               '<button id="p2-star" type="button" aria-label="AI Voice">' +
                 window.renderAtomicForRole({ role: 'dot-icon-orange-badge-1x1' }, { w: 56, h: 56 }) +
               '</button>' +
@@ -6276,6 +6276,7 @@ function schedulePatchTest2ContactListLayout(slot) {
 function deriveTest2LoadingStatus(userText) {
   var t = String(userText || '').trim().replace(/[.…]+$/g, '');
   if (!t) return '요청하신 내용을 정리중입니다.';
+  if (/보고서|요약/.test(t)) return '놓친 보고서를 요약중입니다.';
   if (/업무|연락/.test(t)) return '업무 관련 연락을 정리중입니다.';
   if (/피드백|디자인/.test(t)) return '디자인 피드백 관련 연락을 정리중입니다.';
   if (/메시지|알림/.test(t)) return '메시지와 알림을 정리중입니다.';
