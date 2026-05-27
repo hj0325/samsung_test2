@@ -5501,8 +5501,8 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
             '<div id="p2-slot" class="p2-agent-slot" style="opacity:0; pointer-events:none; overflow:hidden;"></div>' +
             '<div class="p2-agent-footer">' +
               '<div class="p2-agent-input"><span class="p2-input-text">놓친 보고서 요약해줘</span></div>' +
-              '<button id="p2-star" type="button" aria-label="AI Voice">' +
-                window.renderAtomicForRole({ role: 'dot-icon-orange-badge-1x1' }, { w: 56, h: 56 }) +
+              '<button id="p2-star" type="button" aria-label="AI Voice" class="p2-galaxy-star-btn">' +
+                '<canvas class="p2-galaxy-star__canvas" width="112" height="112" aria-hidden="true"></canvas>' +
               '</button>' +
             '</div>' +
           '</div>' +
@@ -6481,49 +6481,46 @@ function syncTest2VoiceStarState(canvas) {
   var active =
     canvas.classList.contains('p2-listening') ||
     canvas.classList.contains('p2-generating');
-  var icon = star.querySelector('.dot-icon11');
-  var grad = star.querySelector('.dot-icon11__grad');
-  var from = star.querySelector('.dot-icon11__layer--from');
-  var to = star.querySelector('.dot-icon11__layer--to');
-  var chord = star.querySelector('.p2-breathing-chord');
 
   if (active) {
     star.classList.add('p2-star-voice-live');
     star.classList.remove('p2-star-voice-settled');
-    star.style.background = '#FF7F24';
-    star.style.borderRadius = '28px';
-    star.style.overflow = 'hidden';
-    if (chord) chord.style.display = 'none';
-    if (icon) {
-      icon.style.display = 'flex';
-      icon.style.background = '#FF7F24';
-      icon.style.opacity = '1';
-    }
-    if (grad) grad.style.opacity = '1';
-    if (from) from.style.opacity = '0';
-    if (to) {
-      to.style.opacity = '1';
-      to.style.filter = 'blur(0px)';
-    }
   } else {
     star.classList.remove('p2-star-voice-live');
     star.classList.add('p2-star-voice-settled');
-    star.style.removeProperty('background');
-    star.style.removeProperty('border-radius');
-    star.style.removeProperty('overflow');
-    if (chord) chord.style.removeProperty('display');
-    if (icon) {
-      icon.style.removeProperty('display');
-      icon.style.removeProperty('background');
-      icon.style.removeProperty('opacity');
-    }
-    if (grad) grad.style.removeProperty('opacity');
-    if (from) from.style.removeProperty('opacity');
-    if (to) {
-      to.style.removeProperty('opacity');
-      to.style.removeProperty('filter');
-    }
   }
+
+  if (window.P2GalaxyStar && typeof window.P2GalaxyStar.syncFromCanvas === 'function') {
+    window.P2GalaxyStar.syncFromCanvas(canvas);
+  }
+}
+
+function installTest2GalaxyStar(canvas) {
+  if (!canvas || !_isTest2Scope()) return;
+
+  function boot() {
+    var star = document.getElementById('p2-star');
+    if (!star || !window.P2GalaxyStar) return;
+    window.P2GalaxyStar.mount(star);
+    syncTest2VoiceStarState(canvas);
+  }
+
+  if (window.P2GalaxyStar) {
+    boot();
+    return;
+  }
+
+  var existing = document.querySelector('script[data-p2-galaxy-star]');
+  if (existing) {
+    existing.addEventListener('load', boot, { once: true });
+    return;
+  }
+
+  var script = document.createElement('script');
+  script.src = '/app/p2-galaxy-star.js?v=4';
+  script.dataset.p2GalaxyStar = '1';
+  script.onload = boot;
+  document.head.appendChild(script);
 }
 
 function installTest2P2TransitionBridge(canvas) {
@@ -6667,6 +6664,7 @@ window.generateSurfaceScenario = function generateSurfaceScenario(surfaceType) {
   if (testScope === 'test2') {
     try {
       installTest2P2TransitionBridge(canvas);
+      installTest2GalaxyStar(canvas);
     } catch (_) {}
   }
   // test3: flip prep → enter on next frame, then tear down enter after animations complete

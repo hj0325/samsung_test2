@@ -1752,83 +1752,27 @@
     -webkit-tap-highlight-color: transparent;
     z-index: 1001 !important;
     overflow: hidden;
-    box-shadow: 0 8px 20px rgba(255, 127, 36, 0.3);
-    animation: p2Test2StarGlow 2.4s ease-in-out infinite;
+    box-shadow: 0 4px 16px rgba(255, 127, 36, 0.32);
+    animation: p2Test2GalaxyGlow 2.8s ease-in-out infinite;
   }
-  @keyframes p2Test2StarGlow {
-    0%, 100% { box-shadow: 0 8px 20px rgba(255, 127, 36, 0.28); }
-    50% { box-shadow: 0 8px 24px rgba(255, 127, 36, 0.42); }
+  @keyframes p2Test2GalaxyGlow {
+    0%, 100% { box-shadow: 0 4px 14px rgba(255, 127, 36, 0.28); }
+    50% { box-shadow: 0 4px 20px rgba(255, 127, 36, 0.44); }
   }
-  #canvas[data-test-scope="test2"] .p2-agent-footer #p2-star .dot-icon11 {
-    display: flex !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    background: #FF7F24 !important;
-  }
-  #canvas[data-test-scope="test2"] .p2-agent-footer #p2-star .dot-icon11__grad {
-    opacity: 1 !important;
-    visibility: visible !important;
-  }
-  #canvas[data-test-scope="test2"] .p2-agent-footer #p2-star .dot-icon11__layer--from {
-    opacity: 0 !important;
-    animation: none !important;
-  }
-  #canvas[data-test-scope="test2"] .p2-agent-footer #p2-star .dot-icon11__layer--to {
-    opacity: 1 !important;
-    filter: blur(0px) !important;
-    animation: none !important;
+  #canvas[data-test-scope="test2"] .p2-galaxy-star__canvas {
+    display: block;
+    width: 56px;
+    height: 56px;
+    pointer-events: none;
   }
   #canvas[data-test-scope="test2"] .p2-agent-footer #p2-star.p2-star-voice-settled,
   #canvas[data-test-scope="test2"] .p2-agent-shell.p2-contact-layout-active .p2-agent-footer #p2-star {
     background: #FF7F24 !important;
-    box-shadow: 0 8px 20px rgba(255, 127, 36, 0.3);
+    box-shadow: 0 4px 16px rgba(255, 127, 36, 0.34);
   }
   #canvas[data-test-scope="test2"] .p2-agent-footer #p2-star.p2-default-hiding {
     opacity: 1 !important;
     pointer-events: auto !important;
-  }
-  #canvas[data-test-scope="test2"] .p2-agent-footer #p2-star .dot-icon11,
-  #canvas[data-test-scope="test2"] .p2-agent-footer #p2-star .dot-icon11__layer {
-    width: 56px;
-    height: 56px;
-  }
-  #canvas[data-test-scope="test2"] .p2-agent-footer #p2-star .dot-icon11__dotsSvg {
-    width: 48px;
-    height: 48px;
-  }
-  /* 56px button keeps size; dot stage maps 80px animation coords into the circle */
-  #canvas[data-test-scope="test2"] .p2-agent-footer #p2-star .p2-breathing-chord {
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    transform: none;
-  }
-  #canvas[data-test-scope="test2"] .p2-agent-footer #p2-star .p2-breathing-chord__stage {
-    position: absolute;
-    top: -12px;
-    left: -12px;
-    width: 80px;
-    height: 80px;
-    transform: scale(0.7);
-    transform-origin: 40px 40px;
-    pointer-events: none;
-  }
-  /* test2 footer: keep orange dot-icon during voice — global p2-listening hides it */
-  #canvas[data-test-scope="test2"].p2-listening #p2-star .dot-icon11,
-  #canvas[data-test-scope="test2"].p2-generating #p2-star .dot-icon11,
-  #canvas[data-test-scope="test2"].p2-listening .p2-agent-footer #p2-star .dot-icon11,
-  #canvas[data-test-scope="test2"].p2-generating .p2-agent-footer #p2-star .dot-icon11,
-  #canvas[data-test-scope="test2"] #p2-star.p2-star-voice-live .dot-icon11 {
-    display: flex !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    background: #FF7F24 !important;
-  }
-  #canvas[data-test-scope="test2"].p2-listening #p2-star .p2-breathing-chord,
-  #canvas[data-test-scope="test2"].p2-generating #p2-star .p2-breathing-chord,
-  #canvas[data-test-scope="test2"].p2-listening .p2-agent-footer #p2-star .p2-breathing-chord,
-  #canvas[data-test-scope="test2"].p2-generating .p2-agent-footer #p2-star .p2-breathing-chord {
-    display: none !important;
   }
   #canvas[data-test-scope="test2"].p2-listening #p2-star,
   #canvas[data-test-scope="test2"].p2-generating #p2-star,
@@ -1838,33 +1782,10 @@
   #canvas[data-test-scope="test2"].p2-listening .p2-agent-shell.p2-contact-layout-active .p2-agent-footer #p2-star,
   #canvas[data-test-scope="test2"].p2-generating .p2-agent-shell.p2-contact-layout-active .p2-agent-footer #p2-star {
     animation: none !important;
-    box-shadow: 0 8px 20px rgba(255, 127, 36, 0.34);
+    box-shadow: 0 4px 18px rgba(255, 127, 36, 0.42);
     background: #FF7F24 !important;
     border-radius: 28px !important;
     overflow: hidden !important;
-  }
-  #canvas[data-test-scope="test2"].p2-listening #p2-star .dot-icon11__grad,
-  #canvas[data-test-scope="test2"].p2-generating #p2-star .dot-icon11__grad,
-  #canvas[data-test-scope="test2"] #p2-star.p2-star-voice-live .dot-icon11__grad {
-    opacity: 1 !important;
-    visibility: visible !important;
-  }
-  #canvas[data-test-scope="test2"].p2-listening #p2-star .dot-icon11__layer--from,
-  #canvas[data-test-scope="test2"].p2-generating #p2-star .dot-icon11__layer--from,
-  #canvas[data-test-scope="test2"] #p2-star.p2-star-voice-live .dot-icon11__layer--from,
-  #canvas[data-test-scope="test2"].p2-listening .p2-agent-footer #p2-star .dot-icon11__layer--from,
-  #canvas[data-test-scope="test2"].p2-generating .p2-agent-footer #p2-star .dot-icon11__layer--from {
-    opacity: 0 !important;
-    animation: none !important;
-  }
-  #canvas[data-test-scope="test2"].p2-listening #p2-star .dot-icon11__layer--to,
-  #canvas[data-test-scope="test2"].p2-generating #p2-star .dot-icon11__layer--to,
-  #canvas[data-test-scope="test2"] #p2-star.p2-star-voice-live .dot-icon11__layer--to,
-  #canvas[data-test-scope="test2"].p2-listening .p2-agent-footer #p2-star .dot-icon11__layer--to,
-  #canvas[data-test-scope="test2"].p2-generating .p2-agent-footer #p2-star .dot-icon11__layer--to {
-    opacity: 1 !important;
-    filter: blur(0px) !important;
-    animation: none !important;
   }
   #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-result.is-loading) {
     position: relative;
