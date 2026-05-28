@@ -499,7 +499,7 @@ export default function MlpTestPage({
                 onClick={handleP2StarClick}
                 style={{ cursor: "pointer", border: "none", width: "auto" }}
               >
-                <div className="gen-submit" style={{ background: "var(--p2-lavender, #FF9748)" }}>
+                <div className="gen-submit" style={{ background: "var(--p2-lavender, #FF9DDA)" }}>
                   <svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5">
                     <path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4L12 2z" fill="#fff" />
                   </svg>

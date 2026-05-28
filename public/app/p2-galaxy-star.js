@@ -76,9 +76,9 @@
   var TR_TEMP_OFFSET = subV(BL_HOME, TR_HOME);
 
   var COLOR_BIG_HOME = [255, 255, 255];
-  var COLOR_BIG_TARGET = [255, 210, 72];
-  var COLOR_SIZE32 = [255, 232, 130];
-  var COLOR_SIZE22 = [255, 245, 190];
+  var COLOR_BIG_TARGET = [255, 157, 218];
+  var COLOR_SIZE32 = [255, 200, 230];
+  var COLOR_SIZE22 = [255, 232, 245];
   var COLOR_SIZE18 = [255, 255, 255];
 
   function scalePos(v) {
