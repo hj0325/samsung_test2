@@ -6399,7 +6399,9 @@ function beginTest2LoadingChromeExit(slot) {
   if (result) result.classList.add('p2-loading-ui-exiting');
 }
 
-var TEST2_CONTACT_GLOW_RETIRE_DELAY = 920;
+var TEST2_CONTACT_REVEAL_BASE = 380;
+var TEST2_CONTACT_REVEAL_STEP = 300;
+var TEST2_CONTACT_GLOW_RETIRE_BUFFER = 680;
 var TEST2_CONTACT_EDGE_LAYOUT_DELAY = 1320;
 
 function beginTest2InputGlowRetire() {
@@ -6472,8 +6474,8 @@ function staggerTest2ContactListRows(slot) {
 
   var header = list.querySelector('.p2-contact-list__header');
   var rows = list.querySelectorAll('.p2-contact-list__item');
-  var baseDelay = 280;
-  var stepDelay = 210;
+  var baseDelay = TEST2_CONTACT_REVEAL_BASE;
+  var stepDelay = TEST2_CONTACT_REVEAL_STEP;
   var seqIndex = 0;
 
   revealTest2ContactSequenceItem(header, baseDelay + seqIndex++ * stepDelay);
@@ -6481,12 +6483,13 @@ function staggerTest2ContactListRows(slot) {
     revealTest2ContactSequenceItem(row, baseDelay + seqIndex++ * stepDelay);
   });
 
-  setTimeout(beginTest2InputGlowRetire, TEST2_CONTACT_GLOW_RETIRE_DELAY);
+  var lastRevealAt = baseDelay + Math.max(seqIndex - 1, 0) * stepDelay;
+  setTimeout(beginTest2InputGlowRetire, lastRevealAt + TEST2_CONTACT_GLOW_RETIRE_BUFFER);
 
   setTimeout(function () {
     slot.dataset.test2ContactRevealLock = '';
     patchTest2ContactListLayout(slot, { force: true });
-  }, baseDelay + seqIndex * stepDelay + 920);
+  }, lastRevealAt + 1180);
 }
 
 function finalizeTest2ContactListVisibility(slot) {
