@@ -5483,6 +5483,8 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
       if (window.__mlpTestConfig && window.__mlpTestConfig.id === 'test2') {
         return '<div class="p2-widgets p2-widgets--compact" style="position:relative; width:100%; height:240px;">' +
           '<div id="p2-area" class="p2-agent-shell" style="position:absolute; top:0; left:24px; right:24px; height:148px; overflow:hidden;">' +
+            '<div class="p2-agent-shell__edge" aria-hidden="true"></div>' +
+            '<div class="p2-agent-shell__edge-inner" aria-hidden="true"></div>' +
             '<div id="p2-default-widgets" class="p2-agent-main" style="position:relative; width:100%; flex:1; min-height:0; transition:opacity 0.4s ease;">' +
               '<div id="p2-result" class="p2-dark p2-obc-host p2-agent-card" style="position:absolute; inset:0; background:transparent; border-radius:36px; padding:0; box-sizing:border-box; overflow:hidden;">' +
                 '<div class="p2-result-loading" aria-hidden="true">' +
@@ -6224,7 +6226,10 @@ function patchTest2ContactListLayout(slot, opts) {
   }
 
   if (_isTest2ContactLayoutReady(slot)) {
-    activateTest2ContactListLayout(slot);
+    var layoutShell = document.getElementById('p2-area');
+    if (layoutShell && !layoutShell.classList.contains('p2-contact-layout-active')) {
+      activateTest2ContactListLayout(slot);
+    }
   }
 
   var count = parseInt(list.getAttribute('data-item-count') || '3', 10) || 3;
@@ -6394,6 +6399,31 @@ function beginTest2LoadingChromeExit(slot) {
   if (result) result.classList.add('p2-loading-ui-exiting');
 }
 
+var TEST2_CONTACT_GLOW_RETIRE_DELAY = 920;
+var TEST2_CONTACT_EDGE_LAYOUT_DELAY = 1320;
+
+function beginTest2InputGlowRetire() {
+  if (!_isTest2Scope()) return;
+  var shell = document.getElementById('p2-area');
+  var slot = document.getElementById('p2-slot');
+  var agentInput = document.querySelector('.p2-agent-input');
+  var star = document.getElementById('p2-star');
+  if (shell) shell.classList.add('p2-agent-shell--glow-retire');
+  setTimeout(function () {
+    if (slot && shell && !shell.classList.contains('p2-contact-layout-active')) {
+      activateTest2ContactListLayout(slot);
+    }
+  }, TEST2_CONTACT_EDGE_LAYOUT_DELAY);
+  if (agentInput) {
+    agentInput.classList.add('p2-agent-input--glow-retire');
+    agentInput.classList.add('p2-agent-input--settled');
+  }
+  if (star) {
+    star.classList.add('p2-agent-star--settled');
+  }
+  setTest2AgentInputGlow(false);
+}
+
 function prepareTest2ContactListSequence(slot) {
   if (!_isTest2Scope() || !slot) return false;
   var list = slot.querySelector('.p2-contact-list');
@@ -6434,14 +6464,11 @@ function staggerTest2ContactListRows(slot) {
   slot.dataset.test2ContactRevealLock = '1';
   slot.classList.add('p2-contact-reveal-active');
 
-  var shell = document.getElementById('p2-area');
   var canvas = document.getElementById('canvas');
-  if (shell) shell.classList.add('p2-agent-shell--glow-retire');
   if (canvas) canvas.classList.remove('p2-generating');
 
   installTest2FillFadeOutBridge(slot);
   applyTest2ContactListShellHeight(slot);
-  activateTest2ContactListLayout(slot);
 
   var header = list.querySelector('.p2-contact-list__header');
   var rows = list.querySelectorAll('.p2-contact-list__item');
@@ -6453,6 +6480,8 @@ function staggerTest2ContactListRows(slot) {
   rows.forEach(function (row) {
     revealTest2ContactSequenceItem(row, baseDelay + seqIndex++ * stepDelay);
   });
+
+  setTimeout(beginTest2InputGlowRetire, TEST2_CONTACT_GLOW_RETIRE_DELAY);
 
   setTimeout(function () {
     slot.dataset.test2ContactRevealLock = '';
@@ -6476,13 +6505,20 @@ function installTest2FillFadeOutBridge(slot) {
   document.addEventListener('p2-test2-fill-fadeout', function onFadeOut() {
     document.removeEventListener('p2-test2-fill-fadeout', onFadeOut);
     finalizeTest2ContactListVisibility(slot);
-    slot.classList.add('p2-seq-done');
+    if (!slot.classList.contains('p2-seq-done')) {
+      slot.classList.add('p2-seq-done');
+    }
     slot.style.pointerEvents = 'auto';
+    var shellHandoff = document.getElementById('p2-area');
+    if (shellHandoff && !shellHandoff.classList.contains('p2-contact-layout-active') && !shellHandoff.classList.contains('p2-agent-shell--glow-retire')) {
+      activateTest2ContactListLayout(slot);
+    }
     var result = document.getElementById('p2-result');
     var defaults = document.getElementById('p2-default-widgets');
-    var shellHandoff = document.getElementById('p2-area');
     if (shellHandoff) {
-      shellHandoff.classList.add('p2-agent-shell--glow-retire');
+      if (!shellHandoff.classList.contains('p2-agent-shell--glow-retire')) {
+        shellHandoff.classList.add('p2-agent-shell--glow-retire');
+      }
       shellHandoff.classList.remove('p2-agent-shell--flow-handoff');
     }
     if (result) {
@@ -6502,6 +6538,7 @@ function installTest2FillFadeOutBridge(slot) {
 window.patchTest2ContactListLayout = patchTest2ContactListLayout;
 window.applyTest2ContactListShellHeight = applyTest2ContactListShellHeight;
 window.beginTest2LoadingChromeExit = beginTest2LoadingChromeExit;
+window.beginTest2InputGlowRetire = beginTest2InputGlowRetire;
 window.activateTest2ContactListLayout = activateTest2ContactListLayout;
 window.syncTest2LoadingPresentation = syncTest2LoadingPresentation;
 window.setTest2AgentInputGlow = setTest2AgentInputGlow;

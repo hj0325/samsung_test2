@@ -353,6 +353,14 @@
     opacity: 1 !important;
     pointer-events: auto !important;
   }
+  #canvas[data-test-scope="test2"] .p2-agent-shell.p2-loading-chrome-exiting #p2-result.is-loading,
+  #canvas[data-test-scope="test2"] .p2-agent-shell.p2-contact-shell-expanding:not(:has(#p2-slot.p2-contact-reveal-active)) #p2-result.is-loading {
+    transform: none !important;
+  }
+  #canvas[data-test-scope="test2"] .p2-agent-shell.p2-loading-chrome-exiting #p2-result.is-loading .p2-result-loading,
+  #canvas[data-test-scope="test2"] .p2-agent-shell.p2-contact-shell-expanding:not(:has(#p2-slot.p2-contact-reveal-active)) #p2-result.is-loading .p2-result-loading {
+    transform: none !important;
+  }
   #canvas[data-test-scope="test2"] .p2-agent-shell.p2-loading-chrome-exiting #p2-result.is-loading .p2-result-loading__head,
   #canvas[data-test-scope="test2"] .p2-agent-shell.p2-loading-chrome-exiting #p2-result.is-loading .p2-result-loading__content,
   #canvas[data-test-scope="test2"] #p2-result.p2-loading-ui-exiting.is-loading .p2-result-loading__head,
@@ -1154,7 +1162,7 @@
     isolation: isolate;
     --p2-fill-x: calc(100% - 36px);
     --p2-fill-y: calc(100% - 40px);
-    transition: background 0.55s ease, box-shadow 0.85s ease, height 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: background 0.55s ease, box-shadow 1.35s cubic-bezier(0.22, 0.82, 0.24, 1), height 0.65s cubic-bezier(0.16, 1, 0.3, 1);
   }
   /* test2: handoff — warm golden glass, soft edge aura (no hard stroke) */
   #canvas[data-test-scope="test2"] .p2-agent-shell.p2-agent-shell--flow-handoff:has(#p2-result.is-loading):not(:has(#p2-slot.p2-reveal-swap)) {
@@ -1173,9 +1181,7 @@
       box-shadow 1.2s cubic-bezier(0.22, 0.82, 0.24, 1) !important;
   }
   #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-slot.p2-reveal-swap):not(.p2-agent-shell--glow-retire):not(.p2-contact-layout-active):not(:has(#p2-slot.p2-seq-done)),
-  #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-slot.p2-seq-color-active):not(.p2-agent-shell--glow-retire):not(.p2-contact-layout-active):not(:has(#p2-slot.p2-seq-done)),
-  #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-slot.p2-contact-reveal-active):not(.p2-agent-shell--glow-retire):not(.p2-contact-layout-active):not(:has(#p2-slot.p2-seq-done)),
-  #canvas[data-test-scope="test2"] .p2-agent-shell.p2-agent-shell--flow-handoff:has(#p2-result.is-loading):not(.p2-agent-shell--glow-retire):not(.p2-contact-layout-active) {
+  #canvas[data-test-scope="test2"] .p2-agent-shell.p2-agent-shell--flow-handoff:has(#p2-result.is-loading):not(.p2-agent-shell--glow-retire):not(.p2-contact-layout-active):not(:has(#p2-slot.p2-contact-reveal-active)):not(:has(#p2-slot.p2-seq-done)) {
     background: linear-gradient(
       148deg,
       rgba(255, 157, 218, 0.22) 0%,
@@ -1196,17 +1202,71 @@
       box-shadow 1.35s cubic-bezier(0.22, 0.82, 0.24, 1),
       backdrop-filter 1.1s ease !important;
   }
+  /* test2 expand prep: solid blue while shell grows (before contact list chrome) */
+  #canvas[data-test-scope="test2"] .p2-agent-shell.p2-agent-shell--flow-handoff:has(#p2-slot.p2-reveal-swap):not(.p2-agent-shell--glow-retire):not(:has(#p2-slot.p2-contact-reveal-active)),
+  #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-slot.p2-seq-color-active):not(.p2-agent-shell--glow-retire):not(:has(#p2-slot.p2-contact-reveal-active)) {
+    background: #5A71F5 !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18) !important;
+    overflow: visible !important;
+    transition:
+      background 1.05s cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 1.35s cubic-bezier(0.22, 0.82, 0.24, 1) !important;
+  }
+  /* test2 contact reveal: solid blue + pink edge overlay (shell __edge, no glass transparency) */
+  #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-slot.p2-contact-reveal-active):not(.p2-agent-shell--glow-retire):not(.p2-contact-layout-active):not(:has(#p2-slot.p2-seq-done)) {
+    background: #5A71F5 !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    box-shadow:
+      inset 0 0 80px rgba(255, 232, 244, 0.12),
+      inset 0 0 156px rgba(255, 240, 250, 0.06),
+      0 0 48px rgba(255, 228, 242, 0.05),
+      0 0 92px rgba(255, 235, 248, 0.03),
+      0 8px 32px rgba(0, 0, 0, 0.18) !important;
+    overflow: visible !important;
+    transition:
+      background 1.05s cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 1.45s cubic-bezier(0.22, 0.82, 0.24, 1) 0.08s !important;
+  }
+  /* test2 contact layout: solid blue card after edge handoff */
+  #canvas[data-test-scope="test2"] .p2-agent-shell.p2-contact-layout-active:not(.p2-agent-shell--glow-retire):not(:has(#p2-slot.p2-seq-done)) {
+    background: #5A71F5 !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    box-shadow:
+      0 0 36px rgba(255, 157, 218, 0.14),
+      0 0 72px rgba(255, 157, 218, 0.07),
+      0 8px 32px rgba(0, 0, 0, 0.18) !important;
+    overflow: visible !important;
+    transition:
+      background 1.05s cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 1.05s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  }
+  /* test2 handoff prep: solid blue only before contact list mounts (reveal-swap, no color-active yet) */
+  #canvas[data-test-scope="test2"] .p2-agent-shell.p2-agent-shell--flow-handoff:has(#p2-slot.p2-reveal-swap):not(.p2-agent-shell--glow-retire):not(:has(#p2-slot.p2-seq-color-active)):not(:has(#p2-slot.p2-contact-reveal-active)) {
+    background: #5A71F5 !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18) !important;
+    overflow: visible !important;
+    transition:
+      background 1.05s cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 1.05s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  }
   /* test2: settled — solid blue card (final contact list) */
   #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-slot.p2-seq-done),
-  #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-slot.p2-contact-reveal-active),
-  #canvas[data-test-scope="test2"] .p2-agent-shell.p2-contact-layout-active:not(.p2-agent-shell--gl-fill) {
+  #canvas[data-test-scope="test2"] .p2-agent-shell.p2-agent-shell--glow-retire:has(#p2-slot.p2-contact-reveal-active),
+  #canvas[data-test-scope="test2"] .p2-agent-shell.p2-contact-layout-active.p2-agent-shell--glow-retire:not(.p2-agent-shell--gl-fill),
+  #canvas[data-test-scope="test2"] .p2-agent-shell.p2-contact-layout-active:has(#p2-slot.p2-seq-done):not(.p2-agent-shell--gl-fill) {
     background: #5A71F5 !important;
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18) !important;
     transition:
       background 1.35s cubic-bezier(0.22, 0.82, 0.24, 1),
-      box-shadow 1.15s cubic-bezier(0.22, 0.82, 0.24, 1) !important;
+      box-shadow 2.4s cubic-bezier(0.22, 0.82, 0.24, 1) !important;
   }
   #canvas[data-test-scope="test2"] .p2-agent-fill {
     position: absolute;
@@ -1397,6 +1457,182 @@
     transition:
       opacity 1.12s cubic-bezier(0.22, 0.82, 0.24, 1),
       filter 1.18s cubic-bezier(0.22, 0.82, 0.24, 1) !important;
+  }
+  /* test2: card-level edge aura — shell overlay (fill lives in input pill) */
+  #canvas[data-test-scope="test2"] .p2-agent-shell__edge,
+  #canvas[data-test-scope="test2"] .p2-agent-shell__edge-inner {
+    position: absolute;
+    border-radius: 36px;
+    pointer-events: none;
+    opacity: 0;
+    transition:
+      opacity 1.45s cubic-bezier(0.22, 0.82, 0.24, 1),
+      filter 1.55s cubic-bezier(0.22, 0.82, 0.24, 1);
+    will-change: opacity, transform, filter;
+  }
+  #canvas[data-test-scope="test2"] .p2-agent-shell__edge {
+    inset: -22px;
+    z-index: 4;
+    background:
+      radial-gradient(ellipse 52% 44% at 0% 0%, rgba(255, 157, 218, 0.62) 0%, transparent 72%),
+      radial-gradient(ellipse 52% 44% at 100% 0%, rgba(255, 180, 230, 0.58) 0%, transparent 72%),
+      radial-gradient(ellipse 52% 44% at 100% 100%, rgba(255, 157, 218, 0.55) 0%, transparent 72%),
+      radial-gradient(ellipse 52% 44% at 0% 100%, rgba(255, 157, 218, 0.52) 0%, transparent 72%),
+      conic-gradient(
+        from 0deg at 50% 50%,
+        rgba(255, 157, 218, 0.42),
+        rgba(255, 220, 240, 0.22),
+        rgba(255, 157, 218, 0.38),
+        rgba(255, 200, 230, 0.28),
+        rgba(255, 157, 218, 0.42)
+      );
+    filter: blur(18px);
+    -webkit-mask: radial-gradient(
+      ellipse 100% 100% at 50% 50%,
+      transparent 56%,
+      rgba(0, 0, 0, 0.45) 72%,
+      rgba(0, 0, 0, 0.82) 86%,
+      transparent 100%
+    );
+    mask: radial-gradient(
+      ellipse 100% 100% at 50% 50%,
+      transparent 56%,
+      rgba(0, 0, 0, 0.45) 72%,
+      rgba(0, 0, 0, 0.82) 86%,
+      transparent 100%
+    );
+  }
+  #canvas[data-test-scope="test2"] .p2-agent-shell__edge-inner {
+    inset: 0;
+    z-index: 3;
+    background:
+      radial-gradient(ellipse 120% 88% at 50% 0%, rgba(255, 180, 230, 0.28) 0%, transparent 58%),
+      radial-gradient(ellipse 120% 88% at 50% 100%, rgba(255, 157, 218, 0.24) 0%, transparent 58%),
+      radial-gradient(ellipse 88% 120% at 0% 50%, rgba(255, 170, 225, 0.22) 0%, transparent 58%),
+      radial-gradient(ellipse 88% 120% at 100% 50%, rgba(255, 170, 225, 0.22) 0%, transparent 58%);
+    filter: blur(10px);
+    -webkit-mask: radial-gradient(
+      ellipse 100% 100% at 50% 50%,
+      transparent 62%,
+      rgba(0, 0, 0, 0.55) 84%,
+      transparent 100%
+    );
+    mask: radial-gradient(
+      ellipse 100% 100% at 50% 50%,
+      transparent 62%,
+      rgba(0, 0, 0, 0.55) 84%,
+      transparent 100%
+    );
+  }
+  #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-slot.p2-contact-reveal-active):not(.p2-agent-shell--glow-retire):not(.p2-contact-layout-active):not(:has(#p2-slot.p2-seq-done)) .p2-agent-shell__edge {
+    z-index: 14;
+    opacity: 0.72 !important;
+    filter: blur(26px) brightness(1.01);
+    animation: p2Test2ContactEdgeIn 1.35s cubic-bezier(0.22, 0.82, 0.24, 1) 0.06s both;
+  }
+  #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-slot.p2-contact-reveal-active):not(.p2-agent-shell--glow-retire):not(.p2-contact-layout-active):not(:has(#p2-slot.p2-seq-done)) .p2-agent-shell__edge-inner {
+    z-index: 13;
+    opacity: 0.78 !important;
+    filter: blur(20px) brightness(1);
+    background:
+      radial-gradient(ellipse 132% 98% at 50% 0%, rgba(255, 232, 244, 0.18) 0%, transparent 66%),
+      radial-gradient(ellipse 132% 98% at 50% 100%, rgba(255, 228, 242, 0.14) 0%, transparent 66%),
+      radial-gradient(ellipse 98% 132% at 0% 50%, rgba(255, 235, 246, 0.12) 0%, transparent 66%),
+      radial-gradient(ellipse 98% 132% at 100% 50%, rgba(255, 235, 246, 0.12) 0%, transparent 66%);
+    -webkit-mask: radial-gradient(
+      ellipse 100% 100% at 50% 50%,
+      transparent 70%,
+      rgba(0, 0, 0, 0.28) 84%,
+      transparent 100%
+    );
+    mask: radial-gradient(
+      ellipse 100% 100% at 50% 50%,
+      transparent 70%,
+      rgba(0, 0, 0, 0.28) 84%,
+      transparent 100%
+    );
+    animation: p2Test2ContactEdgeInnerIn 1.45s cubic-bezier(0.22, 0.82, 0.24, 1) 0.1s both;
+  }
+  #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-slot.p2-reveal-swap):not(.p2-agent-shell--glow-retire):not(:has(#p2-slot.p2-seq-done)) .p2-agent-shell__edge,
+  #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-slot.p2-seq-color-active):not(.p2-agent-shell--glow-retire):not(:has(#p2-slot.p2-seq-done)) .p2-agent-shell__edge,
+  #canvas[data-test-scope="test2"] .p2-agent-shell.p2-agent-shell--flow-handoff:not(.p2-agent-shell--glow-retire):not(:has(#p2-slot.p2-seq-done)) .p2-agent-shell__edge {
+    opacity: 0.96 !important;
+    transition-delay: 0.12s;
+  }
+  #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-slot.p2-reveal-swap):not(.p2-agent-shell--glow-retire):not(:has(#p2-slot.p2-seq-done)) .p2-agent-shell__edge-inner,
+  #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-slot.p2-seq-color-active):not(.p2-agent-shell--glow-retire):not(:has(#p2-slot.p2-seq-done)) .p2-agent-shell__edge-inner,
+  #canvas[data-test-scope="test2"] .p2-agent-shell.p2-agent-shell--flow-handoff:not(.p2-agent-shell--glow-retire):not(:has(#p2-slot.p2-seq-done)) .p2-agent-shell__edge-inner {
+    opacity: 0.78 !important;
+    transition-delay: 0.22s;
+  }
+  #canvas[data-test-scope="test2"] .p2-agent-shell.p2-agent-shell--glow-retire:has(#p2-slot.p2-contact-reveal-active):not(:has(#p2-slot.p2-seq-done)) .p2-agent-shell__edge {
+    animation: p2Test2ContactEdgeOut 2.35s cubic-bezier(0.22, 0.82, 0.24, 1) forwards;
+    transition: none !important;
+  }
+  #canvas[data-test-scope="test2"] .p2-agent-shell.p2-agent-shell--glow-retire:has(#p2-slot.p2-contact-reveal-active):not(:has(#p2-slot.p2-seq-done)) .p2-agent-shell__edge-inner {
+    animation: p2Test2ContactEdgeInnerOut 2.45s cubic-bezier(0.22, 0.82, 0.24, 1) forwards;
+    transition: none !important;
+  }
+  #canvas[data-test-scope="test2"] .p2-agent-shell.p2-agent-shell--glow-retire:not(:has(#p2-slot.p2-contact-reveal-active)) .p2-agent-shell__edge,
+  #canvas[data-test-scope="test2"] .p2-agent-shell.p2-agent-shell--glow-retire:not(:has(#p2-slot.p2-contact-reveal-active)) .p2-agent-shell__edge-inner,
+  #canvas[data-test-scope="test2"] .p2-agent-shell.p2-agent-shell--glow-retire:has(#p2-slot.p2-seq-done) .p2-agent-shell__edge,
+  #canvas[data-test-scope="test2"] .p2-agent-shell.p2-agent-shell--glow-retire:has(#p2-slot.p2-seq-done) .p2-agent-shell__edge-inner,
+  #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-slot.p2-seq-done) .p2-agent-shell__edge,
+  #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-slot.p2-seq-done) .p2-agent-shell__edge-inner {
+    opacity: 0 !important;
+    animation: none !important;
+    filter: blur(30px) brightness(0.98);
+    transition:
+      opacity 1.55s cubic-bezier(0.22, 0.82, 0.24, 1),
+      filter 1.65s cubic-bezier(0.22, 0.82, 0.24, 1) !important;
+  }
+  @keyframes p2Test2ContactEdgeIn {
+    0% {
+      opacity: 0;
+      filter: blur(34px) brightness(1);
+    }
+    100% {
+      opacity: 0.72;
+      filter: blur(26px) brightness(1.01);
+    }
+  }
+  @keyframes p2Test2ContactEdgeInnerIn {
+    0% {
+      opacity: 0;
+      filter: blur(28px) brightness(1);
+    }
+    100% {
+      opacity: 0.78;
+      filter: blur(20px) brightness(1);
+    }
+  }
+  @keyframes p2Test2ContactEdgeOut {
+    0% {
+      opacity: 0.72;
+      filter: blur(26px) brightness(1.01);
+    }
+    55% {
+      opacity: 0.38;
+      filter: blur(28px) brightness(1);
+    }
+    100% {
+      opacity: 0;
+      filter: blur(34px) brightness(0.98);
+    }
+  }
+  @keyframes p2Test2ContactEdgeInnerOut {
+    0% {
+      opacity: 0.78;
+      filter: blur(20px) brightness(1);
+    }
+    55% {
+      opacity: 0.34;
+      filter: blur(24px) brightness(1);
+    }
+    100% {
+      opacity: 0;
+      filter: blur(30px) brightness(0.98);
+    }
   }
   @keyframes p2Test2EdgeAuraDrift {
     0%, 100% {
@@ -2260,6 +2496,12 @@
     min-height: var(--p2-shell-h, 148px);
     overflow: hidden !important;
   }
+  #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-slot.p2-reveal-swap):not(.p2-agent-shell--glow-retire):not(:has(#p2-slot.p2-seq-done)),
+  #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-slot.p2-seq-color-active):not(.p2-agent-shell--glow-retire):not(:has(#p2-slot.p2-seq-done)),
+  #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-slot.p2-contact-reveal-active):not(.p2-agent-shell--glow-retire):not(:has(#p2-slot.p2-seq-done)),
+  #canvas[data-test-scope="test2"] .p2-agent-shell.p2-agent-shell--flow-handoff:not(.p2-agent-shell--glow-retire):not(:has(#p2-slot.p2-seq-done)) {
+    overflow: visible !important;
+  }
   #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-slot.p2-seq-done) .p2-agent-fill:not(.p2-agent-fill--gl-active) {
     opacity: 0 !important;
     pointer-events: none !important;
@@ -2579,10 +2821,13 @@
     stroke: rgba(255, 255, 255, 0.46);
   }
   #canvas[data-test-scope="test2"] .p2-widgets--compact:has(#p2-slot.p2-seq-color-active),
+  #canvas[data-test-scope="test2"] .p2-widgets--compact:has(#p2-slot.p2-contact-reveal-active),
+  #canvas[data-test-scope="test2"] .p2-widgets--compact:has(.p2-agent-shell--flow-handoff),
   #canvas[data-test-scope="test2"] .p2-widgets--compact:has(#p2-slot.p2-seq-done),
   #canvas[data-test-scope="test2"] .p2-widgets--compact:has(.p2-contact-layout-active) {
     height: auto !important;
     min-height: 148px;
+    overflow: visible !important;
   }
   #canvas[data-test-scope="test2"] #p2-slot.p2-seq-color-active .dot-card,
   #canvas[data-test-scope="test2"] #p2-slot.p2-seq-done .dot-card,
