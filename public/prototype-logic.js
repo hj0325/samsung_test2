@@ -541,12 +541,8 @@
       var t = isTest2 ? P2_TEST2_REVEAL_TIMING : P2_REVEAL_TIMING;
       var hasContactList = !!(slot.querySelector && slot.querySelector('.p2-contact-list'));
 
-      if (contentH > P2_AREA_DEFAULT_H) {
-        if (isTest2 && hasContactList && typeof window.applyTest2ContactListShellHeight === 'function') {
-          window.applyTest2ContactListShellHeight(slot);
-        } else {
-          setP2AreaHeight(contentH);
-        }
+      if (contentH > P2_AREA_DEFAULT_H && !(isTest2 && hasContactList)) {
+        setP2AreaHeight(contentH);
       }
 
       slot.classList.remove('p2-reveal-waiting');
@@ -555,9 +551,17 @@
       if (isTest2 && window.P2AgentFillGL) {
         var flowShell = document.getElementById('p2-area');
         if (flowShell) flowShell.classList.add('p2-agent-shell--flow-handoff');
-        window.P2AgentFillGL.setPhase('hollowReveal');
+        if (hasContactList) {
+          window.P2AgentFillGL.setPhase('settling');
+        } else {
+          window.P2AgentFillGL.setPhase('hollowReveal');
+        }
       }
       void slot.offsetWidth;
+
+      if (isTest2 && hasContactList && contentH > P2_AREA_DEFAULT_H && typeof window.applyTest2ContactListShellHeight === 'function') {
+        window.applyTest2ContactListShellHeight(slot);
+      }
 
       if (isTest2 && hasContactList) {
         slot.classList.add('p2-seq-title');

@@ -6131,27 +6131,39 @@ function applyTest2ContactListShellHeight(slot) {
   var widgetsWrap = document.querySelector('[data-role="persona2-widgets"]');
   var stage = slot.querySelector('.p2-reveal-stage');
 
-  if (area) {
-    area.style.height = shellHpx;
-    area.style.minHeight = shellHpx;
-    area.style.setProperty('--p2-shell-h', shellHpx);
+  function apply() {
+    if (area) {
+      if (area.style.height !== shellHpx) {
+        area.classList.add('p2-contact-shell-expanding');
+        setTimeout(function () {
+          area.classList.remove('p2-contact-shell-expanding');
+        }, 2150);
+      }
+      area.style.height = shellHpx;
+      area.style.minHeight = shellHpx;
+      area.style.setProperty('--p2-shell-h', shellHpx);
+    }
+    if (widgets) {
+      widgets.style.height = shellHpx;
+      widgets.style.minHeight = shellHpx;
+    }
+    if (widgetsWrap) {
+      widgetsWrap.style.height = shellHpx;
+      widgetsWrap.style.minHeight = shellHpx;
+      widgetsWrap.style.overflow = 'visible';
+    }
+    if (stage) {
+      stage.style.removeProperty('height');
+      stage.style.setProperty('--p2-reveal-h', contentHpx);
+    }
+    slot.style.setProperty('--p2-reveal-h', contentHpx);
+    if (result) result.style.setProperty('--p2-reveal-h', contentHpx);
+    slot.dataset.p2LayoutReady = count + ':' + contentH;
   }
-  if (widgets) {
-    widgets.style.height = shellHpx;
-    widgets.style.minHeight = shellHpx;
-  }
-  if (widgetsWrap) {
-    widgetsWrap.style.height = shellHpx;
-    widgetsWrap.style.minHeight = shellHpx;
-    widgetsWrap.style.overflow = 'visible';
-  }
-  if (stage) {
-    stage.style.removeProperty('height');
-    stage.style.setProperty('--p2-reveal-h', contentHpx);
-  }
-  slot.style.setProperty('--p2-reveal-h', contentHpx);
-  if (result) result.style.setProperty('--p2-reveal-h', contentHpx);
-  slot.dataset.p2LayoutReady = count + ':' + contentH;
+
+  requestAnimationFrame(function () {
+    requestAnimationFrame(apply);
+  });
 }
 
 function activateTest2ContactListLayout(slot) {
@@ -6399,10 +6411,11 @@ function beginTest2LoadingChromeExit(slot) {
   if (result) result.classList.add('p2-loading-ui-exiting');
 }
 
-var TEST2_CONTACT_REVEAL_BASE = 380;
-var TEST2_CONTACT_REVEAL_STEP = 300;
-var TEST2_CONTACT_GLOW_RETIRE_BUFFER = 680;
-var TEST2_CONTACT_EDGE_LAYOUT_DELAY = 1320;
+var TEST2_CONTACT_EXPAND_LEAD = 380;
+var TEST2_CONTACT_REVEAL_BASE = 120;
+var TEST2_CONTACT_REVEAL_STEP = 260;
+var TEST2_CONTACT_GLOW_RETIRE_BUFFER = 920;
+var TEST2_CONTACT_EDGE_LAYOUT_DELAY = 1580;
 
 function beginTest2InputGlowRetire() {
   if (!_isTest2Scope()) return;
@@ -6464,7 +6477,6 @@ function staggerTest2ContactListRows(slot) {
 
   slot.dataset.test2ContactStagger = '1';
   slot.dataset.test2ContactRevealLock = '1';
-  slot.classList.add('p2-contact-reveal-active');
 
   var canvas = document.getElementById('canvas');
   if (canvas) canvas.classList.remove('p2-generating');
@@ -6472,24 +6484,28 @@ function staggerTest2ContactListRows(slot) {
   installTest2FillFadeOutBridge(slot);
   applyTest2ContactListShellHeight(slot);
 
-  var header = list.querySelector('.p2-contact-list__header');
-  var rows = list.querySelectorAll('.p2-contact-list__item');
-  var baseDelay = TEST2_CONTACT_REVEAL_BASE;
-  var stepDelay = TEST2_CONTACT_REVEAL_STEP;
-  var seqIndex = 0;
-
-  revealTest2ContactSequenceItem(header, baseDelay + seqIndex++ * stepDelay);
-  rows.forEach(function (row) {
-    revealTest2ContactSequenceItem(row, baseDelay + seqIndex++ * stepDelay);
-  });
-
-  var lastRevealAt = baseDelay + Math.max(seqIndex - 1, 0) * stepDelay;
-  setTimeout(beginTest2InputGlowRetire, lastRevealAt + TEST2_CONTACT_GLOW_RETIRE_BUFFER);
-
   setTimeout(function () {
-    slot.dataset.test2ContactRevealLock = '';
-    patchTest2ContactListLayout(slot, { force: true });
-  }, lastRevealAt + 1180);
+    slot.classList.add('p2-contact-reveal-active');
+
+    var header = list.querySelector('.p2-contact-list__header');
+    var rows = list.querySelectorAll('.p2-contact-list__item');
+    var baseDelay = TEST2_CONTACT_REVEAL_BASE;
+    var stepDelay = TEST2_CONTACT_REVEAL_STEP;
+    var seqIndex = 0;
+
+    revealTest2ContactSequenceItem(header, baseDelay + seqIndex++ * stepDelay);
+    rows.forEach(function (row) {
+      revealTest2ContactSequenceItem(row, baseDelay + seqIndex++ * stepDelay);
+    });
+
+    var lastRevealAt = TEST2_CONTACT_EXPAND_LEAD + baseDelay + Math.max(seqIndex - 1, 0) * stepDelay;
+    setTimeout(beginTest2InputGlowRetire, lastRevealAt + TEST2_CONTACT_GLOW_RETIRE_BUFFER);
+
+    setTimeout(function () {
+      slot.dataset.test2ContactRevealLock = '';
+      patchTest2ContactListLayout(slot, { force: true });
+    }, lastRevealAt + 1320);
+  }, TEST2_CONTACT_EXPAND_LEAD);
 }
 
 function finalizeTest2ContactListVisibility(slot) {

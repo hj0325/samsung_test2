@@ -347,6 +347,47 @@
     opacity: 0 !important;
     transition: opacity 0.42s cubic-bezier(0.22, 0.82, 0.24, 1) !important;
   }
+  #canvas[data-test-scope="test2"] .p2-agent-shell.p2-contact-shell-expanding:not(:has(#p2-slot.p2-contact-reveal-active)) .p2-agent-footer {
+    opacity: 1 !important;
+    transition:
+      padding var(--p2-test2-morph-dur) var(--p2-test2-morph-ease) 0.08s,
+      gap calc(var(--p2-test2-morph-dur) - 0.12s) var(--p2-test2-morph-ease) 0.1s,
+      height calc(var(--p2-test2-morph-dur) - 0.18s) var(--p2-test2-morph-ease) 0.06s !important;
+  }
+  #canvas[data-test-scope="test2"] .p2-agent-shell.p2-contact-shell-expanding:not(:has(#p2-slot.p2-contact-reveal-active)) .p2-agent-footer .p2-agent-input,
+  #canvas[data-test-scope="test2"] .p2-agent-shell.p2-contact-shell-expanding:not(:has(#p2-slot.p2-contact-reveal-active)) .p2-agent-footer #p2-star {
+    animation: p2Test2FooterChromeDescend var(--p2-test2-morph-dur) var(--p2-test2-morph-ease) both;
+  }
+  @keyframes p2Test2FooterChromeDescend {
+    0% {
+      opacity: 0.58;
+      transform: translateY(-18px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  #canvas[data-test-scope="test2"] .p2-agent-shell.p2-contact-shell-expanding:not(:has(#p2-slot.p2-contact-reveal-active)) .p2-agent-input {
+    transition:
+      background 0.62s var(--p2-test2-flow-ease),
+      background-color 0.62s var(--p2-test2-flow-ease),
+      background-image 0.52s var(--p2-test2-flow-ease),
+      color 0.52s var(--p2-test2-flow-ease),
+      -webkit-text-fill-color 0.52s var(--p2-test2-flow-ease),
+      filter 0.48s var(--p2-test2-flow-ease),
+      box-shadow 0.48s var(--p2-test2-flow-ease),
+      padding calc(var(--p2-test2-morph-dur) - 0.2s) var(--p2-test2-morph-ease) 0.14s,
+      border-radius calc(var(--p2-test2-morph-dur) - 0.28s) var(--p2-test2-morph-ease) 0.1s,
+      max-width var(--p2-test2-morph-dur) var(--p2-test2-morph-ease) 0.08s !important;
+  }
+  #canvas[data-test-scope="test2"] .p2-agent-shell.p2-contact-shell-expanding:not(:has(#p2-slot.p2-contact-reveal-active)) #p2-star {
+    transition:
+      width calc(var(--p2-test2-morph-dur) - 0.28s) var(--p2-test2-morph-ease) 0.12s,
+      height calc(var(--p2-test2-morph-dur) - 0.28s) var(--p2-test2-morph-ease) 0.12s,
+      box-shadow 0.72s var(--p2-test2-flow-ease),
+      background 0.62s var(--p2-test2-flow-ease) !important;
+  }
   #canvas[data-test-scope="test2"] .p2-agent-shell.p2-loading-chrome-exiting:has(#p2-result.is-loading) .p2-agent-footer,
   #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-slot.p2-contact-reveal-active) .p2-agent-footer,
   #canvas[data-test-scope="test2"] .p2-agent-shell.p2-contact-layout-active .p2-agent-footer {
@@ -372,19 +413,42 @@
       opacity 0.62s cubic-bezier(0.22, 0.82, 0.24, 1),
       transform 0.62s cubic-bezier(0.22, 0.82, 0.24, 1) !important;
   }
+  /* test2: shared motion tokens — expand + content flow */
+  #canvas[data-test-scope="test2"] {
+    --p2-test2-morph-ease: cubic-bezier(0.16, 0.88, 0.18, 1);
+    --p2-test2-morph-dur: 2.05s;
+    --p2-test2-flow-ease: cubic-bezier(0.22, 0.82, 0.24, 1);
+    --p2-test2-content-dur: 1.32s;
+    --p2-test2-edge-dur: 2.55s;
+  }
   #canvas[data-test-scope="test2"] #p2-area.p2-agent-shell {
     transition:
-      height 1.38s cubic-bezier(0.22, 0.82, 0.24, 1),
-      min-height 1.38s cubic-bezier(0.22, 0.82, 0.24, 1),
+      height var(--p2-test2-morph-dur) var(--p2-test2-morph-ease),
+      min-height var(--p2-test2-morph-dur) var(--p2-test2-morph-ease),
+      padding var(--p2-test2-morph-dur) var(--p2-test2-morph-ease),
+      gap var(--p2-test2-morph-dur) var(--p2-test2-morph-ease),
       box-shadow 0.85s ease;
   }
   #canvas[data-test-scope="test2"] #p2-area.p2-agent-shell.p2-agent-shell--flow-handoff {
     transition:
-      height 1.38s cubic-bezier(0.22, 0.82, 0.24, 1),
-      min-height 1.38s cubic-bezier(0.22, 0.82, 0.24, 1),
+      height var(--p2-test2-morph-dur) var(--p2-test2-morph-ease),
+      min-height var(--p2-test2-morph-dur) var(--p2-test2-morph-ease),
+      padding var(--p2-test2-morph-dur) var(--p2-test2-morph-ease),
+      gap var(--p2-test2-morph-dur) var(--p2-test2-morph-ease),
       background 1.35s cubic-bezier(0.22, 0.82, 0.24, 1),
       box-shadow 1.35s cubic-bezier(0.22, 0.82, 0.24, 1),
       backdrop-filter 1.1s ease;
+  }
+  #canvas[data-test-scope="test2"] #p2-area.p2-agent-shell.p2-agent-shell--flow-handoff:has(#p2-slot.p2-seq-color-active),
+  #canvas[data-test-scope="test2"] #p2-area.p2-agent-shell.p2-agent-shell--flow-handoff.p2-contact-shell-expanding {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    transition:
+      height var(--p2-test2-morph-dur) var(--p2-test2-morph-ease),
+      min-height var(--p2-test2-morph-dur) var(--p2-test2-morph-ease),
+      padding var(--p2-test2-morph-dur) var(--p2-test2-morph-ease),
+      gap var(--p2-test2-morph-dur) var(--p2-test2-morph-ease),
+      box-shadow 1.35s var(--p2-test2-flow-ease) !important;
   }
   #canvas[data-test-scope="test2"] .p2-result-loading__bg {
     position: absolute;
@@ -1162,7 +1226,7 @@
     isolation: isolate;
     --p2-fill-x: calc(100% - 36px);
     --p2-fill-y: calc(100% - 40px);
-    transition: background 0.55s ease, box-shadow 1.35s cubic-bezier(0.22, 0.82, 0.24, 1), height 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: background 0.55s ease, box-shadow 1.35s cubic-bezier(0.22, 0.82, 0.24, 1), height var(--p2-test2-morph-dur) var(--p2-test2-morph-ease), min-height var(--p2-test2-morph-dur) var(--p2-test2-morph-ease), padding var(--p2-test2-morph-dur) var(--p2-test2-morph-ease), gap var(--p2-test2-morph-dur) var(--p2-test2-morph-ease);
   }
   /* test2: handoff — warm golden glass, soft edge aura (no hard stroke) */
   #canvas[data-test-scope="test2"] .p2-agent-shell.p2-agent-shell--flow-handoff:has(#p2-result.is-loading):not(:has(#p2-slot.p2-reveal-swap)) {
@@ -1180,8 +1244,8 @@
       background 1.15s cubic-bezier(0.22, 0.82, 0.24, 1),
       box-shadow 1.2s cubic-bezier(0.22, 0.82, 0.24, 1) !important;
   }
-  #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-slot.p2-reveal-swap):not(.p2-agent-shell--glow-retire):not(.p2-contact-layout-active):not(:has(#p2-slot.p2-seq-done)),
-  #canvas[data-test-scope="test2"] .p2-agent-shell.p2-agent-shell--flow-handoff:has(#p2-result.is-loading):not(.p2-agent-shell--glow-retire):not(.p2-contact-layout-active):not(:has(#p2-slot.p2-contact-reveal-active)):not(:has(#p2-slot.p2-seq-done)) {
+  #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-slot.p2-reveal-swap):not(.p2-agent-shell--glow-retire):not(.p2-contact-layout-active):not(:has(#p2-slot.p2-seq-done)):not(:has(#p2-slot.p2-seq-color-active)):not(.p2-contact-shell-expanding),
+  #canvas[data-test-scope="test2"] .p2-agent-shell.p2-agent-shell--flow-handoff:has(#p2-result.is-loading):not(.p2-agent-shell--glow-retire):not(.p2-contact-layout-active):not(:has(#p2-slot.p2-contact-reveal-active)):not(:has(#p2-slot.p2-seq-done)):not(:has(#p2-slot.p2-seq-color-active)):not(.p2-contact-shell-expanding) {
     background: linear-gradient(
       148deg,
       rgba(255, 157, 218, 0.22) 0%,
@@ -1203,6 +1267,7 @@
       backdrop-filter 1.1s ease !important;
   }
   /* test2 expand prep: solid blue while shell grows (before contact list chrome) */
+  #canvas[data-test-scope="test2"] .p2-agent-shell.p2-contact-shell-expanding,
   #canvas[data-test-scope="test2"] .p2-agent-shell.p2-agent-shell--flow-handoff:has(#p2-slot.p2-reveal-swap):not(.p2-agent-shell--glow-retire):not(:has(#p2-slot.p2-contact-reveal-active)),
   #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-slot.p2-seq-color-active):not(.p2-agent-shell--glow-retire):not(:has(#p2-slot.p2-contact-reveal-active)) {
     background: #5A71F5 !important;
@@ -1211,8 +1276,11 @@
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18) !important;
     overflow: visible !important;
     transition:
-      background 1.05s cubic-bezier(0.16, 1, 0.3, 1),
-      box-shadow 1.35s cubic-bezier(0.22, 0.82, 0.24, 1) !important;
+      height var(--p2-test2-morph-dur) var(--p2-test2-morph-ease),
+      min-height var(--p2-test2-morph-dur) var(--p2-test2-morph-ease),
+      padding var(--p2-test2-morph-dur) var(--p2-test2-morph-ease),
+      gap var(--p2-test2-morph-dur) var(--p2-test2-morph-ease),
+      box-shadow 1.35s var(--p2-test2-flow-ease) !important;
   }
   /* test2 contact reveal: solid blue + pink edge overlay (shell __edge, no glass transparency) */
   #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-slot.p2-contact-reveal-active):not(.p2-agent-shell--glow-retire):not(.p2-contact-layout-active):not(:has(#p2-slot.p2-seq-done)) {
@@ -1228,7 +1296,7 @@
     overflow: visible !important;
     transition:
       background 1.05s cubic-bezier(0.16, 1, 0.3, 1),
-      box-shadow 1.45s cubic-bezier(0.22, 0.82, 0.24, 1) 0.08s !important;
+      box-shadow 1.65s var(--p2-test2-morph-ease) 0.12s !important;
   }
   /* test2 contact layout: solid blue card after edge handoff */
   #canvas[data-test-scope="test2"] .p2-agent-shell.p2-contact-layout-active:not(.p2-agent-shell--glow-retire):not(:has(#p2-slot.p2-seq-done)) {
@@ -1265,8 +1333,8 @@
     backdrop-filter: none;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18) !important;
     transition:
-      background 1.35s cubic-bezier(0.22, 0.82, 0.24, 1),
-      box-shadow 2.4s cubic-bezier(0.22, 0.82, 0.24, 1) !important;
+      background 1.35s var(--p2-test2-flow-ease),
+      box-shadow var(--p2-test2-edge-dur) var(--p2-test2-morph-ease) !important;
   }
   #canvas[data-test-scope="test2"] .p2-agent-fill {
     position: absolute;
@@ -1308,6 +1376,11 @@
   #canvas[data-test-scope="test2"] .p2-agent-shell.p2-agent-shell--flow-handoff .p2-agent-fill--gl-ready.p2-agent-fill--gl-active {
     opacity: 1 !important;
     transition: opacity 0.88s cubic-bezier(0.22, 0.82, 0.24, 1) !important;
+  }
+  #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-slot.p2-seq-color-active) .p2-agent-input .p2-agent-fill--gl-ready.p2-agent-fill--gl-active,
+  #canvas[data-test-scope="test2"] .p2-agent-shell.p2-contact-shell-expanding .p2-agent-input .p2-agent-fill--gl-ready.p2-agent-fill--gl-active {
+    opacity: 0 !important;
+    transition: opacity 0.52s var(--p2-test2-flow-ease) !important;
   }
   #canvas[data-test-scope="test2"] .p2-agent-fill--gl-ready.p2-agent-fill--gl-active:not(.p2-agent-fill--gl-fading) .p2-agent-fill__edge,
   #canvas[data-test-scope="test2"] .p2-agent-fill--gl-ready.p2-agent-fill--gl-active:not(.p2-agent-fill--gl-fading) .p2-agent-fill__edge-inner {
@@ -1528,7 +1601,7 @@
     z-index: 14;
     opacity: 0.72 !important;
     filter: blur(26px) brightness(1.01);
-    animation: p2Test2ContactEdgeIn 1.35s cubic-bezier(0.22, 0.82, 0.24, 1) 0.06s both;
+    animation: p2Test2ContactEdgeIn 1.45s var(--p2-test2-morph-ease) 0.08s both;
   }
   #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-slot.p2-contact-reveal-active):not(.p2-agent-shell--glow-retire):not(.p2-contact-layout-active):not(:has(#p2-slot.p2-seq-done)) .p2-agent-shell__edge-inner {
     z-index: 13;
@@ -1551,7 +1624,7 @@
       rgba(0, 0, 0, 0.28) 84%,
       transparent 100%
     );
-    animation: p2Test2ContactEdgeInnerIn 1.45s cubic-bezier(0.22, 0.82, 0.24, 1) 0.1s both;
+    animation: p2Test2ContactEdgeInnerIn 1.55s var(--p2-test2-morph-ease) 0.14s both;
   }
   #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-slot.p2-reveal-swap):not(.p2-agent-shell--glow-retire):not(:has(#p2-slot.p2-seq-done)) .p2-agent-shell__edge,
   #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-slot.p2-seq-color-active):not(.p2-agent-shell--glow-retire):not(:has(#p2-slot.p2-seq-done)) .p2-agent-shell__edge,
@@ -1566,11 +1639,11 @@
     transition-delay: 0.22s;
   }
   #canvas[data-test-scope="test2"] .p2-agent-shell.p2-agent-shell--glow-retire:has(#p2-slot.p2-contact-reveal-active):not(:has(#p2-slot.p2-seq-done)) .p2-agent-shell__edge {
-    animation: p2Test2ContactEdgeOut 2.35s cubic-bezier(0.22, 0.82, 0.24, 1) forwards;
+    animation: p2Test2ContactEdgeOut var(--p2-test2-edge-dur) var(--p2-test2-morph-ease) forwards;
     transition: none !important;
   }
   #canvas[data-test-scope="test2"] .p2-agent-shell.p2-agent-shell--glow-retire:has(#p2-slot.p2-contact-reveal-active):not(:has(#p2-slot.p2-seq-done)) .p2-agent-shell__edge-inner {
-    animation: p2Test2ContactEdgeInnerOut 2.45s cubic-bezier(0.22, 0.82, 0.24, 1) forwards;
+    animation: p2Test2ContactEdgeInnerOut calc(var(--p2-test2-edge-dur) + 0.12s) var(--p2-test2-morph-ease) forwards;
     transition: none !important;
   }
   #canvas[data-test-scope="test2"] .p2-agent-shell.p2-agent-shell--glow-retire:not(:has(#p2-slot.p2-contact-reveal-active)) .p2-agent-shell__edge,
@@ -1611,9 +1684,13 @@
       opacity: 0.72;
       filter: blur(26px) brightness(1.01);
     }
-    55% {
-      opacity: 0.38;
-      filter: blur(28px) brightness(1);
+    38% {
+      opacity: 0.62;
+      filter: blur(27px) brightness(1);
+    }
+    72% {
+      opacity: 0.28;
+      filter: blur(29px) brightness(1);
     }
     100% {
       opacity: 0;
@@ -1625,9 +1702,13 @@
       opacity: 0.78;
       filter: blur(20px) brightness(1);
     }
-    55% {
-      opacity: 0.34;
-      filter: blur(24px) brightness(1);
+    40% {
+      opacity: 0.66;
+      filter: blur(21px) brightness(1);
+    }
+    74% {
+      opacity: 0.24;
+      filter: blur(25px) brightness(1);
     }
     100% {
       opacity: 0;
@@ -1992,8 +2073,13 @@
     min-height: 148px;
     height: auto !important;
     transition:
-      height 1.38s cubic-bezier(0.22, 0.82, 0.24, 1),
-      min-height 1.38s cubic-bezier(0.22, 0.82, 0.24, 1);
+      height var(--p2-test2-morph-dur) var(--p2-test2-morph-ease),
+      min-height var(--p2-test2-morph-dur) var(--p2-test2-morph-ease);
+  }
+  #canvas[data-test-scope="test2"] .canvas-item[data-role="persona2-widgets"] {
+    transition:
+      height var(--p2-test2-morph-dur) var(--p2-test2-morph-ease),
+      min-height var(--p2-test2-morph-dur) var(--p2-test2-morph-ease);
   }
   #canvas[data-test-scope="test2"] .p2-agent-main {
     flex: 1;
@@ -2059,8 +2145,10 @@
     gap: 8px;
     z-index: 15;
     transition:
-      padding 0.72s cubic-bezier(0.22, 0.82, 0.24, 1),
-      opacity 0.42s cubic-bezier(0.22, 0.82, 0.24, 1);
+      padding var(--p2-test2-morph-dur) var(--p2-test2-morph-ease),
+      gap calc(var(--p2-test2-morph-dur) - 0.12s) var(--p2-test2-morph-ease),
+      height calc(var(--p2-test2-morph-dur) - 0.18s) var(--p2-test2-morph-ease),
+      transform var(--p2-test2-morph-dur) var(--p2-test2-morph-ease);
   }
   #canvas[data-test-scope="test2"] .p2-agent-input {
     flex: 1;
@@ -2087,7 +2175,11 @@
       color 0.52s cubic-bezier(0.22, 0.82, 0.24, 1),
       -webkit-text-fill-color 0.52s cubic-bezier(0.22, 0.82, 0.24, 1),
       filter 0.48s cubic-bezier(0.22, 0.82, 0.24, 1),
-      box-shadow 0.48s cubic-bezier(0.22, 0.82, 0.24, 1);
+      box-shadow 0.48s cubic-bezier(0.22, 0.82, 0.24, 1),
+      padding calc(var(--p2-test2-morph-dur) - 0.2s) var(--p2-test2-morph-ease),
+      border-radius calc(var(--p2-test2-morph-dur) - 0.28s) var(--p2-test2-morph-ease),
+      max-width var(--p2-test2-morph-dur) var(--p2-test2-morph-ease),
+      transform var(--p2-test2-morph-dur) var(--p2-test2-morph-ease);
   }
   #canvas[data-test-scope="test2"] .p2-agent-input .p2-input-text {
     position: relative;
@@ -2194,6 +2286,10 @@
     overflow: hidden;
     box-shadow: 0 4px 16px rgba(255, 157, 218, 0.32);
     animation: p2Test2GalaxyGlow 2.8s ease-in-out infinite;
+    transition:
+      transform var(--p2-test2-morph-dur) var(--p2-test2-morph-ease),
+      box-shadow 0.72s var(--p2-test2-flow-ease),
+      background 0.62s var(--p2-test2-flow-ease);
   }
   @keyframes p2Test2GalaxyGlow {
     0%, 100% { box-shadow: 0 4px 14px rgba(255, 157, 218, 0.28); }
@@ -2454,8 +2550,8 @@
     overflow: visible;
     height: auto !important;
     transition:
-      opacity 1.08s cubic-bezier(0.22, 0.82, 0.24, 1),
-      height 1.38s cubic-bezier(0.22, 0.82, 0.24, 1);
+      opacity 1.08s var(--p2-test2-flow-ease),
+      height var(--p2-test2-morph-dur) var(--p2-test2-morph-ease);
   }
   #canvas[data-test-scope="test2"] #p2-slot.p2-reveal-swap.p2-reveal-waiting .p2-reveal-stage {
     opacity: 0;
@@ -2482,6 +2578,26 @@
     overflow: visible !important;
     z-index: 6;
   }
+  #canvas[data-test-scope="test2"] .p2-agent-shell.p2-contact-shell-expanding {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    align-items: stretch !important;
+    padding: 0 !important;
+    gap: 0 !important;
+    height: auto !important;
+    min-height: var(--p2-shell-h, 148px);
+    overflow: hidden !important;
+    background: #5A71F5 !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    transition:
+      height var(--p2-test2-morph-dur) var(--p2-test2-morph-ease),
+      min-height var(--p2-test2-morph-dur) var(--p2-test2-morph-ease),
+      padding var(--p2-test2-morph-dur) var(--p2-test2-morph-ease),
+      gap var(--p2-test2-morph-dur) var(--p2-test2-morph-ease),
+      box-shadow 1.35s var(--p2-test2-flow-ease) !important;
+  }
   #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-slot.p2-seq-color-active),
   #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-slot.p2-seq-done),
   #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-slot.p2-contact-reveal-active),
@@ -2495,6 +2611,13 @@
     height: auto !important;
     min-height: var(--p2-shell-h, 148px);
     overflow: hidden !important;
+    transition:
+      height var(--p2-test2-morph-dur) var(--p2-test2-morph-ease),
+      min-height var(--p2-test2-morph-dur) var(--p2-test2-morph-ease),
+      padding var(--p2-test2-morph-dur) var(--p2-test2-morph-ease),
+      gap var(--p2-test2-morph-dur) var(--p2-test2-morph-ease),
+      background 1.05s cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 1.35s var(--p2-test2-flow-ease) !important;
   }
   #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-slot.p2-reveal-swap):not(.p2-agent-shell--glow-retire):not(:has(#p2-slot.p2-seq-done)),
   #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-slot.p2-seq-color-active):not(.p2-agent-shell--glow-retire):not(:has(#p2-slot.p2-seq-done)),
@@ -2532,6 +2655,10 @@
     height: auto !important;
     overflow: visible !important;
     z-index: 1 !important;
+    transition:
+      height var(--p2-test2-morph-dur) var(--p2-test2-morph-ease),
+      transform var(--p2-test2-morph-dur) var(--p2-test2-morph-ease),
+      opacity var(--p2-test2-content-dur) var(--p2-test2-flow-ease);
   }
   #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-slot.p2-seq-color-active) #p2-slot .p2-reveal-stage,
   #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-slot.p2-seq-done) #p2-slot .p2-reveal-stage,
@@ -2586,6 +2713,11 @@
     background: transparent !important;
     border-radius: 0 !important;
     box-shadow: none !important;
+    transition:
+      padding var(--p2-test2-morph-dur) var(--p2-test2-morph-ease),
+      gap calc(var(--p2-test2-morph-dur) - 0.12s) var(--p2-test2-morph-ease),
+      height calc(var(--p2-test2-morph-dur) - 0.18s) var(--p2-test2-morph-ease),
+      transform var(--p2-test2-morph-dur) var(--p2-test2-morph-ease) !important;
   }
   /* test2 contact flow: lighter blue input pill on settled card */
   #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-slot.p2-seq-color-active) .p2-agent-footer .p2-agent-input,
@@ -2612,9 +2744,13 @@
     filter: none !important;
     box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06) !important;
     transition:
-      background-color 0.72s cubic-bezier(0.22, 0.82, 0.24, 1),
-      color 0.72s cubic-bezier(0.22, 0.82, 0.24, 1),
-      -webkit-text-fill-color 0.72s cubic-bezier(0.22, 0.82, 0.24, 1) !important;
+      background-color 1.12s cubic-bezier(0.22, 0.82, 0.24, 1),
+      color 1.08s cubic-bezier(0.22, 0.82, 0.24, 1),
+      -webkit-text-fill-color 1.08s cubic-bezier(0.22, 0.82, 0.24, 1),
+      padding calc(var(--p2-test2-morph-dur) - 0.2s) var(--p2-test2-morph-ease),
+      border-radius calc(var(--p2-test2-morph-dur) - 0.28s) var(--p2-test2-morph-ease),
+      max-width var(--p2-test2-morph-dur) var(--p2-test2-morph-ease),
+      transform var(--p2-test2-morph-dur) var(--p2-test2-morph-ease) !important;
   }
   #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-slot.p2-seq-color-active) .p2-agent-input .p2-input-text,
   #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-slot.p2-contact-reveal-active) .p2-agent-input .p2-input-text,
@@ -2648,6 +2784,10 @@
     height: 56px !important;
     margin: 0 !important;
     transform: none !important;
+    transition:
+      transform var(--p2-test2-morph-dur) var(--p2-test2-morph-ease),
+      width calc(var(--p2-test2-morph-dur) - 0.28s) var(--p2-test2-morph-ease),
+      height calc(var(--p2-test2-morph-dur) - 0.28s) var(--p2-test2-morph-ease) !important;
   }
   #canvas[data-test-scope="test2"] #p2-slot .p2-contact-list {
     width: 100% !important;
@@ -2695,11 +2835,24 @@
     align-items: center !important;
     color: rgba(255, 255, 255, 0.98) !important;
   }
+  #canvas[data-test-scope="test2"] #p2-slot.p2-contact-reveal-active .p2-contact-list {
+    animation: p2Test2ContactListMount var(--p2-test2-content-dur) var(--p2-test2-morph-ease) both;
+  }
+  @keyframes p2Test2ContactListMount {
+    0% {
+      opacity: 0.9;
+      transform: translateY(6px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
   #canvas[data-test-scope="test2"] #p2-slot .p2-contact-list__header.p2-seq-text-hidden,
   #canvas[data-test-scope="test2"] #p2-slot .p2-contact-list__item.p2-seq-text-hidden {
     opacity: 0 !important;
-    transform: translateY(14px) scale(0.994);
-    filter: blur(1.5px);
+    transform: translateY(8px) scale(0.998);
+    filter: blur(0.6px);
     pointer-events: none;
     will-change: opacity, transform, filter;
   }
@@ -2710,9 +2863,9 @@
     filter: blur(0);
     pointer-events: auto;
     transition:
-      opacity 1.08s cubic-bezier(0.22, 0.82, 0.24, 1),
-      transform 1.18s cubic-bezier(0.22, 0.82, 0.24, 1),
-      filter 0.98s cubic-bezier(0.22, 0.82, 0.24, 1);
+      opacity var(--p2-test2-content-dur) var(--p2-test2-morph-ease),
+      transform calc(var(--p2-test2-content-dur) + 0.08s) var(--p2-test2-morph-ease),
+      filter calc(var(--p2-test2-content-dur) - 0.12s) var(--p2-test2-flow-ease);
   }
   /* settled contact list: never collapse rows after reveal completes */
   #canvas[data-test-scope="test2"] #p2-slot.p2-seq-done .p2-contact-list__header:not(.p2-seq-text-hidden),
