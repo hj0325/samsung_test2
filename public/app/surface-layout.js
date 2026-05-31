@@ -6082,6 +6082,15 @@ window.attachReorderHandlers = function attachReorderHandlers(el, nodeId) {
 
 var _p2LayoutPatchToken = 0;
 var _p2LayoutPatchScheduled = false;
+var TEST2_CONTACT_SHELL_BOTTOM_TRIM = 5;
+
+function _computeP2ContactListShellHeight(itemCount, contentH) {
+  var innerH = contentH;
+  if (innerH == null || isNaN(innerH)) {
+    innerH = _computeP2ContactListHeight(itemCount);
+  }
+  return innerH + 56 - TEST2_CONTACT_SHELL_BOTTOM_TRIM;
+}
 
 function _unlockTest2ContactListNodes(slot) {
   if (!slot) return;
@@ -6122,7 +6131,7 @@ function applyTest2ContactListShellHeight(slot) {
   if (!list) return;
   var count = parseInt(list.getAttribute('data-item-count') || '3', 10) || 3;
   var contentH = _computeP2ContactListHeight(count);
-  var shellH = contentH + 56;
+  var shellH = _computeP2ContactListShellHeight(count, contentH);
   var shellHpx = shellH + 'px';
   var contentHpx = contentH + 'px';
   var area = document.getElementById('p2-area');
@@ -6175,7 +6184,7 @@ function activateTest2ContactListLayout(slot) {
   var main = document.getElementById('p2-default-widgets');
   var footer = shell && shell.querySelector('.p2-agent-footer');
   var count = parseInt(list.getAttribute('data-item-count') || '3', 10) || 3;
-  var shellHpx = (_computeP2ContactListHeight(count) + 56) + 'px';
+  var shellHpx = _computeP2ContactListShellHeight(count) + 'px';
   var widgets = document.querySelector('.p2-widgets--compact');
   var widgetsWrap = document.querySelector('[data-role="persona2-widgets"]');
 
@@ -6253,7 +6262,7 @@ function patchTest2ContactListLayout(slot, opts) {
 
   function applyLayout(contentH) {
     if (patchToken !== _p2LayoutPatchToken) return;
-    var shellH = contentH + 56;
+    var shellH = _computeP2ContactListShellHeight(count, contentH);
     var shellHpx = shellH + 'px';
     var area = document.getElementById('p2-area');
     var result = document.getElementById('p2-result');
