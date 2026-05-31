@@ -551,25 +551,17 @@
       if (isTest2 && window.P2AgentFillGL) {
         var flowShell = document.getElementById('p2-area');
         if (flowShell) flowShell.classList.add('p2-agent-shell--flow-handoff');
-        if (hasContactList) {
-          window.P2AgentFillGL.setPhase('settling');
-        } else {
-          window.P2AgentFillGL.setPhase('hollowReveal');
-        }
+        window.P2AgentFillGL.setPhase('hollowReveal');
       }
       void slot.offsetWidth;
 
-      if (isTest2 && hasContactList && contentH > P2_AREA_DEFAULT_H && typeof window.applyTest2ContactListShellHeight === 'function') {
-        window.applyTest2ContactListShellHeight(slot);
-      }
-
       if (isTest2 && hasContactList) {
+        if (typeof window.prepareTest2ContactListShellExpand === 'function') {
+          window.prepareTest2ContactListShellExpand(slot);
+        } else if (typeof window.applyTest2ContactListShellHeight === 'function') {
+          window.applyTest2ContactListShellHeight(slot);
+        }
         slot.classList.add('p2-seq-title');
-        setTimeout(function () {
-          if (typeof window.beginTest2LoadingChromeExit === 'function') {
-            window.beginTest2LoadingChromeExit(slot);
-          }
-        }, 90);
         return;
       }
 

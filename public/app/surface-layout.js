@@ -6083,7 +6083,6 @@ window.attachReorderHandlers = function attachReorderHandlers(el, nodeId) {
 var _p2LayoutPatchToken = 0;
 var _p2LayoutPatchScheduled = false;
 var TEST2_CONTACT_SHELL_BOTTOM_TRIM = 5;
-var TEST2_MORPH_MS = 5000;
 
 function _computeP2ContactListShellHeight(itemCount, contentH) {
   var innerH = contentH;
@@ -6091,15 +6090,6 @@ function _computeP2ContactListShellHeight(itemCount, contentH) {
     innerH = _computeP2ContactListHeight(itemCount);
   }
   return innerH + 56 - TEST2_CONTACT_SHELL_BOTTOM_TRIM;
-}
-
-function _readTest2ShellHeightPx(el, fallback) {
-  if (!el) return fallback || 148;
-  var inline = parseFloat(el.style.height);
-  if (!isNaN(inline) && inline > 0) return inline;
-  var varH = parseFloat(el.style.getPropertyValue('--p2-shell-h'));
-  if (!isNaN(varH) && varH > 0) return varH;
-  return el.offsetHeight || fallback || 148;
 }
 
 function _unlockTest2ContactListNodes(slot) {
@@ -6135,8 +6125,7 @@ function _unlockTest2ContactListNodes(slot) {
   });
 }
 
-function applyTest2ContactListShellHeight(slot, opts) {
-  opts = opts || {};
+function applyTest2ContactListShellHeight(slot) {
   if (!slot) return;
   var list = slot.querySelector('.p2-contact-list');
   if (!list) return;
@@ -6151,83 +6140,31 @@ function applyTest2ContactListShellHeight(slot, opts) {
   var widgetsWrap = document.querySelector('[data-role="persona2-widgets"]');
   var stage = slot.querySelector('.p2-reveal-stage');
 
-  if (!opts.force && slot.dataset.test2ContactStagger !== '1') {
-    if (stage) {
-      stage.style.removeProperty('height');
-      stage.style.setProperty('--p2-reveal-h', contentHpx);
-    }
-    slot.style.setProperty('--p2-reveal-h', contentHpx);
-    if (result) result.style.setProperty('--p2-reveal-h', contentHpx);
-    return;
+  if (area) {
+    area.style.height = shellHpx;
+    area.style.minHeight = shellHpx;
+    area.style.setProperty('--p2-shell-h', shellHpx);
   }
-  if (slot.dataset.test2ShellExpanding === '1') return;
-
-  slot.dataset.test2ShellExpanding = '1';
-  var canvas = document.getElementById('canvas');
-
-  function finishExpand() {
-    if (canvas) canvas.classList.remove('p2-test2-shell-expanding');
-    if (area) {
-      area.style.setProperty('--p2-shell-h', shellHpx);
-      area.classList.add('p2-contact-expand-settled');
-      area.classList.remove('p2-contact-shell-expanding');
-      requestAnimationFrame(function () {
-        area.style.height = shellHpx;
-        area.style.minHeight = shellHpx;
-      });
-    }
-    if (widgets) {
-      widgets.style.height = shellHpx;
-      widgets.style.minHeight = shellHpx;
-      widgets.style.setProperty('--p2-shell-h', shellHpx);
-    }
-    if (widgetsWrap) {
-      widgetsWrap.style.height = shellHpx;
-      widgetsWrap.style.minHeight = shellHpx;
-      widgetsWrap.style.setProperty('--p2-shell-h', shellHpx);
-      widgetsWrap.style.overflow = 'visible';
-    }
-    slot.dataset.test2ShellExpanding = '';
-    slot.dataset.p2LayoutReady = count + ':' + contentH;
+  if (widgets) {
+    widgets.style.height = shellHpx;
+    widgets.style.minHeight = shellHpx;
   }
-
-  function apply() {
-    if (canvas) canvas.classList.add('p2-test2-shell-expanding');
-    if (area) {
-      var startPx = _readTest2ShellHeightPx(area, 148);
-      var startStr = Math.round(startPx) + 'px';
-      area.classList.add('p2-contact-shell-expanding');
-      area.style.removeProperty('height');
-      area.style.removeProperty('min-height');
-      area.style.setProperty('--p2-shell-h', startStr);
-      if (widgets) widgets.style.setProperty('--p2-shell-h', startStr);
-      if (widgetsWrap) widgetsWrap.style.setProperty('--p2-shell-h', startStr);
-      void area.offsetHeight;
-      requestAnimationFrame(function () {
-        area.style.setProperty('--p2-shell-h', shellHpx);
-        if (widgets) widgets.style.setProperty('--p2-shell-h', shellHpx);
-        if (widgetsWrap) widgetsWrap.style.setProperty('--p2-shell-h', shellHpx);
-        setTimeout(finishExpand, TEST2_MORPH_MS + 80);
-      });
-    } else {
-      setTimeout(finishExpand, TEST2_MORPH_MS + 80);
-    }
-    if (stage) {
-      stage.style.removeProperty('height');
-      stage.style.setProperty('--p2-reveal-h', contentHpx);
-    }
-    slot.style.setProperty('--p2-reveal-h', contentHpx);
-    if (result) result.style.setProperty('--p2-reveal-h', contentHpx);
+  if (widgetsWrap) {
+    widgetsWrap.style.height = shellHpx;
+    widgetsWrap.style.minHeight = shellHpx;
+    widgetsWrap.style.overflow = 'visible';
   }
-
-  requestAnimationFrame(function () {
-    requestAnimationFrame(apply);
-  });
+  if (stage) {
+    stage.style.removeProperty('height');
+    stage.style.setProperty('--p2-reveal-h', contentHpx);
+  }
+  slot.style.setProperty('--p2-reveal-h', contentHpx);
+  if (result) result.style.setProperty('--p2-reveal-h', contentHpx);
+  slot.dataset.p2LayoutReady = count + ':' + contentH;
 }
 
-function activateTest2ContactListLayout(slot) {
+function activateTest2ContactListLayout(slot, opts) {
   if (!_isTest2Scope() || !slot) return false;
-  if (slot.dataset.test2ShellExpanding === '1') return false;
   var list = slot.querySelector('.p2-contact-list');
   if (!list) return false;
 
@@ -6249,28 +6186,41 @@ function activateTest2ContactListLayout(slot) {
   if (widgets) widgets.style.minHeight = shellHpx;
   if (widgetsWrap) widgetsWrap.style.minHeight = shellHpx;
   if (main) {
-    main.style.display = 'none';
-    main.style.opacity = '0';
-    main.style.pointerEvents = 'none';
+    if (!opts || opts.keepMainHidden !== true) {
+      main.style.removeProperty('display');
+      main.style.removeProperty('opacity');
+      main.style.removeProperty('pointer-events');
+    } else {
+      main.style.display = 'none';
+      main.style.opacity = '0';
+      main.style.pointerEvents = 'none';
+    }
   }
   if (footer) {
-    footer.style.position = 'relative';
-    footer.style.opacity = '1';
-    footer.style.height = '56px';
-    footer.style.pointerEvents = 'auto';
-    footer.classList.add('p2-agent-footer--settled');
+    var glowRetired = shell && shell.classList.contains('p2-agent-shell--glow-retire');
+    if (!opts || opts.keepInputGlow !== true || glowRetired) {
+      footer.style.position = 'relative';
+      footer.style.opacity = '1';
+      footer.style.removeProperty('height');
+      footer.style.pointerEvents = 'auto';
+      footer.classList.add('p2-agent-footer--settled');
+    }
   }
   var agentInput = footer && footer.querySelector('.p2-agent-input');
   var star = document.getElementById('p2-star');
   if (agentInput) {
     agentInput.classList.remove('p2-seq-text-hidden', 'p2-seq-text-visible');
-    agentInput.classList.add('p2-agent-input--settled');
+    if (!opts || opts.settleInput !== false) {
+      agentInput.classList.add('p2-agent-input--settled');
+    }
   }
   if (star) {
     star.classList.remove('p2-seq-text-hidden', 'p2-seq-text-visible', 'p2-default-hiding');
     star.classList.add('p2-agent-star--settled');
   }
-  setTest2AgentInputGlow(false);
+  if (!opts || opts.keepInputGlow !== true) {
+    setTest2AgentInputGlow(false);
+  }
 
   _unlockTest2ContactListNodes(slot);
   syncTest2VoiceStarState(document.getElementById('canvas'));
@@ -6477,143 +6427,41 @@ function beginTest2LoadingChromeExit(slot) {
   if (result) result.classList.add('p2-loading-ui-exiting');
 }
 
-var TEST2_CONTACT_REVEAL_FLOW = [
-  { at: 0.06, span: 0.15 },
-  { at: 0.18, span: 0.13 },
-  { at: 0.30, span: 0.13 },
-  { at: 0.42, span: 0.13 },
-  { at: 0.58, span: 0.18 }
-];
-var TEST2_CONTACT_GLOW_RETIRE_BUFFER = 920;
-var TEST2_CONTACT_EDGE_LAYOUT_DELAY = 1580;
+var TEST2_CONTACT_SHELL_EXPAND_START = 480;
+var TEST2_CONTACT_SHELL_EXPAND_MS = 1450;
+var TEST2_CONTACT_SHELL_EXPAND_DELAY =
+  TEST2_CONTACT_SHELL_EXPAND_START + TEST2_CONTACT_SHELL_EXPAND_MS + 80;
+var TEST2_CONTACT_REVEAL_HEADER_DELAY = 120;
+var TEST2_CONTACT_REVEAL_ROW_BASE = 280;
+var TEST2_CONTACT_REVEAL_ROW_STEP = 140;
+var TEST2_CONTACT_GLOW_RETIRE_DELAY = 280;
+var TEST2_CONTACT_LAYOUT_SETTLE_DELAY = 520;
 
-function _test2ContactRevealFlowEndMs() {
-  var maxEnd = 0;
-  TEST2_CONTACT_REVEAL_FLOW.forEach(function (step) {
-    var end = Math.round((step.at + step.span) * TEST2_MORPH_MS);
-    if (end > maxEnd) maxEnd = end;
-  });
-  return maxEnd + 120;
-}
+function prepareTest2ContactListSequence(slot) {
+  if (!_isTest2Scope() || !slot) return false;
+  var list = slot.querySelector('.p2-contact-list');
+  if (!list) return false;
 
-function applyTest2ContactRevealFlowVars(slot, list) {
-  if (!slot || !list) return;
-  var rows = list.querySelectorAll('.p2-contact-list__item');
-  var footer = document.querySelector('.p2-agent-footer');
-  var agentInput = footer && footer.querySelector('.p2-agent-input');
-  var star = document.getElementById('p2-star');
   var header = list.querySelector('.p2-contact-list__header');
-  var stepIdx = 0;
+  var rows = list.querySelectorAll('.p2-contact-list__item');
 
-  function stamp(el) {
-    if (!el || stepIdx >= TEST2_CONTACT_REVEAL_FLOW.length) return;
-    var step = TEST2_CONTACT_REVEAL_FLOW[stepIdx++];
-    var delayMs = Math.round(step.at * TEST2_MORPH_MS);
-    var durMs = Math.round(step.span * TEST2_MORPH_MS);
-    el.dataset.p2RevealDelay = String(delayMs);
-    el.dataset.p2RevealDur = String(durMs);
-    el.style.setProperty('--p2-reveal-transition', (durMs / 1000).toFixed(3) + 's');
+  if (header) {
+    header.classList.add('p2-seq-text-hidden');
+    header.classList.remove('p2-seq-text-visible');
   }
-
-  stamp(header);
   rows.forEach(function (row) {
-    stamp(row);
+    row.classList.add('p2-seq-text-hidden');
+    row.classList.remove('p2-seq-text-visible');
   });
-  if (agentInput || star) {
-    var footerStep = TEST2_CONTACT_REVEAL_FLOW[TEST2_CONTACT_REVEAL_FLOW.length - 1];
-    var footerDelayMs = Math.round(footerStep.at * TEST2_MORPH_MS);
-    var footerDurMs = Math.round(footerStep.span * TEST2_MORPH_MS);
-    var footerDur = (footerDurMs / 1000).toFixed(3) + 's';
-    if (agentInput) {
-      agentInput.dataset.p2RevealDelay = String(footerDelayMs);
-      agentInput.dataset.p2RevealDur = String(footerDurMs);
-      agentInput.style.setProperty('--p2-reveal-transition', footerDur);
-    }
-    if (star) {
-      star.dataset.p2RevealDelay = String(footerDelayMs);
-      star.dataset.p2RevealDur = String(footerDurMs);
-      star.style.setProperty('--p2-reveal-transition', footerDur);
-    }
-  }
-}
-
-var TEST2_CONTACT_REVEAL_EASE = 'cubic-bezier(0.16, 0.88, 0.18, 1)';
-
-function revealTest2ContactSequenceItem(el, delayMs, durMs) {
-  if (!el) return;
-  setTimeout(function () {
-    if (!el.classList.contains('p2-seq-text-hidden')) return;
-
-    function finishReveal() {
-      el.classList.remove('p2-seq-text-hidden');
-      el.classList.add('p2-seq-text-visible');
-      el.style.removeProperty('opacity');
-      el.style.removeProperty('transform');
-    }
-
-    if (typeof el.animate === 'function') {
-      try {
-        var anim = el.animate(
-          [
-            { opacity: 0, transform: 'translate3d(0, 6px, 0)' },
-            { opacity: 1, transform: 'translate3d(0, 0, 0)' }
-          ],
-          {
-            duration: durMs,
-            easing: TEST2_CONTACT_REVEAL_EASE,
-            fill: 'forwards'
-          }
-        );
-        if (anim && typeof anim.finished !== 'undefined') {
-          anim.finished.then(finishReveal).catch(finishReveal);
-          return;
-        }
-      } catch (err) {
-        /* fall through to class swap */
-      }
-    }
-
-    el.classList.remove('p2-seq-text-hidden');
-    el.classList.add('p2-seq-text-visible');
-  }, delayMs);
-}
-
-function runTest2ContactRevealSchedule(list) {
-  var header = list.querySelector('.p2-contact-list__header');
-  var rows = list.querySelectorAll('.p2-contact-list__item');
-  var footer = document.querySelector('.p2-agent-footer');
-  var agentInput = footer && footer.querySelector('.p2-agent-input');
-  var star = document.getElementById('p2-star');
-  var maxEnd = 0;
-
-  function schedule(el) {
-    if (!el) return;
-    var delayMs = parseInt(el.dataset.p2RevealDelay || '0', 10) || 0;
-    var durMs = parseInt(el.dataset.p2RevealDur || '700', 10) || 700;
-    revealTest2ContactSequenceItem(el, delayMs, durMs);
-    var endMs = delayMs + durMs;
-    if (endMs > maxEnd) maxEnd = endMs;
-  }
-
-  schedule(header);
-  rows.forEach(schedule);
-  schedule(agentInput);
-  schedule(star);
-  return maxEnd;
+  return true;
 }
 
 function beginTest2InputGlowRetire() {
   if (!_isTest2Scope()) return;
   var shell = document.getElementById('p2-area');
-  var slot = document.getElementById('p2-slot');
   var agentInput = document.querySelector('.p2-agent-input');
   var star = document.getElementById('p2-star');
   if (shell) shell.classList.add('p2-agent-shell--glow-retire');
-  setTimeout(function () {
-    if (slot && shell && !shell.classList.contains('p2-contact-layout-active')) {
-      activateTest2ContactListLayout(slot);
-    }
-  }, TEST2_CONTACT_EDGE_LAYOUT_DELAY);
   if (agentInput) {
     agentInput.classList.add('p2-agent-input--glow-retire');
     agentInput.classList.add('p2-agent-input--settled');
@@ -6624,70 +6472,37 @@ function beginTest2InputGlowRetire() {
   setTest2AgentInputGlow(false);
 }
 
-function prepareTest2ContactListSequence(slot) {
-  if (!_isTest2Scope() || !slot) return false;
-  var list = slot.querySelector('.p2-contact-list');
-  if (!list) return false;
+function prepareTest2ContactListShellExpand(slot) {
+  if (!_isTest2Scope() || !slot) return;
+  if (slot.dataset.test2ShellExpanding === '1') return;
+  slot.dataset.test2ShellExpanding = '1';
 
-  var header = list.querySelector('.p2-contact-list__header');
-  var rows = list.querySelectorAll('.p2-contact-list__item');
-  var footer = document.querySelector('.p2-agent-footer');
-  var agentInput = footer && footer.querySelector('.p2-agent-input');
-  var star = document.getElementById('p2-star');
+  if (slot.dataset.test2ChromeExit !== '1') {
+    slot.dataset.test2ChromeExit = '1';
+    beginTest2LoadingChromeExit(slot);
+  }
 
-  if (header) {
-    header.classList.add('p2-seq-text-hidden');
-    header.classList.remove('p2-seq-text-visible');
-  }
-  rows.forEach(function (row) {
-    row.classList.add('p2-seq-text-hidden');
-    row.classList.remove('p2-seq-text-visible');
-  });
-  if (agentInput) {
-    agentInput.classList.add('p2-seq-text-hidden');
-    agentInput.classList.remove('p2-seq-text-visible');
-  }
-  if (star) {
-    star.classList.add('p2-seq-text-hidden');
-    star.classList.remove('p2-seq-text-visible');
-  }
-  return true;
+  setTimeout(function () {
+    applyTest2ContactListShellHeight(slot);
+    var shell = document.getElementById('p2-area');
+    if (shell) {
+      shell.classList.add(
+        'p2-contact-shell-expanding',
+        'p2-agent-shell--contact-chrome',
+        'p2-agent-shell--footer-stable'
+      );
+    }
+  }, TEST2_CONTACT_SHELL_EXPAND_START);
 }
 
-function settleTest2ContactRevealFlow(slot) {
-  if (!slot) return;
-  var scope = slot.querySelector('.p2-contact-list') || slot;
-  scope.querySelectorAll('.p2-seq-text-hidden, .p2-seq-text-visible').forEach(function (el) {
-    if (typeof el.getAnimations === 'function') {
-      el.getAnimations().forEach(function (anim) {
-        anim.cancel();
-      });
-    }
-    el.classList.remove('p2-seq-text-hidden');
-    el.classList.add('p2-seq-text-visible');
-    el.style.removeProperty('--p2-reveal-transition');
-    el.style.removeProperty('opacity');
-    el.style.removeProperty('transform');
-    delete el.dataset.p2RevealDelay;
-    delete el.dataset.p2RevealDur;
-  });
-  var footer = document.querySelector('.p2-agent-footer');
-  if (footer) {
-    footer.querySelectorAll('.p2-seq-text-hidden, .p2-seq-text-visible').forEach(function (el) {
-      if (typeof el.getAnimations === 'function') {
-        el.getAnimations().forEach(function (anim) {
-          anim.cancel();
-        });
-      }
+function revealTest2ContactSequenceItem(el, delayMs) {
+  if (!el) return;
+  setTimeout(function () {
+    requestAnimationFrame(function () {
       el.classList.remove('p2-seq-text-hidden');
       el.classList.add('p2-seq-text-visible');
-      el.style.removeProperty('--p2-reveal-transition');
-      el.style.removeProperty('opacity');
-      el.style.removeProperty('transform');
-      delete el.dataset.p2RevealDelay;
-      delete el.dataset.p2RevealDur;
     });
-  }
+  }, delayMs);
 }
 
 function staggerTest2ContactListRows(slot) {
@@ -6704,46 +6519,54 @@ function staggerTest2ContactListRows(slot) {
   if (canvas) canvas.classList.remove('p2-generating');
 
   installTest2FillFadeOutBridge(slot);
-  prepareTest2ContactListSequence(slot);
-  applyTest2ContactRevealFlowVars(slot, list);
-  slot.classList.add('p2-contact-reveal-active', 'p2-contact-reveal-flow');
-  applyTest2ContactListShellHeight(slot, { force: true });
+  prepareTest2ContactListShellExpand(slot);
 
-  var revealDoneMs = runTest2ContactRevealSchedule(list);
-
-  setTimeout(beginTest2InputGlowRetire, Math.max(revealDoneMs, TEST2_MORPH_MS + 280) + TEST2_CONTACT_GLOW_RETIRE_BUFFER);
+  var header = list.querySelector('.p2-contact-list__header');
+  var rows = list.querySelectorAll('.p2-contact-list__item');
+  var baseDelay = TEST2_CONTACT_REVEAL_ROW_BASE;
+  var stepDelay = TEST2_CONTACT_REVEAL_ROW_STEP;
+  var rowCount = rows.length;
+  var revealAt = TEST2_CONTACT_SHELL_EXPAND_DELAY;
+  var layoutAt =
+    TEST2_CONTACT_REVEAL_HEADER_DELAY +
+    baseDelay +
+    Math.max(rowCount - 1, 0) * stepDelay +
+    TEST2_CONTACT_LAYOUT_SETTLE_DELAY;
 
   setTimeout(function () {
-    settleTest2ContactRevealFlow(slot);
-    slot.classList.remove('p2-contact-reveal-flow');
-    slot.dataset.test2ContactRevealLock = '';
-    if (!slot.classList.contains('p2-seq-done')) {
-      slot.classList.add('p2-seq-done');
-    }
-    finalizeTest2ContactListVisibility(slot);
-    if (slot.dataset.test2FillFadePending === '1') {
-      slot.dataset.test2FillFadePending = '';
-      _applyTest2FillFadeOutHandoff(slot);
-    }
-  }, Math.max(revealDoneMs + 80, _test2ContactRevealFlowEndMs()));
+    requestAnimationFrame(function () {
+      var shell = document.getElementById('p2-area');
+      slot.classList.add('p2-contact-reveal-active');
+      slot.style.display = 'block';
+      slot.style.removeProperty('opacity');
+      slot.style.pointerEvents = 'none';
+
+      revealTest2ContactSequenceItem(header, TEST2_CONTACT_REVEAL_HEADER_DELAY);
+
+      rows.forEach(function (row, index) {
+        revealTest2ContactSequenceItem(row, baseDelay + index * stepDelay);
+      });
+
+      setTimeout(beginTest2InputGlowRetire, TEST2_CONTACT_GLOW_RETIRE_DELAY);
+
+      setTimeout(function () {
+        if (shell) {
+          shell.classList.remove('p2-contact-shell-expanding');
+        }
+        slot.dataset.test2ContactRevealLock = '';
+      }, layoutAt);
+    });
+  }, revealAt);
 }
 
 function finalizeTest2ContactListVisibility(slot) {
   if (!_isTest2Scope() || !slot) return;
-  if (slot.dataset.test2ContactRevealLock === '1') return;
   var list = slot.querySelector('.p2-contact-list');
-  var scope = list || document;
-  scope.querySelectorAll('.p2-seq-text-hidden').forEach(function (el) {
+  if (!list) return;
+  list.querySelectorAll('.p2-seq-text-hidden').forEach(function (el) {
     el.classList.remove('p2-seq-text-hidden');
     el.classList.add('p2-seq-text-visible');
   });
-  var footer = document.querySelector('.p2-agent-footer');
-  if (footer) {
-    footer.querySelectorAll('.p2-seq-text-hidden').forEach(function (el) {
-      el.classList.remove('p2-seq-text-hidden');
-      el.classList.add('p2-seq-text-visible');
-    });
-  }
 }
 
 function installTest2FillFadeOutBridge(slot) {
@@ -6751,49 +6574,41 @@ function installTest2FillFadeOutBridge(slot) {
   slot.dataset.test2FillFadeBound = '1';
   document.addEventListener('p2-test2-fill-fadeout', function onFadeOut() {
     document.removeEventListener('p2-test2-fill-fadeout', onFadeOut);
-    var inContactReveal = slot.dataset.test2ContactRevealLock === '1';
-    if (inContactReveal) {
-      slot.dataset.test2FillFadePending = '1';
-    } else {
-      finalizeTest2ContactListVisibility(slot);
-      if (!slot.classList.contains('p2-seq-done')) {
-        slot.classList.add('p2-seq-done');
-      }
-      _applyTest2FillFadeOutHandoff(slot);
+    finalizeTest2ContactListVisibility(slot);
+    slot.classList.add('p2-seq-done');
+    slot.style.pointerEvents = 'auto';
+    activateTest2ContactListLayout(slot, {
+      settleInput: true,
+      keepInputGlow: false,
+      keepMainHidden: true
+    });
+    setTimeout(function () {
+      patchTest2ContactListLayout(slot, { force: true });
+    }, 120);
+    var result = document.getElementById('p2-result');
+    var defaults = document.getElementById('p2-default-widgets');
+    var shellHandoff = document.getElementById('p2-area');
+    if (shellHandoff) {
+      shellHandoff.classList.add('p2-agent-shell--glow-retire');
+      shellHandoff.classList.remove('p2-agent-shell--flow-handoff');
+    }
+    if (result) {
+      result.classList.add('p2-loading-ui-exiting');
+      result.classList.add('has-swap', 'p2-default-hiding');
+      setTimeout(function () {
+        result.classList.remove('is-loading', 'p2-crossfade-out', 'p2-loading-ui-exiting');
+      }, 380);
+    }
+    if (defaults) {
+      defaults.style.opacity = '0';
+      defaults.style.pointerEvents = 'none';
     }
   });
 }
 
-function _applyTest2FillFadeOutHandoff(slot) {
-  if (!slot) return;
-  slot.style.pointerEvents = 'auto';
-  var shellHandoff = document.getElementById('p2-area');
-  if (shellHandoff && !shellHandoff.classList.contains('p2-contact-layout-active') && !shellHandoff.classList.contains('p2-agent-shell--glow-retire')) {
-    activateTest2ContactListLayout(slot);
-  }
-  var result = document.getElementById('p2-result');
-  var defaults = document.getElementById('p2-default-widgets');
-  if (shellHandoff) {
-    if (!shellHandoff.classList.contains('p2-agent-shell--glow-retire')) {
-      shellHandoff.classList.add('p2-agent-shell--glow-retire');
-    }
-    shellHandoff.classList.remove('p2-agent-shell--flow-handoff');
-  }
-  if (result) {
-    result.classList.add('p2-loading-ui-exiting');
-    result.classList.add('has-swap', 'p2-default-hiding');
-    setTimeout(function () {
-      result.classList.remove('is-loading', 'p2-crossfade-out', 'p2-loading-ui-exiting');
-    }, 380);
-  }
-  if (defaults) {
-    defaults.style.opacity = '0';
-    defaults.style.display = 'none';
-  }
-}
-
 window.patchTest2ContactListLayout = patchTest2ContactListLayout;
 window.applyTest2ContactListShellHeight = applyTest2ContactListShellHeight;
+window.prepareTest2ContactListShellExpand = prepareTest2ContactListShellExpand;
 window.beginTest2LoadingChromeExit = beginTest2LoadingChromeExit;
 window.beginTest2InputGlowRetire = beginTest2InputGlowRetire;
 window.activateTest2ContactListLayout = activateTest2ContactListLayout;
@@ -6909,7 +6724,6 @@ function installTest2P2TransitionBridge(canvas) {
       slot.dataset.p2LayoutReady = '';
       delete slot.dataset.test2ContactStagger;
       delete slot.dataset.test2ContactRevealLock;
-      slot.classList.remove('p2-contact-reveal-flow');
       prepareTest2ContactListSequence(slot);
     }
 
