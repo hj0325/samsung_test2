@@ -560,6 +560,8 @@
     overflow: hidden;
     text-overflow: ellipsis;
     vertical-align: middle;
+    position: relative;
+    z-index: 1;
   }
   #canvas[data-test-scope="test2"] .p2-result-loading__input::before {
     content: "";
@@ -1217,6 +1219,16 @@
     will-change: opacity;
     transition: opacity 0.55s cubic-bezier(0.22, 0.82, 0.24, 1);
   }
+  #canvas[data-test-scope="test2"] .p2-agent-input .p2-agent-fill {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    border-radius: inherit;
+    pointer-events: none;
+    overflow: hidden;
+    will-change: opacity;
+    transition: opacity 0.55s cubic-bezier(0.22, 0.82, 0.24, 1);
+  }
   #canvas[data-test-scope="test2"] .p2-agent-fill__gl {
     position: absolute;
     inset: 0;
@@ -1818,6 +1830,8 @@
     flex: 1;
     min-width: 0;
     height: 44px;
+    position: relative;
+    isolation: isolate;
     background: rgba(255, 255, 255, 0.10);
     border-radius: 22px;
     display: flex;
@@ -1838,6 +1852,93 @@
       -webkit-text-fill-color 0.52s cubic-bezier(0.22, 0.82, 0.24, 1),
       filter 0.48s cubic-bezier(0.22, 0.82, 0.24, 1),
       box-shadow 0.48s cubic-bezier(0.22, 0.82, 0.24, 1);
+  }
+  #canvas[data-test-scope="test2"] .p2-agent-input .p2-input-text {
+    position: relative;
+    z-index: 2;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  #canvas[data-test-scope="test2"]:is(.p2-listening, .p2-generating) .p2-agent-input .p2-agent-fill,
+  #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-result.is-loading):not(:has(#p2-slot.p2-contact-reveal-active)) .p2-agent-input .p2-agent-fill,
+  #canvas[data-test-scope="test2"] .p2-agent-input .p2-agent-fill--gl-ready.p2-agent-fill--gl-active:not(.p2-agent-fill--gl-fading) {
+    opacity: 1 !important;
+  }
+  #canvas[data-test-scope="test2"] .p2-agent-input.p2-agent-input--glow-retire .p2-agent-fill--gl-ready.p2-agent-fill--gl-active,
+  #canvas[data-test-scope="test2"] .p2-agent-input.p2-agent-input--glow-retire .p2-agent-fill--gl-ready.p2-agent-fill--gl-fading {
+    opacity: 0 !important;
+    transition: opacity 0.88s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  }
+  #canvas[data-test-scope="test2"] .p2-agent-input.p2-agent-input--glow-retire .p2-agent-fill__bloom,
+  #canvas[data-test-scope="test2"] .p2-agent-input.p2-agent-input--glow-retire .p2-agent-fill__mist,
+  #canvas[data-test-scope="test2"] .p2-agent-input.p2-agent-input--glow-retire .p2-agent-fill__wave {
+    opacity: 0 !important;
+    animation: none !important;
+    transition: opacity 0.88s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  }
+  #canvas[data-test-scope="test2"]:not(.p2-listening):not(.p2-generating) .p2-agent-shell:not(:has(#p2-result.is-loading)):not(:has(#p2-slot.p2-reveal-swap)):not(:has(#p2-slot.p2-seq-done)) .p2-agent-input .p2-agent-fill:not(.p2-agent-fill--gl-active):not(.p2-agent-fill--gl-fading) {
+    opacity: 0;
+    transition: opacity 0.85s cubic-bezier(0.22, 0.82, 0.24, 1) 0.35s;
+  }
+  #canvas[data-test-scope="test2"] .p2-agent-input .p2-agent-fill__gl {
+    border-radius: inherit;
+    z-index: 1;
+  }
+  #canvas[data-test-scope="test2"] .p2-agent-input .p2-agent-fill__edge {
+    inset: -10px;
+    border-radius: inherit;
+  }
+  #canvas[data-test-scope="test2"] .p2-agent-input .p2-agent-fill__edge-inner {
+    border-radius: inherit;
+  }
+  #canvas[data-test-scope="test2"] .p2-agent-input .p2-agent-fill--gl-ready .p2-agent-fill__bloom,
+  #canvas[data-test-scope="test2"] .p2-agent-input .p2-agent-fill--gl-ready .p2-agent-fill__mist,
+  #canvas[data-test-scope="test2"] .p2-agent-input .p2-agent-fill--gl-ready .p2-agent-fill__wave {
+    display: block !important;
+    pointer-events: none;
+    z-index: 0;
+  }
+  #canvas[data-test-scope="test2"] .p2-agent-input .p2-agent-fill--gl-ready .p2-agent-fill__bloom {
+    opacity: 0.42 !important;
+    filter: blur(16px);
+    transform: translate(28%, 0%) scale(0.82);
+  }
+  #canvas[data-test-scope="test2"] .p2-agent-input .p2-agent-fill--gl-ready .p2-agent-fill__mist {
+    opacity: 0.34 !important;
+    filter: blur(20px);
+    transform: translate(22%, 0%) scale(0.88);
+  }
+  #canvas[data-test-scope="test2"] .p2-agent-input .p2-agent-fill--gl-ready .p2-agent-fill__wave {
+    opacity: 0.28 !important;
+    mix-blend-mode: soft-light;
+    z-index: 2;
+  }
+  #canvas[data-test-scope="test2"]:is(.p2-listening, .p2-generating) .p2-agent-input .p2-agent-fill--gl-ready .p2-agent-fill__bloom {
+    opacity: 0.62 !important;
+    filter: blur(16px);
+    animation: p2Test2BloomRipple 3.8s ease-in-out infinite;
+  }
+  #canvas[data-test-scope="test2"]:is(.p2-listening, .p2-generating) .p2-agent-input .p2-agent-fill--gl-ready .p2-agent-fill__mist {
+    opacity: 0.48 !important;
+    filter: blur(20px);
+    animation: p2Test2MistRipple 4.4s ease-in-out infinite;
+  }
+  #canvas[data-test-scope="test2"]:is(.p2-listening, .p2-generating) .p2-agent-input .p2-agent-fill--gl-ready .p2-agent-fill__wave,
+  #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-result.is-loading) .p2-agent-input .p2-agent-fill--gl-ready .p2-agent-fill__wave {
+    opacity: 0.38 !important;
+    animation: p2Test2ListenShimmer 2.8s ease-in-out infinite;
+  }
+  #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-result.is-loading) .p2-agent-input .p2-agent-fill--gl-ready .p2-agent-fill__bloom {
+    opacity: 0.52 !important;
+    filter: blur(18px);
+  }
+  #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-result.is-loading) .p2-agent-input .p2-agent-fill--gl-ready .p2-agent-fill__mist {
+    opacity: 0.40 !important;
+    filter: blur(22px);
+  }
+  #canvas[data-test-scope="test2"] .p2-agent-shell:has(#p2-result.is-loading) .p2-agent-input .p2-agent-fill--gl-ready .p2-agent-fill__wave {
+    animation: p2Test2FillWave 4.8s ease-in-out infinite;
   }
   #canvas[data-test-scope="test2"] .p2-agent-footer #p2-star {
     position: relative;

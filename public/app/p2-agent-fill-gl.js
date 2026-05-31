@@ -22,6 +22,8 @@
     'uniform float u_fill;',
     'uniform float u_sweep;',
     'uniform float u_audio;',
+    'uniform float u_compact;',
+    'uniform float u_virtAspect;',
     '',
     'float hash(vec2 p) {',
     '  return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);',
@@ -66,13 +68,26 @@
     '  float onset = smoothstep(0.0, 0.09, s);',
     '  float early = (1.0 - smoothstep(0.0, 0.48, s)) * onset;',
     '  float wt = time * (1.82 + early * 1.55);',
-    '  vec2 target = vec2(0.05, 0.95);',
-    '  vec2 diag = vec2((target.x - u_origin.x) * u_aspect, target.y - u_origin.y);',
+    '  float isCompact = step(0.5, u_compact);',
+    '  vec2 target = mix(vec2(0.05, 0.95), vec2(0.04, u_origin.y), isCompact);',
+    '  float diagAspect = mix(u_aspect, u_virtAspect, isCompact);',
+    '  vec2 diag = vec2((target.x - u_origin.x) * diagAspect, target.y - u_origin.y);',
     '  vec2 diagN = diag / max(length(diag), 0.0001);',
-    '  vec2 ellRel = rel * vec2(mix(0.50, 0.72, s), mix(1.10, 1.0, early));',
+    '  vec2 ellRel = rel * vec2(',
+    '    mix(mix(0.50, 0.72, s), mix(0.48, 0.66, s), isCompact),',
+    '    mix(mix(1.10, 1.0, early), mix(0.78, 0.72, early), isCompact)',
+    '  );',
     '  float dist = length(ellRel);',
+    '  float horizLead = max(0.0, -rel.x);',
+    '  float vertRound = abs(rel.y) * mix(1.0, 0.58, isCompact);',
+    '  float roundFlow = sqrt(horizLead * horizLead * 0.94 + vertRound * vertRound);',
+    '  dist = mix(dist, roundFlow, isCompact);',
     '  float align = max(0.0, dot(normalize(rel + vec2(0.001)), diagN));',
-    '  dist *= 1.0 - align * mix(0.22, 0.10, smoothstep(0.0, 0.55, s));',
+    '  dist *= 1.0 - align * mix(',
+    '    mix(0.22, 0.10, smoothstep(0.0, 0.55, s)),',
+    '    mix(0.04, 0.01, smoothstep(0.0, 0.55, s)),',
+    '    isCompact',
+    '  );',
     '  float depthIn = clamp(-sdf / max(u_radius * 2.4, 0.08), 0.0, 1.0);',
     '  float edgeProx = 1.0 - smoothstep(0.0, 0.26, depthIn);',
     '  float wobble = (fbm(uv * 2.4 + wt * 0.052) - 0.5)',
@@ -87,8 +102,12 @@
     '  float edgeBoost = edgeProx * (0.36 + early * 0.18);',
     '  float centerLag = depthIn * 0.17 * (1.0 - smoothstep(0.40, 1.02, s));',
     '  float localFront = revealAt + edgeBoost - centerLag;',
-    '  float softLead = max(0.26, 0.44 * s + early * 0.14 + audio * 0.02);',
-    '  float softTrail = softLead * 1.32;',
+    '  float softLead = mix(',
+    '    max(0.26, 0.44 * s + early * 0.14 + audio * 0.02),',
+    '    max(0.24, 0.34 * s + early * 0.12 + audio * 0.028),',
+    '    isCompact',
+    '  );',
+    '  float softTrail = softLead * mix(1.32, 1.52, isCompact);',
     '  float revealCore = 1.0 - smoothstep(',
     '    localFront - softLead * 0.82 + wobble,',
     '    localFront + softTrail * 0.88 + wobble,',
@@ -104,15 +123,16 @@
     '    sin(wt * 1.58 + uv.x * 5.8) * 0.034,',
     '    cos(wt * 1.32 + uv.y * 4.2) * 0.028',
     '  ) * early;',
-    '  vec2 waveRel = pulseRel * vec2(1.42, 0.84);',
+    '  vec2 waveRel = pulseRel * mix(vec2(1.42, 0.84), vec2(0.90, 0.92), isCompact);',
     '  float rel2 = dot(waveRel, waveRel);',
-    '  float pulseDist = length(pulseRel * vec2(0.62, 1.08));',
-    '  float originCore = exp(-rel2 * 2.1) * (1.0 + early * 0.14);',
-    '  float originHalo = exp(-rel2 * 0.82) * (0.52 + early * 0.22);',
-    '  float originWide = exp(-pulseDist * 1.05) * (0.34 + early * 0.26);',
-    '  float originMist = exp(-pulseDist * 0.58) * early * 0.34;',
+    '  float pulseDist = length(pulseRel * mix(vec2(0.62, 1.08), vec2(1.02, 0.94), isCompact));',
+    '  float originCore = exp(-rel2 * mix(2.1, 3.4, isCompact)) * (1.0 + early * 0.14);',
+    '  float originHalo = exp(-rel2 * mix(0.82, 1.05, isCompact)) * (0.52 + early * 0.22);',
+    '  float originWide = exp(-pulseDist * mix(1.05, 1.42, isCompact)) * (0.34 + early * 0.26);',
+    '  float originMist = exp(-pulseDist * mix(0.58, 0.82, isCompact)) * early * mix(0.34, 0.42, isCompact);',
     '  float originPulse = (originCore + originHalo + originWide + originMist)',
     '    * (1.0 - smoothstep(0.18, 0.82, s)) * onset',
+    '    * mix(1.0, 1.24, isCompact)',
     '    * mix(0.40, 1.0, smoothstep(0.18, 0.56, s));',
     '  float travelMist = exp(-max(dist - localFront * 0.35, 0.0) * 2.4) * s * 0.28 * onset;',
     '  float flowSheet = exp(-abs(dist - localFront * 0.46 - flowWave * 3.0) * 2.1)',
@@ -238,7 +258,10 @@
     '',
     '  float depth = clamp(-sdf / 0.36, 0.0, 1.0);',
     '',
-    '  vec2 rel = vec2((uv.x - u_origin.x) * u_aspect, uv.y - u_origin.y);',
+    '  vec2 rel = vec2(',
+    '    (uv.x - u_origin.x) * mix(u_aspect, u_virtAspect, step(0.5, u_compact)),',
+    '    (uv.y - u_origin.y) * mix(1.0, 0.72, step(0.5, u_compact))',
+    '  );',
     '',
     '  float reveal = organicReveal(uv, rel, sdf, u_spread, u_time, u_audio)',
     '    * smoothstep(0.82, 0.98, u_sweep);',
@@ -313,7 +336,7 @@
   }
 
   function easeGlowRetire(t) {
-    return 1 - Math.pow(1 - t, 2.35);
+    return 1 - Math.pow(1 - t, 1.75);
   }
 
   function easeOutCubic(t) {
@@ -384,6 +407,7 @@
   }
 
   var LISTEN_SWEEP_PORTION = 0.28;
+  var INPUT_VIRT_ASPECT = 1.65;
 
   function AgentFillGL() {
     this.canvas = null;
@@ -403,32 +427,44 @@
     this.audio = 0;
     this.smoothAudio = 0;
     this.startTime = 0;
-    this.layout = { aspect: 1, radius: 0.24 };
+    this.layout = { aspect: 1, radius: 0.24, compact: 0, virtAspect: INPUT_VIRT_ASPECT };
     this._layoutCache = { w: 0, h: 0, aspect: 0 };
     this.resizeObserver = null;
     this.uniforms = {};
     this._onFrame = this._tick.bind(this);
   }
 
+  AgentFillGL.prototype._fillRect = function () {
+    if (!this.fillEl) return null;
+    var rect = this.fillEl.getBoundingClientRect();
+    if (!rect.width || !rect.height) return null;
+    return rect;
+  };
+
   AgentFillGL.prototype._updateLayout = function () {
-    if (!this.shellEl) return;
-    var rect = this.shellEl.getBoundingClientRect();
-    if (!rect.width || !rect.height) return;
+    var rect = this._fillRect();
+    if (!rect) return;
     this.layout.aspect = rect.width / rect.height;
-    this.layout.radius = 36 / rect.height;
+    this.layout.radius = Math.min(22, rect.height * 0.5) / rect.height;
   };
 
   AgentFillGL.prototype._getOrigin = function () {
-    if (!this.shellEl) return [0.92, 0.10];
-    var shell = this.shellEl.getBoundingClientRect();
-    if (!shell.width || !shell.height) return [0.92, 0.10];
+    var fill = this._fillRect();
+    if (!fill) return [0.92, 0.10];
+    var isInput = this.fillEl && this.fillEl.closest('.p2-agent-input');
     var star = document.getElementById('p2-star');
-    if (!star) return [0.92, 0.10];
+    if (!star) return isInput ? [0.96, 0.50] : [0.92, 0.10];
     var btn = star.getBoundingClientRect();
-    var btnX = (btn.left + btn.width * 0.5 - shell.left) / shell.width;
-    var btnY = 1 - (btn.top + btn.height * 0.5 - shell.top) / shell.height;
-    var cornerX = clamp((shell.width - 8) / shell.width, 0, 1);
-    var cornerY = clamp(8 / shell.height, 0, 1);
+    var btnX = (btn.left + btn.width * 0.5 - fill.left) / fill.width;
+    var btnY = 1 - (btn.top + btn.height * 0.5 - fill.top) / fill.height;
+    if (isInput) {
+      return [
+        clamp(btnX * 0.52 + 0.98 * 0.48, 0.88, 1.06),
+        clamp(btnY * 0.62 + 0.5 * 0.38, 0.40, 0.60)
+      ];
+    }
+    var cornerX = clamp((fill.width - 8) / fill.width, 0, 1);
+    var cornerY = clamp(8 / fill.height, 0, 1);
     return [
       clamp(btnX * 0.35 + cornerX * 0.65, 0, 1),
       clamp(btnY * 0.35 + cornerY * 0.65, 0, 1)
@@ -436,9 +472,9 @@
   };
 
   AgentFillGL.prototype._resize = function (force) {
-    if (!this.canvas || !this.gl || !this.shellEl) return;
-    var rect = this.shellEl.getBoundingClientRect();
-    if (!rect.width || !rect.height) return;
+    if (!this.canvas || !this.gl || !this.fillEl) return;
+    var rect = this._fillRect();
+    if (!rect) return;
     var dpr = Math.min(window.devicePixelRatio || 1, 2);
     var w = Math.max(1, Math.round(rect.width * dpr));
     var h = Math.max(1, Math.round(rect.height * dpr));
@@ -456,9 +492,10 @@
     }
     if (sizeChanged || Math.abs(cache.aspect - aspect) > 0.002) {
       this.layout.aspect = aspect;
-      this.layout.radius = 36 / rect.height;
+      this.layout.radius = Math.min(22, rect.height * 0.5) / rect.height;
       cache.aspect = aspect;
     }
+    this.layout.compact = this.fillEl.closest('.p2-agent-input') ? 1 : 0;
   };
 
   function getPhaseConfig(phaseName) {
@@ -468,13 +505,13 @@
       return { spread: 1.42, intensity: 1.0, fill: 0.0, duration: 1780 };
     }
     if (phaseName === 'hollowReveal') {
-      return { spread: 1.42, intensity: 0.86, fill: 0.74, duration: 640 };
+      return { spread: 1.42, intensity: 0.86, fill: 0.74, duration: 780 };
     }
     if (phaseName === 'settling') {
       return { spread: 1.42, intensity: 0.20, fill: 1.0, duration: 380 };
     }
     if (phaseName === 'fadeOut') {
-      return { spread: 1.42, intensity: 0.0, fill: 0.0, duration: 1320 };
+      return { spread: 1.42, intensity: 0.0, fill: 0.0, duration: 1420 };
     }
     return next;
   }
@@ -700,6 +737,8 @@
     gl.uniform1f(this.uniforms.fill, this.values.fill);
     gl.uniform1f(this.uniforms.sweep, this.values.sweep);
     gl.uniform1f(this.uniforms.audio, this.smoothAudio);
+    gl.uniform1f(this.uniforms.compact, this.layout.compact || 0);
+    gl.uniform1f(this.uniforms.virtAspect, this.layout.virtAspect || INPUT_VIRT_ASPECT);
 
     gl.clearColor(0, 0, 0, 0);
     gl.clear(gl.COLOR_BUFFER_BIT);
@@ -750,8 +789,11 @@
 
   AgentFillGL.prototype.destroy = function () {
     this._stopLoop(true);
-    if (this.resizeObserver && this.shellEl) {
-      this.resizeObserver.unobserve(this.shellEl);
+    if (this.resizeObserver) {
+      if (this.fillEl) this.resizeObserver.unobserve(this.fillEl);
+      if (this.shellEl && this.shellEl !== this.fillEl) {
+        this.resizeObserver.unobserve(this.shellEl);
+      }
     }
     this.resizeObserver = null;
     if (this.fillEl) {
@@ -815,7 +857,9 @@
       intensity: gl.getUniformLocation(program, 'u_intensity'),
       fill: gl.getUniformLocation(program, 'u_fill'),
       sweep: gl.getUniformLocation(program, 'u_sweep'),
-      audio: gl.getUniformLocation(program, 'u_audio')
+      audio: gl.getUniformLocation(program, 'u_audio'),
+      compact: gl.getUniformLocation(program, 'u_compact'),
+      virtAspect: gl.getUniformLocation(program, 'u_virtAspect')
     };
 
     this.ready = true;
@@ -829,7 +873,10 @@
       this.resizeObserver = new ResizeObserver(function () {
         self._resize(true);
       });
-      this.resizeObserver.observe(this.shellEl);
+      this.resizeObserver.observe(this.fillEl);
+      if (this.shellEl && this.shellEl !== this.fillEl) {
+        this.resizeObserver.observe(this.shellEl);
+      }
     }
 
     canvas.addEventListener('webglcontextlost', function (e) {
@@ -844,7 +891,7 @@
 
   function ensureBound() {
     if (!isTest2Scope() || prefersReducedMotion()) return false;
-    var canvas = document.querySelector('.p2-agent-fill__gl');
+    var canvas = document.querySelector('.p2-agent-input .p2-agent-fill__gl');
     if (!canvas) return false;
     if (instance.canvas === canvas && instance.ready) return true;
     return instance.bind(canvas);

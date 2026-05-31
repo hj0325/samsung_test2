@@ -5483,14 +5483,6 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
       if (window.__mlpTestConfig && window.__mlpTestConfig.id === 'test2') {
         return '<div class="p2-widgets p2-widgets--compact" style="position:relative; width:100%; height:240px;">' +
           '<div id="p2-area" class="p2-agent-shell" style="position:absolute; top:0; left:24px; right:24px; height:148px; overflow:hidden;">' +
-            '<div class="p2-agent-fill" aria-hidden="true">' +
-              '<canvas class="p2-agent-fill__gl"></canvas>' +
-              '<div class="p2-agent-fill__edge" aria-hidden="true"></div>' +
-              '<div class="p2-agent-fill__edge-inner" aria-hidden="true"></div>' +
-              '<div class="p2-agent-fill__bloom"></div>' +
-              '<div class="p2-agent-fill__mist"></div>' +
-              '<div class="p2-agent-fill__wave"></div>' +
-            '</div>' +
             '<div id="p2-default-widgets" class="p2-agent-main" style="position:relative; width:100%; flex:1; min-height:0; transition:opacity 0.4s ease;">' +
               '<div id="p2-result" class="p2-dark p2-obc-host p2-agent-card" style="position:absolute; inset:0; background:transparent; border-radius:36px; padding:0; box-sizing:border-box; overflow:hidden;">' +
                 '<div class="p2-result-loading" aria-hidden="true">' +
@@ -5521,7 +5513,17 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
             '</div>' +
             '<div id="p2-slot" class="p2-agent-slot" style="opacity:0; pointer-events:none; overflow:hidden;"></div>' +
             '<div class="p2-agent-footer">' +
-              '<div class="p2-agent-input"><span class="p2-input-text">놓친 보고서 요약해줘</span></div>' +
+              '<div class="p2-agent-input">' +
+                '<div class="p2-agent-fill" aria-hidden="true">' +
+                  '<canvas class="p2-agent-fill__gl"></canvas>' +
+                  '<div class="p2-agent-fill__edge" aria-hidden="true"></div>' +
+                  '<div class="p2-agent-fill__edge-inner" aria-hidden="true"></div>' +
+                  '<div class="p2-agent-fill__bloom"></div>' +
+                  '<div class="p2-agent-fill__mist"></div>' +
+                  '<div class="p2-agent-fill__wave"></div>' +
+                '</div>' +
+                '<span class="p2-input-text">놓친 보고서 요약해줘</span>' +
+              '</div>' +
               '<button id="p2-star" type="button" aria-label="AI Voice" class="p2-galaxy-star-btn">' +
                 '<span class="p2-galaxy-star__grad" aria-hidden="true"></span>' +
                 '<canvas class="p2-galaxy-star__canvas" width="112" height="112" aria-hidden="true"></canvas>' +
